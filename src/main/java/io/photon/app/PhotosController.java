@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -45,8 +44,7 @@ public class PhotosController
     String id = args.get("id");
     List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
     queryParams.add(new BasicNameValuePair("q", "feed"));
-    queryParams.add(new BasicNameValuePair("id", String.format("urn:feed:photon:public:%s", id)));
-    queryParams.add(new BasicNameValuePair("viewerId", String.format("urn:feed:photon:public:%s", id)));
+    queryParams.add(new BasicNameValuePair("id", String.format("photon:public", id)));
     return Util.createJsonResponse(_queryClient.doQuery(queryParams));
   }
 
@@ -70,27 +68,29 @@ public class PhotosController
     String thumbnail = args.get("thumbnail");
     String url = args.get("url");
 
-    String member = String.format("urn:member:%s", id);
+    String member = String.format("member:%s", id);
     JSONObject post = new JSONObject();
     post.put("actor", member);
-    post.put("verb", "share");
+    
+    JSONObject verb = new JSONObject();
+    verb.put("type", "linkedin:share");
+    post.put("verb", verb);
 
+    JSONArray properties = new JSONArray();
+    JSONObject property = new JSONObject();
+    property.put("property", "id");
+    property.put("content", photoId);
+    properties.put(property);
     JSONObject object = new JSONObject();
-    JSONArray links = new JSONArray();
-    JSONObject link = new JSONObject();
-    link.put("title", "");
-    link.put("description", "");
-    link.put("thumbnail", thumbnail);
-    link.put("url", url);
-    links.put(link);
-    object.put("id", photoId);
-    object.put("links", links);
-    object.put("body", "a photo");
+    object.put("type", "photon:photo");
+    object.put("title", "a photo");
+    object.put("description", "");
+    object.put("image", thumbnail);
+    object.put("url", url);
+    object.put("properties", properties);
     post.put("object", object);
 
-    post.put("attributedApplication", "urn:app:photon");
-    post.put("attributedEntity", member);
-    post.put("destination", member);
+    post.put("app", "photon");
 
     return Util.createJsonResponse(_publishClient.doPost(post.toString(2), _headers));
   }
