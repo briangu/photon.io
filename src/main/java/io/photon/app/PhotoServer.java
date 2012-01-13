@@ -101,14 +101,7 @@ public class PhotoServer
     {
       List<Route> routes = new ArrayList<Route>();
 
-      HttpChunkRelayProxy proxy = new FileChunkProxy(_uploadFileRoot);
-      FileUploadChunkRelayEventListener relayListener = new FileUploadChunkRelayEventListener(_downloadHostname);
-      routes.add(new HttpChunkProxyHandler("/u/", proxy, relayListener, _maxContentLength));
-
-      routes.add(new GetRoute("/d/$path", new StaticFileServerHandler(_photoFileProvider)));
-      routes.add(new GetRoute("/$path", new StaticFileServerHandler(_staticFileProvider)));
-
-      routes.add(new GetRoute("/photos/myfeed/$id", new RouteHandler()
+      routes.add(new GetRoute("/photos/myfeed", new RouteHandler()
       {
         @Override
         public RouteResponse exec(Map<String, String> args)
@@ -118,7 +111,7 @@ public class PhotoServer
         }
       }));
 
-      routes.add(new GetRoute("/photos/feed/$id", new RouteHandler()
+      routes.add(new GetRoute("/photos/feed", new RouteHandler()
       {
         @Override
         public RouteResponse exec(Map<String, String> args)
@@ -128,7 +121,7 @@ public class PhotoServer
         }
       }));
 
-      routes.add(new GetRoute("/photos/photocomments/$threadId", new RouteHandler()
+      routes.add(new GetRoute("/photos/photocomments", new RouteHandler()
       {
         @Override
         public RouteResponse exec(Map<String, String> args)
@@ -157,6 +150,13 @@ public class PhotoServer
           return _photosController.addPhotoCommentEvent(args);
         }
       }));
+
+      HttpChunkRelayProxy proxy = new FileChunkProxy(_uploadFileRoot);
+      FileUploadChunkRelayEventListener relayListener = new FileUploadChunkRelayEventListener(_downloadHostname);
+      routes.add(new HttpChunkProxyHandler("/u/", proxy, relayListener, _maxContentLength));
+
+      routes.add(new GetRoute("/d/$path", new StaticFileServerHandler(_photoFileProvider)));
+      routes.add(new GetRoute("/$path", new StaticFileServerHandler(_staticFileProvider)));
 
       ChannelPipeline lhPipeline = new DefaultChannelPipeline();
       lhPipeline.addLast("decoder", new HttpRequestDecoder());

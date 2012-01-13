@@ -34,8 +34,8 @@ public class PhotosController
     String id = args.get("id");
     List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
     queryParams.add(new BasicNameValuePair("q", "feed"));
-    queryParams.add(new BasicNameValuePair("id", String.format("urn:feed:photon:member:%s", id)));
-    queryParams.add(new BasicNameValuePair("viewerId", String.format("urn:feed:photon:member:%s", id)));
+    queryParams.add(new BasicNameValuePair("id", "photon:member"));
+    queryParams.add(new BasicNameValuePair("member", String.format("member:%s", id)));
     return Util.createJsonResponse(_queryClient.doQuery(queryParams));
   }
 
