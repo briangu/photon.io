@@ -52,17 +52,18 @@ form {
   margin-bottom: 0;
 }
 .update-box {
+  vertical-align: top;
   border: 1px solid #CCC;
   background-color: #FFFFFF;
-  margin: 10px 0px 20px 30px;
+  margin: 0px 0px 0px 10px;
   position: relative;
   top: auto;
   left: auto;
   z-index: 1;
-  width: 720px;
+  width: 700px;
 }
 .update-box .modal-user {
-  float: left;
+  float: right;
   margin: 10px;
 }
 .update-box .modal-user .photo {
@@ -189,7 +190,7 @@ form {
 /* Admin */
 .save-templates {
   float: right;
-  text-align: right;i
+  text-align: right;
   position: relative;
   top: 36px;
 }
@@ -244,36 +245,6 @@ ul.team li img {
   width: 48px;
 }
 
-/* Stock */
-.stock span.stock-name {
-  color: #333;
-  font-weight: bold;
-}
-
-.stock .up, .stock .down {
-  padding-left:30px;
-}
-
-.stock .up {
-  background: transparent url(/images/stocks/stock-up.png) no-repeat scroll 5px 0px;
-}
-
-.stock .down {
-  background: transparent url(/images/stocks/stock-down.png) no-repeat scroll 5px 0px;
-}
-
-.stock .up {
-  color: green;
-}
-
-.stock .down {
-  color: red;
-}
-
-.stock .update-actions a {
-  font-size: 11px;
-}
-
 /* Diff */
 .diff-inline {
 }
@@ -322,11 +293,11 @@ ul.idTabs a.selected {
   cursor:default;
 }
 div.tab {
-    border: 1px solid #454545;
+/*    border: 1px solid #454545; */
     background-color: #FFFFFF;
     clear: both;
     padding: 20px;
-    *margin-top: -10px;
+    margin-top: -10px;
 }
 
 .comment-box share-btn {
@@ -371,3 +342,46 @@ width: 390px;
 .pc_img {
     height: auto;
 }
+
+.showmore {
+  color: #000;
+  text-align: center;
+  border: 1px solid #C8DADA;
+  background-color: #EDF6F7;
+  padding:5px;
+  margin-left:9px;
+  margin-top: -15px;
+  width: 574px;
+}
+
+.showmore:hover {
+  cursor: pointer;
+}
+
+.profile-box {
+    float: right;
+}
+
+.img_border {
+    margin-top: 5px;
+    width: 35px
+}
+
+.myname {
+    display: none;
+}
+
+.myheadline {
+    display: none;
+}
+
+.uploader-text {
+    float: right;
+    margin-top: 20px;
+}
+
+#file-uploader-demo1 {
+    margin-top: 10px;
+    margin-left: 20px;
+}
+

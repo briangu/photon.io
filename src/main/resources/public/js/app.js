@@ -22,27 +22,6 @@ var photonApp = function() {
                });
       }
       });
-
-      var my_uploader = new qq.FileUploader({
-        element: document.getElementById('my-file-uploader-demo1'),
-        action: '/u/',
-        debug: false,
-        params: params,
-        allowedExtensions: ["jpg", "jpeg", "gif", "png", "tiff", "bmp"],
-        onComplete: function(id, filename, responseJSON) {
-          if (!responseJSON.success) return;
-          $.post('/photos/add',
-                 {
-                   id: params.id,
-                   thumbnail: responseJSON.url,
-                   url: responseJSON.url,
-                   photoId: "urn:photo:"+responseJSON.key
-                 },
-                 function(response) {
-                   _getFeed();
-                 });
-        }
-        });
   }
 
   function fixBrokenImages() {

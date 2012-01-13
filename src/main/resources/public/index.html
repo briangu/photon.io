@@ -85,12 +85,12 @@
 </head>
 <body>
 
-
     <!-- Topbar -->
     <div class="topbar">
       <div class="topbar-inner">
         <div class="container">
           <h3><a id="logo" href="/"></a></h3>
+          <div id="profile" class="profile-box"></div>
         </div>
       </div>
     </div>
@@ -110,7 +110,21 @@
   }
 </style>
 
-<div id="profile"></div>
+<div>
+  <!-- Update Box -->
+  <div class="modal update-box" id="update-box">
+    <div class="modal-body">
+      <p class="uploader-text">Drag-and-drop or click the upload button.</p>
+      <div id="file-uploader-demo1">
+        <noscript>
+          <p>Please enable JavaScript to use file uploader.</p>
+          <!-- or put a simple form for upload here -->
+        </noscript>
+      </div>
+    </div>
+  </div>
+  <!-- END Update Box -->
+</div>
 <script type="IN/Login" data-onAuth="loadData"></script>
 
 <br/>
@@ -134,20 +148,6 @@
                         </div>
 
                         <div class="publicphotos tab">
-
-                              <!-- Update Box -->
-                              <div class="modal update-box" id="update-box">
-                                <div class="modal-body">
-                                  <p>To upload a file, click on the button below. Drag-and-drop is supported in FF, Chrome.</p>
-                                  <div id="file-uploader-demo1">
-                                    <noscript>
-                                      <p>Please enable JavaScript to use file uploader.</p>
-                                      <!-- or put a simple form for upload here -->
-                                    </noscript>
-                                  </div>
-                                </div>
-                              </div>
-                              <!-- END Update Box -->
 
                               <!-- Stream -->
                             <table  border="0" cellspacing="0" class="TwentyFour stream">
@@ -189,20 +189,6 @@
                          </div>
 
                             <div class="myphotos tab">
-
-                                  <!-- Update Box -->
-                                  <div class="modal update-box" id="my-update-box">
-                                    <div class="modal-body">
-                                      <p>To upload a file, click on the button below. Drag-and-drop is supported in FF, Chrome.</p>
-                                      <div id="my-file-uploader-demo1">
-                                        <noscript>
-                                          <p>Please enable JavaScript to use file uploader.</p>
-                                          <!-- or put a simple form for upload here -->
-                                        </noscript>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <!-- END Update Box -->
 
                                   <!-- Stream -->
                                 <table border="0" cellspacing="0" class="TwentyFour stream">
@@ -364,6 +350,10 @@
     </script>
 
 <!-- templates -->
+    <div class="showmore" id="showmore">
+      Show More
+    </div>
+
 
 <!-- /container -->
 <div id="footer">
