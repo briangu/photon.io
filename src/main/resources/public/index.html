@@ -257,54 +257,44 @@
   <div class="update-actions">
     <a href="javascript:void(0)" class="add-comment">Comment {{#totalComments}}({{totalComments}}){{/totalComments}}</a> ·
     {{#actor}}
-       {{#links}}
     <a href="{{url}}"><b>{{title}}</b></a>
-    {{/links}}
-   {{/actor}}
+    {{/actor}}
     <span rel="{{createdDate}}" class="easydate"></span>
-    {{/socialSummary}}
+  {{/socialSummary}}
   </div>
-    <div>
-      {{#object}}
-        {{#links}}
-      <a href="{{url}}"><b><i>{{description}}</i></b></a><br>
-      {{/links}}
+  <div>
+    {{#object}}
+    <a href="{{url}}"><b><i>{{description}}</i></b></a><br>
     {{/object}}
-    </div>
+  </div>
 </script>
 
 <script type="text/html" id="template-photo-image">
   {{#object}}
-    {{#links}}
   <span class="photo_container pc_m">
     <a href="{{url}}" title="{{title}}" target="_blank" class="lb_pub">
-      <img src="{{thumbnail}}" width="240" height="180" alt="{{title}}" class="pc_img" border="0">
+      <img src="{{image}}" width="240" height="180" alt="{{title}}" class="pc_img" border="0">
     </a>
   </span>
-    {{/links}}
   {{/object}}
 </script>
 
 <script type="text/html" id="template-photo-image-mine">
   {{#object}}
-    {{#links}}
   <span class="photo_container pc_m">
     <a href="{{url}}" title="{{title}}" target="_blank" class="lb_mine">
-      <img src="{{thumbnail}}" width="240" height="180" alt="{{title}}" class="pc_img" border="0">
+      <img src="{{image}}" width="240" height="180" alt="{{title}}" class="pc_img" border="0">
     </a>
   </span>
-    {{/links}}
   {{/object}}
 </script>
 
 <script type="text/html" id="template-update">
 <div class="float" id="{{id}}">
   {{#object}}
-    {{#links}}
-      {{#thumbnail}}
-      <div class="article-photo"><a href="{{url}}" target="_blank"><img src="{{thumbnail}}" alt="{{title}}" /></a></div>
-      {{/thumbnail}}
-    {{/links}}
+      {{#image}}
+      <div class="article-photo"><a href="{{url}}" target="_blank"><img src="{{image}}" alt="{{title}}" /></a></div>
+      {{/image}}
   {{/object}}
   {{#socialSummary}}
   <div class="update-actions">
@@ -321,17 +311,15 @@
 <script type="text/html" id="template-photo-comment">
 <div class="row update" id="{{id}}">
   {{#actor}}
-    {{#links}}
     <div class="span1 columns photo">
-      <img src="http://media03.linkedin.com/mpr/mpr/shrink_80_80{{thumbnail}}" alt="" />
+      <img src="http://media03.linkedin.com/mpr/mpr/shrink_80_80{{image}}" alt="" />
     </div>
     <div class="span9 columns body">
         <div class="name"><a href="#">{{title}}</a></div>
-    {{/links}}
   {{/actor}}
   {{#object}}
     <p>
-     {{body}}
+     {{title}}
     </p>
   {{/object}}
   {{#socialSummary}}
