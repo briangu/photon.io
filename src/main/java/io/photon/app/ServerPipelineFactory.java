@@ -1,11 +1,11 @@
-package cloudcmd.srv.photon;
+package io.photon.app;
 
 
+import io.viper.core.server.router.HostRouterHandler;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
-import io.viper.net.server.router.HostRouterHandler;
 
 import static org.jboss.netty.channel.Channels.pipeline;
 

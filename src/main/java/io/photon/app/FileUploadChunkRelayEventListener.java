@@ -1,6 +1,7 @@
-package cloudcmd.srv.photon;
+package io.photon.app;
 
 
+import io.viper.core.server.file.HttpChunkRelayEventListener;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.UUID;
@@ -13,8 +14,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.json.JSONException;
 import org.json.JSONObject;
-import io.viper.net.server.Util;
-import io.viper.net.server.chunkproxy.HttpChunkRelayEventListener;
+import io.viper.core.server.Util;
 
 
 public class FileUploadChunkRelayEventListener implements HttpChunkRelayEventListener
