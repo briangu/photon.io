@@ -4,7 +4,7 @@
 <title>Photon</title>
 
 <script type="text/javascript" src="http://platform.linkedin.com/in.js">
-  api_key: yqQd9hQtbDqlu6ns_mY8r10oBFoj2PrTp6mJkea879iGwVpNyfdmXPcKZNMF7upb
+    api_key: p6Fg79EEpYLqTvs0yEC5xLUOLpyuT90_h51M1C0pNtOYL8gytWp8CXkHNtOcpGWF
   authorize: true
 </script>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -271,30 +271,36 @@
 
 <script type="text/html" id="template-photo-image">
   {{#object}}
+  {{#com.linkedin.ucp.ObjectSummary}}
   <span class="photo_container pc_m">
     <a href="{{url}}" title="{{title}}" target="_blank" class="lb_pub">
       <img src="{{image}}" width="240" height="180" alt="{{title}}" class="pc_img" border="0">
     </a>
   </span>
+  {{/com.linkedin.ucp.ObjectSummary}}
   {{/object}}
 </script>
 
 <script type="text/html" id="template-photo-image-mine">
   {{#object}}
+  {{#com.linkedin.ucp.ObjectSummary}}
   <span class="photo_container pc_m">
     <a href="{{url}}" title="{{title}}" target="_blank" class="lb_mine">
       <img src="{{image}}" width="240" height="180" alt="{{title}}" class="pc_img" border="0">
     </a>
   </span>
+  {{/com.linkedin.ucp.ObjectSummary}}
   {{/object}}
 </script>
 
 <script type="text/html" id="template-update">
 <div class="float" id="{{id}}">
   {{#object}}
+  {{#com.linkedin.ucp.ObjectSummary}}
       {{#image}}
       <div class="article-photo"><a href="{{url}}" target="_blank"><img src="{{image}}" alt="{{title}}" /></a></div>
       {{/image}}
+  {{/com.linkedin.ucp.ObjectSummary}}
   {{/object}}
   {{#socialSummary}}
   <div class="update-actions">

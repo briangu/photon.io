@@ -367,3 +367,7 @@ width: 390px;
     padding: 10px;
     margin: 0 auto;
 }
+
+.pc_img {
+    height: auto;
+}
