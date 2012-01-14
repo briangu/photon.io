@@ -1,5 +1,8 @@
 var photonApp = function() {
 
+  var start = 0;
+  var count = 100;
+
   function createUploader()
   {
     var pub_uploader = new qq.FileUploader({
@@ -13,12 +16,12 @@ var photonApp = function() {
         $.post('/photos/add',
                {
                  id: params.id,
-                 thumbnail: responseJSON.url,
+                 thumbnail: responseJSON.thumbnail,
                  url: responseJSON.url,
                  photoId: "urn:photo:"+responseJSON.key
                },
                function(response) {
-                 getFeed();
+                 //_getFeed();
                });
       }
       });
@@ -41,50 +44,18 @@ var photonApp = function() {
 
   function _getFeed() {
     showSpinner();
-
-    $.getJSON('/photos/feed?id='+params.id, function(data) {
-       var r = 0;
-       var c = 0;
-
+    $.getJSON('/photos/feed?id='+params.id+'&start='+start+"&count="+count, function(data) {
        $.each(data.elements, function(key, activity) {
-         var imageHTML = renderActivity(activity, "#template-photo-image");
-         var ownerHTML = renderActivity(activity, "#template-photo-owner");
-         $('#ir'+r+'c'+c).html(imageHTML);
-         $('#or'+r+'c'+c).html(ownerHTML);
-
+         image = activity.object["com.linkedin.ucp.ObjectSummary"].image;
+//           $('#posts').append("<li class='post photo'><img class='carousel_img' src=\""+image+"\"></li>");
+           $('#posts').append(renderActivity(activity, '#template-post'));
          activityIdMap[activity.object.id] = activity.id;
-
-         c++;
-         if (c % 3 == 0) r++;
-         c %= 3;
        });
 
        fixBrokenImages();
        showTimeAgoDates();
        activateLightbox("lb_pub");
      });
-
-      $.getJSON('/photos/myfeed?id='+params.id, function(data) {
-         var r = 0;
-         var c = 0;
-
-         $.each(data.elements, function(key, activity) {
-           var imageHTML = renderActivity(activity, "#template-photo-image-mine");
-           var ownerHTML = renderActivity(activity, "#template-photo-owner");
-           $('#my_ir'+r+'c'+c).html(imageHTML);
-           $('#my_or'+r+'c'+c).html(ownerHTML);
-
-           activityIdMap[activity.object.id] = activity.id;
-
-           c++;
-           if (c % 3 == 0) r++;
-           c %= 3;
-         });
-
-         fixBrokenImages();
-         showTimeAgoDates();
-         activateLightbox("lb_mine");
-       });
   }
 
   function activateLightbox(clazz) {
@@ -172,7 +143,7 @@ var photonApp = function() {
      return Mustache.to_html(template, activity);
    }
 
-   createUploader();
+//   createUploader();
    _getFeed();
 };
 

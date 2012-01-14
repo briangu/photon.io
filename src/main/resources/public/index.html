@@ -1,38 +1,33 @@
-
 <html>
 <head>
-<title>Photon</title>
+  <title>Photon</title>
 
-<script type="text/javascript" src="http://platform.linkedin.com/in.js">
-    api_key: p6Fg79EEpYLqTvs0yEC5xLUOLpyuT90_h51M1C0pNtOYL8gytWp8CXkHNtOcpGWF
-  authorize: true
-</script>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="text/javascript" src="http://platform.linkedin.com/in.js">
+    api_key: yqQd9hQtbDqlu6ns_mY8r10oBFoj2PrTp6mJkea879iGwVpNyfdmXPcKZNMF7upb
+    authorize: true
+  </script>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <title>Photon - Photo Sharing at the speed of light</title>
-  <style>
-    body {
-      font-size: 13px;
-      font-family: arial, sans-serif;
-      width: 700px;
-      margin: 100px auto;
-    }
-  </style>
-  <meta name="description" content="A small little demo of the power of viper.io">
-  <meta name="author" content="Brian Guarraci">
-
-  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-  <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-  <![endif]-->
-
-  <!-- Le styles -->
-  <link href="/css/base.css" rel="stylesheet">
-  <link href="/css/styles.css" rel="stylesheet">
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
   <script src="/js/mustache.js"></script>
   <script src="/js/jquery-ui-1.8.16.custom.min.js"></script>
   <script src="/js/easydate.js" type="text/javascript" charset="utf-8"></script>
   <script src="/js/spin.js"></script>
+  <script type="text/javascript" src="js/jquery.moodular.js"></script>
+  <script type="text/javascript" src="js/jquery.moodular.controls.js"></script>
+  <script type="text/javascript" src="js/jquery.moodular.effects.js"></script>
+  <meta name="description" content="A small little demo of the power of viper.io">
+  <meta name="author" content="Brian Guarraci">
+
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <!-- Le styles -->
+  <link href="/css/global.css" rel="stylesheet">
+  <link href="/css/dashboard.css" rel="stylesheet">
+  <link href="/css/styles.css" rel="stylesheet">
 
   <!-- Code Mirror -->
   <link rel="stylesheet" href="/codemirror/lib/codemirror.css">
@@ -50,7 +45,7 @@
 
   <!-- lightbox -->
   <script type="text/javascript" src="js/jquery.lightbox-0.5.js"></script>
-  <link rel="stylesheet" type="text/css" href="css/jquery.lightbox-0.5.css" media="screen" />
+  <link rel="stylesheet" type="text/css" href="css/jquery.lightbox-0.5.css" media="screen"/>
   <script type="text/javascript" src="js/jquery.idTabs.js"></script>
 
   <link href="css/fileuploader.css" rel="stylesheet" type="text/css">
@@ -60,303 +55,299 @@
     var params = {};
     var activityIdMap = {};
 
-    function loadData() {
-      IN.API.Profile("me")
-        .fields(["id", "firstName", "lastName", "pictureUrl","headline","publicProfileUrl"])
-        .result(function(result) {
-          profile = result.values[0];
-          params.id = profile.id;
-          profHTML = "<p><a href=\"" + profile.publicProfileUrl + "\">";
-          profHTML += "<img class=img_border align=\"left\" src=\"" + profile.pictureUrl + "\"></a>";
-          profHTML += "<a href=\"" + profile.publicProfileUrl + "\">";
-          profHTML += "<h2 class=myname>" + profile.firstName + " " + profile.lastName + "</a> </h2>";
-          profHTML += "<span class=myheadline>" + profile.headline + "</span>";
-          $("#profile").html(profHTML);
-
-          photonApp();
-        });
+    function loadData()
+    {
+      IN.API.Profile("me").fields(["id", "firstName", "lastName", "pictureUrl","headline","publicProfileUrl"]).result(function(result)
+                                                                                                                      {
+                                                                                                                        profile = result.values[0];
+                                                                                                                        params.id = profile.id;
+                                                                                                                        $('.avatar_and_i a')[0].href = profile.publicProfileUrl;
+                                                                                                                        $('.avatar_and_i a img')[0].src = profile.pictureUrl;
+                                                                                                                        photonApp();
+                                                                                                                      });
     }
-
-    $(function() {
-        $('ul.idTabs').idTabs();
-    });
-
   </script>
 </head>
-<body>
-
-    <!-- Topbar -->
-    <div class="topbar">
-      <div class="topbar-inner">
-        <div class="container">
-          <h3><a id="logo" href="/"></a></h3>
-          <div id="profile" class="profile-box"></div>
-        </div>
-      </div>
-    </div>
-
-<script type="text/javascript" src="js/app.js"></script>
-<style type="text/css" media="screen">
-  .CodeMirror-scroll {
-    background-color: #F7F7F7;
-    border: 1px solid #CCC;
-    border-radius: 3px;
-    margin: 5px 0;
-    padding: 5px 10px 10px 10px;
-    -webkit-box-shadow: 0px 1px 2px #CCC;
-    height: auto;
-    overflow: hidden;
-    position: relative;
-  }
-</style>
-
-<div>
-  <!-- Update Box -->
-  <div class="modal update-box" id="update-box">
-    <div class="modal-body">
-      <p class="uploader-text">Drag-and-drop or click the upload button.</p>
-      <div id="file-uploader-demo1">
-        <noscript>
-          <p>Please enable JavaScript to use file uploader.</p>
-          <!-- or put a simple form for upload here -->
-        </noscript>
-      </div>
-    </div>
-  </div>
-  <!-- END Update Box -->
-</div>
+<body id="dashboard_index" class="with_auto_paginate" onclick="click_body();" onload="">
+<script src="/js/app.js"></script>
 <script type="IN/Login" data-onAuth="loadData"></script>
 
-<br/>
-<br/>
- <!-- Main Content-->
-    <div id="main-content">
-      <div class="inner">
-          <div class="container">
-              <div class="row update-box-container">
-                  <div class="span14 columns">
-                      <ul class="idTabs">
-                          <li><a href="#publicphotos">Public Photos</a></li>
-                          <li><a href="#myphotos">My Photos</a></li>
-                          <li><a href="#overview">About</a></li>
-                      </ul>
+<div id="overlay_for_active_menu" style="display: none; "></div>
+<div id="container">
+<div id="header_container">
+  <div id="header">
+    <a href="/dashboard"><img src="/images/logo.png?alpha&amp;6" height="32"
+                              alt="Photon" id="logo"></a>
 
-                        <div id="overview" class="tab">
-                          <h2>Overview</h2>
-                          <p><strong>Photon</strong> is a photo sharing app built upon the Social Content Platform (SCP), <a href="http://github.com/briangu/viper.io">viper.io</a> and the search-as-a-service platform <a href="http://linkedin.jira.com/wiki/display/SIN/Home">SIN</a>.</p>
-                          <p>The application is easy to build as it uses vertical feeds queried from SCP to construct public and personal (my) image feeds.  Commenting and soon-to-be-completed Liking are inherited behaviors from SCP.
-                        </div>
 
-                        <div class="publicphotos tab">
+    <div id="tabs_outter_container">
 
-                              <!-- Stream -->
-                            <table  border="0" cellspacing="0" class="TwentyFour stream">
-                              <tbody>
-                              <tr valign="bottom">
-                                <td id="ir0c0" class="Photo"></td>
-                                <td id="ir0c1" class="Photo"></td>
-                                <td id="ir0c2" class="Photo"></td>
-                              </tr>
-                              <tr valign="top">
-                                <td id="or0c0" class="Owner"></td>
-                                <td id="or0c1" class="Owner"></td>
-                                <td id="or0c2" class="Owner"></td>
-                              </tr>
-                              <tr valign="bottom">
-                                <td id="ir1c0" class="Photo"></td>
-                                <td id="ir1c1" class="Photo"></td>
-                                <td id="ir1c2" class="Photo"></td>
-                              </tr>
-                              <tr valign="top">
-                                <td id="or1c0" class="Owner"></td>
-                                <td id="or1c1" class="Owner"></td>
-                                <td id="or1c2" class="Owner"></td>
-                              </tr>
-                              <tr valign="bottom">
-                                <td id="ir2c0" class="Photo"></td>
-                                <td id="ir2c1" class="Photo"></td>
-                                <td id="ir2c2" class="Photo"></td>
-                              </tr>
-                              <tr valign="top">
-                                <td id="or2c0" class="Owner"></td>
-                                <td id="or2c1" class="Owner"></td>
-                                <td id="or2c2" class="Owner"></td>
-                              </tr>
-                              </tbody>
-                            </table>
-                              <!-- END Stream -->
+      <div class="tab_bar" id="user_tools">
 
-                         </div>
+        <div class="tab iconic" id="all_blogs_menu_arrow" style="display:none" title="My blogs">
+          <div id="all_blogs_menu" class="menu" style="display:none">
+            <div class="shadow">
+              <ul class="items" id="all_blogs_list">
+                <li class="item" id="menuitem-eismcc">
+                  <a href="/blog/eismcc">
+                    <span>Untitled</span>
 
-                            <div class="myphotos tab">
+                    <div class="overflow_gradient"></div>
+                    <div class="drag_handle" onclick="return false;"></div>
+                  </a>
+                </li>
+              </ul>
+              <li class="item last_item"><a href="/new/blog"><span>Create a new blog</span>
 
-                                  <!-- Stream -->
-                                <table border="0" cellspacing="0" class="TwentyFour stream">
-                                  <tbody>
-                                  <tr valign="bottom">
-                                    <td id="my_ir0c0" class="Photo"></td>
-                                    <td id="my_ir0c1" class="Photo"></td>
-                                    <td id="my_ir0c2" class="Photo"></td>
-                                  </tr>
-                                  <tr valign="top">
-                                    <td id="my_or0c0" class="Owner"></td>
-                                    <td id="my_or0c1" class="Owner"></td>
-                                    <td id="my_or0c2" class="Owner"></td>
-                                  </tr>
-                                  <tr valign="bottom">
-                                    <td id="my_ir1c0" class="Photo"></td>
-                                    <td id="my_ir1c1" class="Photo"></td>
-                                    <td id="my_ir1c2" class="Photo"></td>
-                                  </tr>
-                                  <tr valign="top">
-                                    <td id="my_or1c0" class="Owner"></td>
-                                    <td id="my_or1c1" class="Owner"></td>
-                                    <td id="my_or1c2" class="Owner"></td>
-                                  </tr>
-                                  <tr valign="bottom">
-                                    <td id="my_ir2c0" class="Photo"></td>
-                                    <td id="my_ir2c1" class="Photo"></td>
-                                    <td id="my_ir2c2" class="Photo"></td>
-                                  </tr>
-                                  <tr valign="top">
-                                    <td id="my_or2c0" class="Owner"></td>
-                                    <td id="my_or2c1" class="Owner"></td>
-                                    <td id="my_or2c2" class="Owner"></td>
-                                  </tr>
-                                  </tbody>
-                                </table>
-                                  <!-- END Stream -->
-
-                          </div>
-                  </div>
-              </div>
+                <div class="recession_shadow"></div>
+              </a></li>
+            </div>
+            <div class="menu_nipple"></div>
           </div>
         </div>
-    </div>
-  </div>
-<!-- templates -->
 
-<!-- Update kind: Share -->
-
-<script type="text/html" id="template-photo-owner">
-  {{#socialSummary}}
-  <div class="update-actions">
-    <a href="javascript:void(0)" class="add-comment">Comment {{#totalComments}}({{totalComments}}){{/totalComments}}</a> ·
-    {{#actor}}
-    <a href="{{url}}"><b>{{title}}</b></a>
-    {{/actor}}
-    <span rel="{{createdDate}}" class="easydate"></span>
-  {{/socialSummary}}
-  </div>
-  <div>
-    {{#object}}
-    <a href="{{url}}"><b><i>{{description}}</i></b></a><br>
-    {{/object}}
-  </div>
-</script>
-
-<script type="text/html" id="template-photo-image">
-  {{#object}}
-  {{#com.linkedin.ucp.ObjectSummary}}
-  <span class="photo_container pc_m">
-    <a href="{{url}}" title="{{title}}" target="_blank" class="lb_pub">
-      <img src="{{image}}" width="240" height="180" alt="{{title}}" class="pc_img" border="0">
-    </a>
-  </span>
-  {{/com.linkedin.ucp.ObjectSummary}}
-  {{/object}}
-</script>
-
-<script type="text/html" id="template-photo-image-mine">
-  {{#object}}
-  {{#com.linkedin.ucp.ObjectSummary}}
-  <span class="photo_container pc_m">
-    <a href="{{url}}" title="{{title}}" target="_blank" class="lb_mine">
-      <img src="{{image}}" width="240" height="180" alt="{{title}}" class="pc_img" border="0">
-    </a>
-  </span>
-  {{/com.linkedin.ucp.ObjectSummary}}
-  {{/object}}
-</script>
-
-<script type="text/html" id="template-update">
-<div class="float" id="{{id}}">
-  {{#object}}
-  {{#com.linkedin.ucp.ObjectSummary}}
-      {{#image}}
-      <div class="article-photo"><a href="{{url}}" target="_blank"><img src="{{image}}" alt="{{title}}" /></a></div>
-      {{/image}}
-  {{/com.linkedin.ucp.ObjectSummary}}
-  {{/object}}
-  {{#socialSummary}}
-  <div class="update-actions">
-<!--    <a href="#" class="add-like">Like {{#totalLikes}}({{totalLikes}}){{/totalLikes}}</a> ·-->
-    <a href="#" class="add-comment">Comment {{#totalComments}}({{totalComments}}){{/totalComments}}</a> ·
-    <span rel="{{createdDate}}" class="easydate"></span>
-  </div>
-  {{/socialSummary}}
-  </div>
-</div>
-</script>
-
-<!-- Update kind: comment -->
-<script type="text/html" id="template-photo-comment">
-<div class="row update" id="{{id}}">
-  {{#actor}}
-    <div class="span1 columns photo">
-      <img src="http://media03.linkedin.com/mpr/mpr/shrink_80_80{{image}}" alt="" />
-    </div>
-    <div class="span9 columns body">
-        <div class="name"><a href="#">{{title}}</a></div>
-  {{/actor}}
-  {{#object}}
-    <p>
-     {{title}}
-    </p>
-  {{/object}}
-  {{#socialSummary}}
-  <div class="update-actions">
-    <span rel="{{createdDate}}" class="easydate"></span>
-    <!-- comment list -->
-      <ol class="comment-list">
-      {{#recentComments}}
-        <li>{{message}}</li>
-      {{/recentComments}}
-      </ol>
-    <!-- end of comment box -->
-  </div>
-  {{/socialSummary}}
-  </div>
-</div>
-</script>
-
-    <!-- Update kind: comment -->
-    <script type="text/html" id="template-photo-comment-box">
-    <div class="row update">
-      <div class="update-actions">
-        <!-- comment box -->
-        <div id="comment-box-lightbox" class="comment-box">
-          <form method="post" id="comment-form-lightbox">
-            <textarea name="comment" class="comment-textarea" cols="40" rows="3"></textarea>
-            <div class="post-comment-button">
-              <input type="button" value="Comment" class="share-btn btn primary comment-button" />
-              <a href="javascript:void(0)" class="cancel-comment">cancel</a>
-            </div>
-          </form>
+        <div class="tab iconic" id="logout_button">
+          <a href="/logout" title="Log out" onclick="return confirm('Are you sure you want to log out?');">Log out</a>
         </div>
-        <!-- end of comment box -->
       </div>
+
+      <div class="tab_bar " id="tabs_container">
+      </div>
+
     </div>
-    </script>
-
-<!-- templates -->
-    <div class="showmore" id="showmore">
-      Show More
-    </div>
-
-
-<!-- /container -->
-<div id="footer">
+  </div>
 </div>
+
+
+<img src="http://assets.tumblr.com/images/content_top.png?alpha" alt="" id="content_top">
+
+<div id="content">
+
+
+  <!-- New posts notice -->
+  <script type="text/javascript">
+    var check_for_new_posts_url = 'http://abacus.tumblr.com/check_for_new_posts/89c3d54467f5969a1fa024339b9fcc66.js';//  check_for_new_posts(60000);
+  </script>
+
+
+  <!-- Dashboard controls -->
+  <div id="right_column" class="">
+
+
+    <!-- Tracked Tags -->
+
+    <ul class="controls_section">
+      <li class="forever_alone">
+        <a href="/explore" class="explore_tumblr"
+           onclick="track_event(this, 'Explore', 'No tracked tags', '/dashboard'); return false;">
+          Explore Photon </a>
+      </li>
+
+    </ul>
+
+    <form method="get" action="/search" id="search_form">
+      <input type="text" name="q" id="search_query" placeholder="Search Tags" value="">
+      <input type="hidden" name="t" value="eismcc">
+      <input type="hidden" name="scope" id="search_scope" value="all_of_tumblr">
+
+      <div id="search_controls_wrapper">
+        <div id="search_controls_button" onclick="just_clicked_search_menu = true;">▾</div>
+        <div id="search_controls" style="display: none; ">
+          <a name="all_of_tumblr" class="first">
+            Search Tags <span class="check" style=""></span>
+          </a>
+          <a name="everyone_i_follow">
+            My Dashboard <span class="check" style="display:none"></span>
+          </a>
+          <a name="my_posts">
+            My posts <span class="check" style="display:none"></span>
+          </a>
+          <a name="help_docs" class="last">
+            Help Docs <span class="check" style="display:none"></span>
+          </a>
+
+          <div class="arrow"></div>
+        </div>
+      </div>
+    </form>
+
+
+    <div class="clear"></div>
+  </div>
+
+  <!-- Left column -->
+  <div id="left_column">
+    <!-- Top pagination -->
+
+
+    <!-- Posts -->
+    <ol id="posts" class="">
+
+
+      <li class="post is_mine with_avatar new_post" id="new_post">
+        <img id="new_post_icons" alt="Create a post" src="http://assets.tumblr.com/images/new_post_icons_no_labels.png"
+             usemap="#add_post">
+
+        <map id="add_post" name="add_post">
+          <area shape="rect" coords="0,0,72,97" title="Post Text" alt="Text" href="/new/text">
+          <area shape="rect" coords="72,0,147,97" title="Post a Photo" alt="Photo" href="/new/photo">
+          <area shape="rect" coords="147,0,221,97" title="Post a Quote" alt="Quote" href="/new/quote">
+          <area shape="rect" coords="221,0,296,97" title="Post a Link" alt="Link" href="/new/link">
+          <area shape="rect" coords="296,0,371,97" title="Post a Chat" alt="Chat" href="/new/chat">
+          <area shape="rect" coords="371,0,447,97" title="Post Audio" alt="Audio" href="/new/audio">
+          <area shape="rect" coords="447,0,513,97" title="Post a Video" alt="Video" href="/new/video">
+        </map>
+
+        <a href="/new/text" class="new_post_label" id="new_post_label_text">Text</a>
+        <a href="/new/photo" class="new_post_label" id="new_post_label_photo">Photo</a>
+        <a href="/new/quote" class="new_post_label" id="new_post_label_quote">Quote</a>
+        <a href="/new/link" class="new_post_label" id="new_post_label_link">Link</a>
+        <a href="/new/chat" class="new_post_label" id="new_post_label_chat">Chat</a>
+        <a href="/new/audio" class="new_post_label" id="new_post_label_audio">Audio</a>
+        <a href="/new/video" class="new_post_label" id="new_post_label_video">Video</a>
+
+        <span class="arrow"></span>
+
+        <div class="avatar_and_i">
+          <a href="http://eismcc.tumblr.com/" title="Untitled" class="post_avatar" id="post_controls_avatar">
+            <img src=''/>
+          </a>
+        </div>
+      </li>
+
+      <!-- START POSTS -->
+      <!-- END POSTS -->
+    </ol>
+
+
+    <!-- No posts found -->
+  </div>
+
+
+  <div class="clear"></div>
+
+  <div id="pagination" style="display:none;">
+    <a id="next_page_link" href="/dashboard/2/15314428669">Next page →</a>
+  </div>
+
+
+</div>
+
+<img src="/images/content_bottom.png?alpha" alt="" id="content_bottom">
+
+<div id="footer" class="fixed">
+</div>
+
+<a href="#" onclick="Effect.ScrollTo('container'); return false;"
+   style="opacity:0; filter:alpha(opacity=0); -moz-opacity:0; display:block;" id="return_to_top">
+  <div class="return_to_top_icon"></div>
+</a>
+
+<div id="auto_pagination_loader">
+                <span id="auto_pagination_loader_loading">
+                    <div class="spinner"></div>
+                    Loading more posts...                </span>
+
+                <span id="auto_pagination_loader_failure" style="display:none;">
+                    Sorry, we couldn't load the next page!&nbsp; <a href="#"
+                                                                    onclick="retry_auto_paginator_request(); return false;">Try
+                  again</a>.                </span>
+</div>
+
+<div id="report_tumblelog_bar" style="display:none;">
+  <input type="hidden" id="report_tumblelog_target">
+                <span id="report_tumblelog_with_name" style="display:none;">
+                    Report <span id="report_tumblelog_name"></span>?                </span>
+  <span id="report_tumblelog_without_name" style="display:none;">Report this person?</span>
+  <button class="chrome"
+          onclick="report_tumblelog($('report_tumblelog_target').value, 'Dhf2EjPEKMLX87UmryIE1ZR7Iuk', '1');">
+    <div class="chrome_button">
+      <div class="chrome_button_left"></div>
+      Spam
+      <div class="chrome_button_right"></div>
+    </div>
+  </button>
+  <button class="chrome"
+          onclick="report_tumblelog($('report_tumblelog_target').value, 'Dhf2EjPEKMLX87UmryIE1ZR7Iuk', '2');">
+    <div class="chrome_button">
+      <div class="chrome_button_left"></div>
+      Harassment
+      <div class="chrome_button_right"></div>
+    </div>
+  </button>
+  <button class="chrome"
+          onclick="report_tumblelog($('report_tumblelog_target').value, 'Dhf2EjPEKMLX87UmryIE1ZR7Iuk', 'other');">
+    <div class="chrome_button">
+      <div class="chrome_button_left"></div>
+      No thanks
+      <div class="chrome_button_right"></div>
+    </div>
+  </button>
+</div>
+
+<script type="text/javascript">
+  /*
+   start_processing_image_queue();
+
+   var default_search_text = 'Search Photon';
+
+   window.setInterval(show_or_hide_elevator, 200);
+   var next_page = $('next_page_link') ? $('next_page_link').href : false;
+   new PeriodicalExecuter(auto_paginator, 0.2);
+   */
+</script>
+
+<script type="text/html" id="template-post">
+  <li id="post_{{id}}" class="post regular not_mine">
+    <!-- Post controls -->
+    <div class="post_controls">
+    </div>
+
+    <!-- Username -->
+    {{#actor}}
+    <div class="post_info">
+      <a href="{{url}}">{{title}}</a>:
+    </div>
+    {{/actor}}
+
+    <!-- Reply pane -->
+    <div id="reply_pane_outer_container_15302237842" style="clear:both; display:none"></div>
+
+    <!-- Share post -->
+    {{#object}}
+    {{#com.linkedin.ucp.ObjectSummary}}
+    <div class="post_content" id="post_content_15302237842">
+      <div class="post_title">
+        {{title}}
+      </div>
+      <p>{{description}}</p>
+      <p></p>
+      <img src="{{image}}"/>
+    </div>
+    {{/com.linkedin.ucp.ObjectSummary}}
+    {{/object}}
+
+    <div class="clear"></div>
+
+    <div class="footer_links with_tags ">
+      <span id="post_tags_wrapper_15302237842">
+        <span id="post_tags_15302237842" class="tags">
+          <a href="/tagged/Look-Back-at-2011">#Look Back at 2011</a>
+        </span>
+      </span>
+    </div>
+
+    {{#actor}}
+    <div class="avatar_and_i">
+      <a href="{{url}}" title="{{title}}" class="post_avatar" id="post_avatar_15302237842">
+        <img src="{{image}}"/>
+      </a>
+    </div>
+    {{/actor}}
+
+    <span class="arrow "></span>
+  </li>
+</script>
+
 </body>
 </html>
