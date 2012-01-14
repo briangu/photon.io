@@ -185,7 +185,7 @@ var photonApp = function()
         }
     }
 
-//   createUploader();
+   createUploader();
     _getFeed();
     setInterval(auto_paginator, 200);
 };

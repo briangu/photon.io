@@ -51,9 +51,14 @@
                                                                                                                         photonApp();
                                                                                                                       });
     }
+
+    function postPhoto()
+    {
+
+    }
   </script>
 </head>
-<body id="dashboard_index" class="with_auto_paginate" onclick="click_body();" onload="">
+<body id="dashboard_index" class="with_auto_paginate">
 <script src="/js/app.js"></script>
 <script type="IN/Login" data-onAuth="loadData"></script>
 
@@ -172,10 +177,30 @@
       <li class="post is_mine with_avatar new_post" id="new_post">
         <img id="new_post_icons" alt="Create a post" src="http://assets.tumblr.com/images/new_post_icons_no_labels.png"
              usemap="#add_post">
+        <div id="photo_input" hidden>
+          <hr/>
+          <!-- Update Box -->
+          <div class="modal update-box" id="update-box">
+            <div class="modal-body">
+              <p class="uploader-text">drag-and-drop or click the upload button.</p>
+              <div id="file-uploader-demo1">
+                <noscript>
+                  <p>Please enable JavaScript to use file uploader.</p>
+                </noscript>
+              </div>
+            </div>
+          </div>
+
+          <form>
+            <label for="photo_caption" class="photo_caption_label">Caption: (optional)</label>
+            <textarea id="photo_caption" rows="3" cols="60"></textarea>
+            <input type="submit" value="share"/>
+          </form>
+        </div>
 
         <map id="add_post" name="add_post">
           <area shape="rect" coords="0,0,72,97" title="Post Text" alt="Text" href="/new/text">
-          <area shape="rect" coords="72,0,147,97" title="Post a Photo" alt="Photo" href="/new/photo">
+          <area shape="rect" coords="72,0,147,97" title="Post a Photo" alt="Photo" onclick="postPhoto(); return false;">
           <area shape="rect" coords="147,0,221,97" title="Post a Quote" alt="Quote" href="/new/quote">
           <area shape="rect" coords="221,0,296,97" title="Post a Link" alt="Link" href="/new/link">
           <area shape="rect" coords="296,0,371,97" title="Post a Chat" alt="Chat" href="/new/chat">
@@ -194,7 +219,7 @@
         <span class="arrow"></span>
 
         <div class="avatar_and_i">
-          <a href="http://eismcc.tumblr.com/" title="Untitled" class="post_avatar" id="post_controls_avatar">
+          <a href="" title="Untitled" class="post_avatar" id="post_controls_avatar">
             <img src=''/>
           </a>
         </div>
