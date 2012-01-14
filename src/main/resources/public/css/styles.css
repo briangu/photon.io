@@ -38,3 +38,24 @@ padding: 0;
     margin-top: 10px;
     margin-left: 20px;
 }
+
+.photoset .photoset_row {
+    width: 500px;
+    white-space: nowrap;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.photoset .photoset_row:first-child {
+    margin-top: 0;
+}
+
+.photoset .photoset_row .photoset_photo {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 10px;
+}
+
+.photoset .photoset_row .photoset_photo:first-child {
+    margin-left: 0 !important;
+}

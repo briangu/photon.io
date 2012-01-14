@@ -35,6 +35,16 @@ public class PhotosController
     queryParams.add(new BasicNameValuePair("q", "feed"));
     queryParams.add(new BasicNameValuePair("id", "photon:member"));
     queryParams.add(new BasicNameValuePair("member", String.format("member:%s", id)));
+    if (args.containsKey("start"))
+    {
+      Integer.parseInt(args.get("start"));
+      queryParams.add(new BasicNameValuePair("start", args.get("start")));
+    }
+    if (args.containsKey("count"))
+    {
+      Integer.parseInt(args.get("count"));
+      queryParams.add(new BasicNameValuePair("id", args.get("count")));
+    }
     return Util.createJsonResponse(_queryClient.doQuery(queryParams));
   }
 
@@ -45,6 +55,16 @@ public class PhotosController
     List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
     queryParams.add(new BasicNameValuePair("q", "feed"));
     queryParams.add(new BasicNameValuePair("id", String.format("photon:public", id)));
+    if (args.containsKey("start"))
+    {
+      Integer.parseInt(args.get("start"));
+      queryParams.add(new BasicNameValuePair("start", args.get("start")));
+    }
+    if (args.containsKey("count"))
+    {
+      Integer.parseInt(args.get("count"));
+      queryParams.add(new BasicNameValuePair("id", args.get("count")));
+    }
     return Util.createJsonResponse(_queryClient.doQuery(queryParams));
   }
 
