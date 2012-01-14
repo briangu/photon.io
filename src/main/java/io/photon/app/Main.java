@@ -38,6 +38,8 @@ public class Main
         staticFileRoot,
         uploadDir,
         pc);
+
+      System.in.read();
     }
     catch (Exception e)
     {

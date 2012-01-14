@@ -1,12 +1,14 @@
 package io.photon.app;
 
 
+import com.thebuzzmedia.imgscalr.AsyncScalr;
 import io.viper.core.server.file.FileChunkProxy;
 import io.viper.core.server.file.FileContentInfoProvider;
 import io.viper.core.server.file.HttpChunkProxyHandler;
 import io.viper.core.server.file.HttpChunkRelayProxy;
 import io.viper.core.server.file.StaticFileContentInfoProvider;
 import io.viper.core.server.file.StaticFileServerHandler;
+import io.viper.core.server.file.ThumbnailFileContentInfoProvider;
 import io.viper.core.server.router.GetRoute;
 import io.viper.core.server.router.PostRoute;
 import io.viper.core.server.router.Route;
@@ -20,12 +22,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.DefaultChannelPipeline;
+import org.jboss.netty.channel.group.ChannelGroup;
+import org.jboss.netty.channel.group.ChannelGroupFuture;
+import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
-import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.json.JSONException;
 
@@ -33,6 +38,8 @@ import org.json.JSONException;
 public class PhotoServer
 {
   private ServerBootstrap _bootstrap;
+
+  static final ChannelGroup allChannels = new DefaultChannelGroup("server");
 
   public static PhotoServer create(
     String localhostName,
@@ -43,6 +50,9 @@ public class PhotoServer
   )
       throws Exception
   {
+    AsyncScalr.setService(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
+    AsyncScalr.setServiceThreadCount(Runtime.getRuntime().availableProcessors());
+
     PhotoServer photoServer = new PhotoServer();
 
     photoServer._bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
@@ -54,17 +64,26 @@ public class PhotoServer
         (1024 * 1024) * 1024,
         uploadDir,
         staticFileRoot,
-        localhost + "/d/",
+        localhost,
         photosController);
 
+    photoServer._bootstrap.setOption("tcpNoDelay", true);
+    photoServer._bootstrap.setOption("keepAlive", true);
+
     photoServer._bootstrap.setPipelineFactory(pipelineFactory);
-    photoServer._bootstrap.bind(new InetSocketAddress(port));
+    Channel channel = photoServer._bootstrap.bind(new InetSocketAddress(port));
+
+    allChannels.add(channel);
 
     return photoServer;
   }
 
   public void shutdown()
   {
+    ChannelGroupFuture future = allChannels.close();
+    future.awaitUninterruptibly();
+
+    AsyncScalr.getService().shutdownNow();
   }
 
   private static class PhotosPipelineFactory implements ChannelPipelineFactory
@@ -72,6 +91,7 @@ public class PhotoServer
     final int _maxContentLength;
     final String _uploadFileRoot;
     final String _staticFileRoot;
+    final FileContentInfoProvider _thumbFileProvider;
     final FileContentInfoProvider _staticFileProvider;
     final FileContentInfoProvider _photoFileProvider;
     final String _downloadHostname;
@@ -90,7 +110,8 @@ public class PhotoServer
       _downloadHostname = downloadHostname;
 
       _staticFileProvider = StaticFileContentInfoProvider.create(_staticFileRoot);
-      _photoFileProvider = new StaticFileContentInfoProvider(_uploadFileRoot);
+      _photoFileProvider = StaticFileContentInfoProvider.create(_uploadFileRoot);
+      _thumbFileProvider = ThumbnailFileContentInfoProvider.create(_uploadFileRoot);
 
       _photosController = photosController;
     }
@@ -155,6 +176,7 @@ public class PhotoServer
       FileUploadChunkRelayEventListener relayListener = new FileUploadChunkRelayEventListener(_downloadHostname);
       routes.add(new HttpChunkProxyHandler("/u/", proxy, relayListener, _maxContentLength));
 
+      routes.add(new GetRoute("/thumb/$path", new StaticFileServerHandler(_thumbFileProvider)));
       routes.add(new GetRoute("/d/$path", new StaticFileServerHandler(_photoFileProvider)));
       routes.add(new GetRoute("/$path", new StaticFileServerHandler(_staticFileProvider)));
 

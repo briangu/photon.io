@@ -19,8 +19,7 @@ import io.viper.core.server.Util;
 
 public class FileUploadChunkRelayEventListener implements HttpChunkRelayEventListener
 {
-  String _hostname;
-  String _fileKey;
+  final String _hostname;
 
   public FileUploadChunkRelayEventListener(String hostname)
   {
@@ -30,30 +29,35 @@ public class FileUploadChunkRelayEventListener implements HttpChunkRelayEventLis
   public void onError(Channel clientChannel)
   {
     if (clientChannel == null) return;
-    sendResponse(clientChannel, false);
+    sendResponse(null, clientChannel, false);
   }
 
-  public void onCompleted(Channel clientChannel)
+  public void onCompleted(String fileKey, Channel clientChannel)
   {
-    sendResponse(clientChannel, true);
+    sendResponse(fileKey, clientChannel, true);
   }
 
   @Override
   public String onStart(Map<String, String> props)
   {
-    _fileKey = Util.base64Encode(UUID.randomUUID());
-    return _fileKey;
+    return Util.base64Encode(UUID.randomUUID());
   }
 
-  private void sendResponse(Channel clientChannel, boolean success)
+  private void sendResponse(String fileKey, Channel clientChannel, boolean success)
   {
     try
     {
       HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+
       JSONObject jsonResponse = new JSONObject();
       jsonResponse.put("success", Boolean.toString(success));
-      jsonResponse.put("url", String.format("%s%s", _hostname, _fileKey));
-      jsonResponse.put("key", _fileKey);
+      if (success)
+      {
+        jsonResponse.put("thumbnail", String.format("%s/thumb/%s", _hostname, fileKey));
+        jsonResponse.put("url", String.format("%s/d/%s", _hostname, fileKey));
+        jsonResponse.put("key", fileKey);
+      }
+
       response.setContent(ChannelBuffers.wrappedBuffer(jsonResponse.toString(2).getBytes("UTF-8")));
       clientChannel.write(response).addListener(ChannelFutureListener.CLOSE);
     }
