@@ -225,6 +225,7 @@ public class PhotoServer
       routes.add(new GetRoute("/thumb/$path", new StaticFileServerHandler(_thumbFileProvider)));
       routes.add(new GetRoute("/d/$path", new StaticFileServerHandler(_photoFileProvider)));
       routes.add(new GetRoute("/$path", new StaticFileServerHandler(_staticFileProvider)));
+      routes.add(new GetRoute("/", new StaticFileServerHandler(_staticFileProvider)));
 
       ChannelPipeline lhPipeline = new DefaultChannelPipeline();
       lhPipeline.addLast("decoder", new HttpRequestDecoder());
