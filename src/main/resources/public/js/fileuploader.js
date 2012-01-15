@@ -498,7 +498,6 @@ qq.FileUploader = function(o){
                 '<span class="qq-upload-file"></span>' +
                 '<span class="qq-upload-spinner"></span>' +
                 '<span class="qq-upload-size"></span>' +
-		'<span class="qq-upload-url"></span>' +
                 '<a class="qq-upload-cancel" href="#">Cancel</a>' +
                 '<span class="qq-upload-failed-text">Failed</span>' +
             '</li>',        
@@ -513,7 +512,7 @@ qq.FileUploader = function(o){
             file: 'qq-upload-file',
             spinner: 'qq-upload-spinner',
             size: 'qq-upload-size',
-	    url: 'qq-upload-url',
+	        url: 'qq-upload-url',
             cancel: 'qq-upload-cancel',
 
             // added to list item when upload completes
@@ -547,7 +546,7 @@ qq.extend(qq.FileUploader.prototype, {
     _find: function(parent, type){                                
         var element = qq.getByClass(parent, this._options.classes[type])[0];        
         if (!element){
-            throw new Error('element not found ' + type);
+            return null;
         }
         
         return element;
@@ -621,8 +620,12 @@ qq.extend(qq.FileUploader.prototype, {
         qq.remove(this._find(item, 'spinner'));
         
         if (result.success){
-            qq.addClass(item, this._classes.success);    
-	    qq.setHtml(this._find(item, 'url'), "<a href=\"" + result.url + "\">" + result.url + "</a>");
+            qq.addClass(item, this._classes.success);
+        var urlNode = this._find(item, 'url');
+        if (urlNode != null)
+        {
+  	      qq.setHtml(urlNode, "<a href=\"" + result.url + "\">" + result.url + "</a>");
+        }
         } else {
             qq.addClass(item, this._classes.fail);
         }         

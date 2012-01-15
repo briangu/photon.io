@@ -14,11 +14,13 @@ var photonApp = function()
                                                    onComplete: function(id, filename, responseJSON)
                                                    {
                                                        if (!responseJSON.success) return;
+
                                                        $.post('/photos/add', {
                                                                   id: params.id,
                                                                   thumbnail: responseJSON.thumbnail,
                                                                   url: responseJSON.url,
-                                                                  photoId: "urn:photo:" + responseJSON.key
+                                                                  filename: filename,
+                                                                  photoId: responseJSON.key
                                                               }, function(response)
                                                               {
                                                                   //_getFeed();
@@ -55,7 +57,6 @@ var photonApp = function()
             $.each(data.elements, function(key, activity)
             {
                 image = activity.object["com.linkedin.ucp.ObjectSummary"].image;
-//           $('#posts').append("<li class='post photo'><img class='carousel_img' src=\""+image+"\"></li>");
                 $('#posts').append(renderActivity(activity, '#template-post'));
                 activityIdMap[activity.object.id] = activity.id;
             });
