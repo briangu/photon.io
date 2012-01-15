@@ -115,7 +115,7 @@
                             <generateRepository>false</generateRepository>
                             <programs>
                                 <program>
-                                    <mainClass>cloudcmd.srv.Main</mainClass>
+                                    <mainClass>io.photon.app.Main</mainClass>
                                     <name>photo</name>
                                 </program>
                             </programs>
@@ -129,7 +129,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>cloudcmd.srv.Main</mainClass>
+              <mainClass>io.photon.app.Main</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

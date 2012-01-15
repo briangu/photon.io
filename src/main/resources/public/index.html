@@ -62,6 +62,12 @@
       $('#chat_input').attr('hidden', true);
       $('#audio_input').attr('hidden', true);
       $('#video_input').attr('hidden', true);
+
+      $('#text_caption').val("");
+
+      $('.qq-upload-success').remove();
+      $('#photo_caption').val("");
+
     }
 
     function enableInput(inputName)
@@ -85,7 +91,6 @@ $(function() {
              }, function(response)
              {
                fetchActivityList[response.meta.Id] = 0;
-               $('#text_caption').val("");
                hideInput();
              });
       return false;
