@@ -489,7 +489,7 @@ qq.FileUploader = function(o){
                 
         template: '<div class="qq-uploader">' + 
                 '<div class="qq-upload-drop-area"><span>Drop photos here to upload</span></div>' +
-                '<div class="qq-upload-button">Upload photos</div>' +
+                '<div class="qq-upload-button">Select photos</div>' +
                 '<ul class="qq-upload-list"></ul>' + 
              '</div>',
 
@@ -619,16 +619,15 @@ qq.extend(qq.FileUploader.prototype, {
         qq.remove(this._find(item, 'cancel'));
         qq.remove(this._find(item, 'spinner'));
         
-        if (result.success){
+        if (result.success) {
             qq.addClass(item, this._classes.success);
-        var urlNode = this._find(item, 'url');
-        if (urlNode != null)
-        {
-  	      qq.setHtml(urlNode, "<a href=\"" + result.url + "\">" + result.url + "</a>");
-        }
+            var urlNode = this._find(item, 'url');
+            if (urlNode != null) {
+                qq.setHtml(urlNode, "<a href=\"" + result.url + "\">" + result.url + "</a>");
+            }
         } else {
             qq.addClass(item, this._classes.fail);
-        }         
+        }
     },
     _addToList: function(id, fileName){
         var item = qq.toElement(this._options.fileTemplate);                

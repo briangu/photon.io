@@ -113,9 +113,48 @@ public class PhotosController
     JSONObject object = new JSONObject();
     object.put("type", "photon:photo");
     object.put("title", "a photo");
-    object.put("description", "");
     object.put("image", thumbnail);
     object.put("url", url);
+    object.put("properties", properties);
+    post.put("object", object);
+
+    post.put("app", "photon");
+
+    return Util.createJsonResponse(_publishClient.doPost(post.toString(2), _headers));
+  }
+
+  public RouteResponse addPhotoAlbum(Map<String, String> args)
+      throws Exception
+  {
+    String id = args.get("id");
+    String msg = args.get("msg");
+    JSONArray photoList = new JSONArray(args.get("photoList"));
+
+    String member = String.format("member:%s", id);
+    JSONObject post = new JSONObject();
+    post.put("actor", member);
+
+    JSONObject verb = new JSONObject();
+    verb.put("type", "photon:create_album");
+    post.put("verb", verb);
+
+    JSONArray properties = new JSONArray();
+    for (int i =0; i < photoList.length(); i++)
+    {
+      JSONObject property = new JSONObject();
+      property.put("property", "photo");
+      property.put("content", photoList.getJSONObject(i).toString());
+      properties.put(property);
+    }
+
+    JSONObject object = new JSONObject();
+    object.put("type", "photon:album");
+    object.put("title", msg);
+    if (photoList.length() > 0)
+    {
+      object.put("image", photoList.getJSONObject(0).getString("thumbnail"));
+      object.put("url", photoList.getJSONObject(0).getString("url"));
+    }
     object.put("properties", properties);
     post.put("object", object);
 

@@ -15,7 +15,13 @@ var photonApp = function()
                                                    onComplete: function(id, filename, responseJSON)
                                                    {
                                                        if (!responseJSON.success) return;
-
+                                                       photoList.push({
+                                                                          thumbnail: responseJSON.thumbnail,
+                                                                          url: responseJSON.url,
+                                                                          filename: filename,
+                                                                          photoId: responseJSON.key
+                                                                      });
+                                                   /*
                                                        $.post('/photos/add', {
                                                                   id: params.id,
                                                                   thumbnail: responseJSON.thumbnail,
@@ -26,6 +32,7 @@ var photonApp = function()
                                                               {
                                                                 fetchActivityList[response.meta.Id] = 0;
                                                               });
+                                                   */
                                                    }
                                                });
     }

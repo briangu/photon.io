@@ -41,6 +41,7 @@
     var params = {};
     var activityIdMap = {};
     var fetchActivityList = {};
+    var photoList = new Array();
 
     function loadData()
     {
@@ -48,6 +49,7 @@
                                                                                                                       {
                                                                                                                         profile = result.values[0];
                                                                                                                         params.id = profile.id;
+                                                                                                                        // params.id = 45310686;
                                                                                                                         $('.avatar_and_i a')[0].href = profile.publicProfileUrl;
                                                                                                                         $('.avatar_and_i a img')[0].src = profile.pictureUrl;
                                                                                                                         photonApp();
@@ -68,7 +70,7 @@
 
       $('.qq-upload-success').remove();
       $('#photo_caption').val("");
-
+      photoList = new Array();
     }
 
     function enableInput(inputName)
@@ -84,7 +86,7 @@
 <script type="text/javascript">
 $(function() {
   $('#text_input_form').submit(
-    function postMessage(e) {
+    function(e) {
       msg = $('#text_caption').val();
       $.post('/text/add', {
                 id: params.id,
@@ -94,6 +96,24 @@ $(function() {
                fetchActivityList[response.meta.Id] = 0;
                hideInput();
              });
+      return false;
+    }
+  );
+
+  $('#photo_input_form').submit(
+    function(e) {
+      msg = $('#photo_caption').val();
+
+      $.post('/photos/add', {
+                 id: params.id,
+                 msg: msg,
+                 photoList: JSON.stringify(photoList)
+             }, function(response)
+             {
+               fetchActivityList[response.meta.Id] = 0;
+               hideInput();
+             });
+
       return false;
     }
   );
@@ -234,7 +254,7 @@ $(function() {
           <!-- Update Box -->
           <div class="modal update-box" id="update-box">
             <div class="modal-body">
-              <p class="uploader-text">drag-and-drop or click the upload button.</p>
+              <p class="uploader-text">drag-and-drop or use the select button.</p>
               <div id="file-uploader-demo1">
                 <noscript>
                   <p>Please enable JavaScript to use file uploader.</p>
@@ -243,10 +263,9 @@ $(function() {
             </div>
           </div>
 
-          <form>
+          <form id="photo_input_form">
             <label for="photo_caption" class="input_caption_label">Caption: (optional)</label>
             <textarea id="photo_caption" rows="3" cols="60"></textarea>
-            <input type="checkbox" value="store as album">
             <input type="submit" value="post"/>
           </form>
         </div>

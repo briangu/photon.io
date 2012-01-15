@@ -29,3 +29,10 @@
 
 .qq-upload-failed-text {display:none;}
 .qq-upload-fail .qq-upload-failed-text {display:inline;}
+
+.qq-upload-success {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}

@@ -178,7 +178,7 @@ public class PhotoServer
         public RouteResponse exec(Map<String, String> args)
           throws Exception
         {
-          return _photosController.addPhotoEvent(args);
+          return _photosController.addPhotoAlbum(args);
         }
       }));
 
