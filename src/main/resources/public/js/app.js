@@ -2,6 +2,8 @@ var photonApp = function()
 {
     var start = 0;
     var count = 10;
+    var loading_next_page = false;
+    var fetchActivityList = {};
 
     function createUploader()
     {
@@ -23,7 +25,7 @@ var photonApp = function()
                                                                   photoId: responseJSON.key
                                                               }, function(response)
                                                               {
-                                                                  //_getFeed();
+                                                                fetchActivityList[response.meta.Id] = 0;
                                                               });
                                                    }
                                                });
@@ -48,15 +50,14 @@ var photonApp = function()
         $('#stream-updates').html(spinner.el);
     }
 
-    function _getFeed()
+    function _getPublicFeed()
     {
         loading_next_page = true;
         showSpinner();
-        $.getJSON('/photos/feed?id=' + params.id + '&start=' + start + "&count=" + count, function(data)
+        $.getJSON('/feeds/public?start=' + start + "&count=" + count, function(data)
         {
             $.each(data.elements, function(key, activity)
             {
-                image = activity.object["com.linkedin.ucp.ObjectSummary"].image;
                 $('#posts').append(renderActivity(activity, '#template-post'));
                 activityIdMap[activity.object.id] = activity.id;
             });
@@ -158,9 +159,7 @@ var photonApp = function()
         return Mustache.to_html(template, activity);
     }
 
-    var loading_next_page = false;
-
-    function auto_paginator(pe)
+    function auto_paginator()
     {
         if (loading_next_page) return;
 
@@ -175,7 +174,7 @@ var photonApp = function()
 
             start = posts.length - 1;
             count = 10;
-            _getFeed();
+            _getPublicFeed();
         }
         else
         {
@@ -186,8 +185,42 @@ var photonApp = function()
         }
     }
 
-   createUploader();
-    _getFeed();
+    function activity_fetcher()
+    {
+        var cloneActivityList = jQuery.extend({}, fetchActivityList);
+
+        $.each(cloneActivityList, function(activityId, attempts)
+        {
+            $.getJSON('/posts/' + activityId, function(data)
+            {
+                if (data.elements.length == 0)
+                {
+                    attempts++;
+                    if (attempts > 40)
+                    {
+                        fetchActivityList.remove(key);
+                    }
+                    fetchActivityList[activityId] = attempts;
+                    return;
+                }
+
+                delete fetchActivityList[activityId];
+
+                $.each(data.elements, function(key, activity)
+                {
+                    $('#posts .is_mine').after(renderActivity(activity, '#template-post'));
+                    activityIdMap[activity.object.id] = activity.id;
+                });
+
+                fixBrokenImages();
+                showTimeAgoDates();
+            });
+        });
+    }
+
+    createUploader();
+    _getPublicFeed();
     setInterval(auto_paginator, 200);
+    setInterval(activity_fetcher, 250);
 };
 

@@ -51,10 +51,9 @@ public class PhotosController
   public RouteResponse getPublicPhotoFeed(Map<String, String> args)
     throws Exception
   {
-    String id = args.get("id");
     List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
     queryParams.add(new BasicNameValuePair("q", "feed"));
-    queryParams.add(new BasicNameValuePair("id", String.format("photon:public", id)));
+    queryParams.add(new BasicNameValuePair("id", "photon:public"));
     if (args.containsKey("start"))
     {
       Integer.parseInt(args.get("start"));
@@ -65,6 +64,16 @@ public class PhotosController
       Integer.parseInt(args.get("count"));
       queryParams.add(new BasicNameValuePair("id", args.get("count")));
     }
+    return Util.createJsonResponse(_queryClient.doQuery(queryParams));
+  }
+
+  public RouteResponse getPosts(Map<String, String> args)
+    throws Exception
+  {
+    List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
+    queryParams.add(new BasicNameValuePair("q", "feed"));
+    queryParams.add(new BasicNameValuePair("id", "photon:activity"));
+    queryParams.add(new BasicNameValuePair("activityId", args.get("postId")));
     return Util.createJsonResponse(_queryClient.doQuery(queryParams));
   }
 

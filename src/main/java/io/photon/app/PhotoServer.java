@@ -35,7 +35,6 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -143,13 +142,23 @@ public class PhotoServer
         }
       }));
 
-      routes.add(new GetRoute("/photos/feed", new RouteHandler()
+      routes.add(new GetRoute("/feeds/public", new RouteHandler()
       {
         @Override
         public RouteResponse exec(Map<String, String> args)
           throws Exception
         {
           return _photosController.getPublicPhotoFeed(args);
+        }
+      }));
+
+      routes.add(new GetRoute("/posts/$postId", new RouteHandler()
+      {
+        @Override
+        public RouteResponse exec(Map<String, String> args)
+          throws Exception
+        {
+          return _photosController.getPosts(args);
         }
       }));
 
