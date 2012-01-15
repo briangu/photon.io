@@ -52,15 +52,42 @@
                                                                                                                       });
     }
 
-    function postPhoto()
+    function hideInput()
     {
-      $('#photo_input').removeAttr('hidden');
+      $('#text_input').attr('hidden', true);
+      $('#photo_input').attr('hidden', true);
+    }
+
+    function enableInput(inputName)
+    {
+      hideInput();
+      $(inputName).removeAttr('hidden');
     }
   </script>
 </head>
 <body id="dashboard_index" class="with_auto_paginate">
 <script src="/js/app.js"></script>
 <script type="IN/Login" data-onAuth="loadData"></script>
+<script type="text/javascript">
+$(function() {
+  $('#text_input_form').submit(
+    function postMessage(e) {
+      msg = $('#text_caption').val();
+      $.post('/text/add', {
+                id: params.id,
+                msg: msg
+             }, function(response)
+             {
+                 //_getFeed();
+               $('#text_caption').val("");
+               hideInput();
+             });
+      return false;
+    }
+  );
+});
+
+</script>
 
 <div id="overlay_for_active_menu" style="display: none; "></div>
 <div id="container">
@@ -177,6 +204,15 @@
       <li class="post is_mine with_avatar new_post" id="new_post">
         <img id="new_post_icons" alt="Create a post" src="http://assets.tumblr.com/images/new_post_icons_no_labels.png"
              usemap="#add_post">
+        <div id="text_input" hidden>
+          <hr/>
+          <form id="text_input_form">
+            <label for="text_caption" class="input_caption_label">Message:</label>
+            <textarea id="text_caption" rows="3" cols="60"></textarea>
+            <input type="submit" value="post"/>
+          </form>
+        </div>
+
         <div id="photo_input" hidden>
           <hr/>
           <!-- Update Box -->
@@ -192,15 +228,16 @@
           </div>
 
           <form>
-            <label for="photo_caption" class="photo_caption_label">Caption: (optional)</label>
+            <label for="photo_caption" class="input_caption_label">Caption: (optional)</label>
             <textarea id="photo_caption" rows="3" cols="60"></textarea>
-            <input type="submit" value="share"/>
+            <input type="checkbox" value="store as album">
+            <input type="submit" value="post"/>
           </form>
         </div>
 
         <map id="add_post" name="add_post">
-          <area shape="rect" coords="0,0,72,97" title="Post Text" alt="Text" href="/new/text">
-          <area shape="rect" coords="72,0,147,97" title="Post a Photo" alt="Photo" href="/new/photo" onclick="postPhoto(); return false;">
+          <area shape="rect" coords="0,0,72,97" title="Post Text" alt="Text" href="/new/text" onclick="enableInput('#text_input'); return false;">
+          <area shape="rect" coords="72,0,147,97" title="Post a Photo" alt="Photo" href="/new/photo" onclick="enableInput('#photo_input'); return false;">
           <area shape="rect" coords="147,0,221,97" title="Post a Quote" alt="Quote" href="/new/quote">
           <area shape="rect" coords="221,0,296,97" title="Post a Link" alt="Link" href="/new/link">
           <area shape="rect" coords="296,0,371,97" title="Post a Chat" alt="Chat" href="/new/chat">
@@ -324,25 +361,32 @@
     <div id="reply_pane_outer_container_15302237842" style="clear:both; display:none"></div>
 
     <!-- Share post -->
-    {{#object}}
-    {{#com.linkedin.ucp.ObjectSummary}}
     <div class="post_content" id="post_content_15302237842">
+      {{#object}}
+      {{#com.linkedin.ucp.ObjectSummary}}
       <div class="post_title">
         {{title}}
       </div>
       <p>{{description}}</p>
       <p></p>
       <img src="{{image}}"/>
+      {{/com.linkedin.ucp.ObjectSummary}}
+      {{/object}}
+
+      {{#verb}}
+      <div class="post_title">
+        {{commentary}}
+      </div>
+      {{/verb}}
     </div>
-    {{/com.linkedin.ucp.ObjectSummary}}
-    {{/object}}
 
     <div class="clear"></div>
 
     <div class="footer_links with_tags ">
       <span id="post_tags_wrapper_15302237842">
         <span id="post_tags_15302237842" class="tags">
-          <a href="/tagged/Look-Back-at-2011">#Look Back at 2011</a>
+<!--          <a href="/tagged/Look-Back-at-2011">#Look Back at 2011</a>
+-->
         </span>
       </span>
     </div>

@@ -2,6 +2,8 @@ package io.photon.app;
 
 
 import com.thebuzzmedia.imgscalr.AsyncScalr;
+import httpjsonclient.HttpJSONClient;
+import io.viper.core.server.Util;
 import io.viper.core.server.file.FileChunkProxy;
 import io.viper.core.server.file.FileContentInfoProvider;
 import io.viper.core.server.file.HttpChunkProxyHandler;
@@ -18,6 +20,7 @@ import io.viper.core.server.router.RouterMatcherUpstreamHandler;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -32,7 +35,9 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class PhotoServer
@@ -46,6 +51,7 @@ public class PhotoServer
     int port,
     String staticFileRoot,
     String uploadDir,
+    HttpJSONClient publishClient,
     PhotosController photosController
   )
       throws Exception
@@ -65,6 +71,7 @@ public class PhotoServer
         uploadDir,
         staticFileRoot,
         localhost,
+        publishClient,
         photosController);
 
     photoServer._bootstrap.setOption("tcpNoDelay", true);
@@ -95,12 +102,14 @@ public class PhotoServer
     final FileContentInfoProvider _staticFileProvider;
     final FileContentInfoProvider _photoFileProvider;
     final String _downloadHostname;
+    final HttpJSONClient _publishClient;
     final PhotosController _photosController;
 
     public PhotosPipelineFactory(int maxContentLength,
                                  String uploadFileRoot,
                                  String staticFileRoot,
                                  String downloadHostname,
+                                 HttpJSONClient publishClient,
                                  PhotosController photosController)
       throws IOException, JSONException
     {
@@ -112,6 +121,8 @@ public class PhotoServer
       _staticFileProvider = StaticFileContentInfoProvider.create(_staticFileRoot);
       _photoFileProvider = StaticFileContentInfoProvider.create(_uploadFileRoot);
       _thumbFileProvider = ThumbnailFileContentInfoProvider.create(_uploadFileRoot);
+
+      _publishClient = publishClient;
 
       _photosController = photosController;
     }
@@ -169,6 +180,32 @@ public class PhotoServer
           throws Exception
         {
           return _photosController.addPhotoCommentEvent(args);
+        }
+      }));
+
+      routes.add(new PostRoute("/text/add", new RouteHandler()
+      {
+        @Override
+        public RouteResponse exec(Map<String, String> args)
+            throws Exception
+        {
+          String id = args.get("id");
+          String msg = args.get("msg");
+
+          String member = String.format("member:%s", id);
+          JSONObject post = new JSONObject();
+          post.put("actor", member);
+
+          JSONObject verb = new JSONObject();
+          verb.put("type", "linkedin:post");
+          verb.put("commentary", msg);
+          post.put("verb", verb);
+
+          post.put("object", new JSONObject());
+
+          post.put("app", "photon");
+
+          return Util.createJsonResponse(_publishClient.doPost(post.toString(2), Collections.<String, String>emptyMap()));
         }
       }));
 

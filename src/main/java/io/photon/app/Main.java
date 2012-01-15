@@ -37,6 +37,7 @@ public class Main
         localHostPort,
         staticFileRoot,
         uploadDir,
+        publishClient,
         pc);
 
       System.in.read();
