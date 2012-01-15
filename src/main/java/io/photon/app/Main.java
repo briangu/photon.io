@@ -40,7 +40,10 @@ public class Main
         publishClient,
         pc);
 
-      System.in.read();
+      while(true)
+      {
+        Thread.sleep(250);
+      }
     }
     catch (Exception e)
     {
