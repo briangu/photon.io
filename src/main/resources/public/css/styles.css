@@ -78,3 +78,12 @@ padding: 0;
     padding-left: 20px;
     font-weight: bold;
 }
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    background: url('/images/auto_pagination_loader.gif');
+    margin-right: 10px;
+    vertical-align: -5px;
+    display: inline-block
+}

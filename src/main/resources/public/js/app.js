@@ -3,7 +3,6 @@ var photonApp = function()
     var start = 0;
     var count = 10;
     var loading_next_page = false;
-    var fetchActivityList = {};
 
     function createUploader()
     {
@@ -45,9 +44,18 @@ var photonApp = function()
 
     function showSpinner()
     {
+ /*
         var spinner = new Spinner().spin();
         spinner.el.className = "spinner";
-        $('#stream-updates').html(spinner.el);
+        $('#loading_icon').html(spinner.el);
+*/
+        $('#loading_icon_spinner').show();
+    }
+
+    function hideSpinner()
+    {
+//        $('#loading_icon').html('');
+        $('#loading_icon_spinner').hide();
     }
 
     function _getPublicFeed()
@@ -189,6 +197,15 @@ var photonApp = function()
     {
         var cloneActivityList = jQuery.extend({}, fetchActivityList);
 
+        if (Object.keys(cloneActivityList).length > 0)
+        {
+            showSpinner();
+        }
+        else
+        {
+            hideSpinner();
+        }
+
         $.each(cloneActivityList, function(activityId, attempts)
         {
             $.getJSON('/posts/' + activityId, function(data)
@@ -198,7 +215,7 @@ var photonApp = function()
                     attempts++;
                     if (attempts > 40)
                     {
-                        fetchActivityList.remove(key);
+                        delete fetchActivityList[activityId];
                     }
                     fetchActivityList[activityId] = attempts;
                     return;

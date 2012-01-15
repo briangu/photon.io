@@ -39,6 +39,7 @@
   <script type="text/javascript">
     var params = {};
     var activityIdMap = {};
+    var fetchActivityList = {};
 
     function loadData()
     {
@@ -56,6 +57,11 @@
     {
       $('#text_input').attr('hidden', true);
       $('#photo_input').attr('hidden', true);
+      $('#quote_input').attr('hidden', true);
+      $('#link_input').attr('hidden', true);
+      $('#chat_input').attr('hidden', true);
+      $('#audio_input').attr('hidden', true);
+      $('#video_input').attr('hidden', true);
     }
 
     function enableInput(inputName)
@@ -78,7 +84,7 @@ $(function() {
                 msg: msg
              }, function(response)
              {
-                 //_getFeed();
+               fetchActivityList[response.meta.Id] = 0;
                $('#text_caption').val("");
                hideInput();
              });
@@ -123,6 +129,11 @@ $(function() {
           </div>
         </div>
 
+        <div class="tab iconic" id="loading_icon">
+          <span id="loading_icon_spinner">
+            <div class="spinner"></div>
+          </span>
+        </div>
         <div class="tab iconic" id="logout_button">
           <a href="/logout" title="Log out" onclick="return confirm('Are you sure you want to log out?');">Log out</a>
         </div>
@@ -235,23 +246,68 @@ $(function() {
           </form>
         </div>
 
+        <div id="quote_input" hidden>
+          <hr/>
+          <form id="quote_input_form">
+            <label for="text_caption" class="input_caption_label">Quote:</label>
+            <textarea id="quote_caption" rows="3" cols="60">Not Yet Implemented</textarea>
+            <input type="submit" value="post"/>
+          </form>
+        </div>
+
+        <div id="link_input" hidden>
+          <hr/>
+          <form id="link_input_form">
+            <label for="link_caption" class="input_caption_label">Link:</label>
+            <textarea id="link_caption" rows="3" cols="60">Not Yet Implemented</textarea>
+            <input type="submit" value="post"/>
+          </form>
+        </div>
+
+        <div id="chat_input" hidden>
+          <hr/>
+          <form id="chat_input_form">
+            <label for="chat_caption" class="input_caption_label">Chat:</label>
+            <textarea id="chat_caption" rows="3" cols="60">Not Yet Implemented</textarea>
+            <input type="submit" value="post"/>
+          </form>
+        </div>
+
+        <div id="audio_input" hidden>
+          <hr/>
+          <form id="audio_input_form">
+            <label for="audio_caption" class="input_caption_label">Audio:</label>
+            <textarea id="audio_caption" rows="3" cols="60">Not Yet Implemented</textarea>
+            <input type="submit" value="post"/>
+          </form>
+        </div>
+
+        <div id="video_input" hidden>
+          <hr/>
+          <form id="video_input_form">
+            <label for="video_caption" class="input_caption_label">Video:</label>
+            <textarea id="video_caption" rows="3" cols="60">Not Yet Implemented</textarea>
+            <input type="submit" value="post"/>
+          </form>
+        </div>
+
         <map id="add_post" name="add_post">
           <area shape="rect" coords="0,0,72,97" title="Post Text" alt="Text" href="/new/text" onclick="enableInput('#text_input'); return false;">
           <area shape="rect" coords="72,0,147,97" title="Post a Photo" alt="Photo" href="/new/photo" onclick="enableInput('#photo_input'); return false;">
-          <area shape="rect" coords="147,0,221,97" title="Post a Quote" alt="Quote" href="/new/quote">
-          <area shape="rect" coords="221,0,296,97" title="Post a Link" alt="Link" href="/new/link">
-          <area shape="rect" coords="296,0,371,97" title="Post a Chat" alt="Chat" href="/new/chat">
-          <area shape="rect" coords="371,0,447,97" title="Post Audio" alt="Audio" href="/new/audio">
-          <area shape="rect" coords="447,0,513,97" title="Post a Video" alt="Video" href="/new/video">
+          <area shape="rect" coords="147,0,221,97" title="Post a Quote" alt="Quote" href="/new/quote" onclick="enableInput('#quote_input'); return false;">
+          <area shape="rect" coords="221,0,296,97" title="Post a Link" alt="Link" href="/new/link" onclick="enableInput('#link_input'); return false;">
+          <area shape="rect" coords="296,0,371,97" title="Post a Chat" alt="Chat" href="/new/chat" onclick="enableInput('#chat_input'); return false;">
+          <area shape="rect" coords="371,0,447,97" title="Post Audio" alt="Audio" href="/new/audio" onclick="enableInput('#audio_input'); return false;">
+          <area shape="rect" coords="447,0,513,97" title="Post a Video" alt="Video" href="/new/video" onclick="enableInput('#video_input'); return false;">
         </map>
 
-        <a href="/new/text" class="new_post_label" id="new_post_label_text">Text</a>
-        <a href="/new/photo" class="new_post_label" id="new_post_label_photo">Photo</a>
-        <a href="/new/quote" class="new_post_label" id="new_post_label_quote">Quote</a>
-        <a href="/new/link" class="new_post_label" id="new_post_label_link">Link</a>
-        <a href="/new/chat" class="new_post_label" id="new_post_label_chat">Chat</a>
-        <a href="/new/audio" class="new_post_label" id="new_post_label_audio">Audio</a>
-        <a href="/new/video" class="new_post_label" id="new_post_label_video">Video</a>
+        <a href="/new/text" class="new_post_label" id="new_post_label_text" onclick="enableInput('#text_input'); return false;">Text</a>
+        <a href="/new/photo" class="new_post_label" id="new_post_label_photo" onclick="enableInput('#photo_input'); return false;">Photo</a>
+        <a href="/new/quote" class="new_post_label" id="new_post_label_quote" onclick="enableInput('#quote_input'); return false;">Quote</a>
+        <a href="/new/link" class="new_post_label" id="new_post_label_link" onclick="enableInput('#link_input'); return false;">Link</a>
+        <a href="/new/chat" class="new_post_label" id="new_post_label_chat" onclick="enableInput('#chat_input'); return false;">Chat</a>
+        <a href="/new/audio" class="new_post_label" id="new_post_label_audio" onclick="enableInput('#audio_input'); return false;">Audio</a>
+        <a href="/new/video" class="new_post_label" id="new_post_label_video" onclick="enableInput('#video_input'); return false;">Video</a>
 
         <span class="arrow"></span>
 
