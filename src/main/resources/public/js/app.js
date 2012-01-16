@@ -69,7 +69,7 @@ var photonApp = function()
     {
         loading_next_page = true;
         showSpinner();
-        $.getJSON('/feeds/public?start=' + start + "&count=" + count, function(data)
+        $.getJSON('/feeds/public?id=' + params.id + '&start=' + start + "&count=" + count, function(data)
         {
             $.each(data.elements, function(key, activity)
             {
@@ -81,6 +81,8 @@ var photonApp = function()
 
             fixBrokenImages();
             showTimeAgoDates();
+            attachCommentListeners();
+
             loading_next_page = false;
         });
     }
@@ -116,46 +118,6 @@ var photonApp = function()
                   });
     }
 
-    function attachCommentHandlers(imgInfo, threadId)
-    {
-        $(".comment-button").click(function ()
-                                   {
-                                       commentBox = $(".comment-box")
-                                       commentTextArea = commentBox.find(".comment-textarea")
-                                       commentText = commentTextArea.val();
-                                       if (commentText.length > 0)
-                                       {
-                                           $.ajax({
-                                                      type: 'POST',
-                                                      url: '/photos/comments/?id=' + params.id + "&threadId=" + threadId,
-                                                      data: "message=" + escape(commentText),
-                                                      success: function(data)
-                                                      {
-                                                          setTimeout(function()
-                                                                     {
-                                                                         imageData(imgInfo)
-                                                                     }, 1000);
-                                                          commentTextArea.val("");
-                                                          commentBox.hide(500);
-                                                      },
-                                                      error: function(data, textStatus, errorThrown)
-                                                      {
-                                                          alert("Error posting comment: " + errorThrown);
-                                                      }
-                                                  });
-                                       }
-                                       else
-                                       {
-                                           commentBox.effect('shake', { times: 2 }, 200);
-                                       }
-                                   });
-
-        $(".cancel-comment").click(function ()
-                                   {
-                                       $(".comment-box").hide(500);
-                                   });
-    }
-
     function showTimeAgoDates()
     {
         // Show timeago
@@ -167,13 +129,9 @@ var photonApp = function()
                             });
     }
 
-    /**
-     * Just takes an activity and template id, and adds the resulting html to the stream
-     */
     function renderActivity(activity)
     {
-        origId = activity.id;
-        activity.id = activity.id.replace(':', '_')
+        activity.idEscaped = activity.id.replace(':', '_')
 
         useCarousel = false;
 
@@ -207,8 +165,6 @@ var photonApp = function()
         result = {};
         result['html'] = applyTemplate(activity, "#template-post");
         result['applyCarousel'] = useCarousel;
-
-        activity.id = origId
 
         return result;
     }
@@ -303,6 +259,70 @@ var photonApp = function()
             $(this).parents('.carousel').children('.mid').children('img').attr("src", $(this).attr("src"));
 //            $(".widget_"+id+" .mid img").attr("src", $(this).attr("src"));
         })
+    }
+
+    function attachCommentListeners() {
+       $(".add-comment").click(function () {
+         $(".comment-box").slideUp('fast'); // Hide all other comments
+         $(this).parent().parent().find(".comment-box").slideDown('fast');
+         $(this).parent().parent().find(".comment-box textarea").focus();
+       });
+
+       $(".comment-button").click(function () {
+         commentBox = $(this).parents(".comment-box");
+         commentTextArea = commentBox.find(".comment-textarea");
+         commentText = commentTextArea.val();
+         if (commentText.length > 0) {
+           m = commentBox.attr('id').match("comment-box-activity_(.*)");
+           activityUrn = "activity:"+m[1];
+           $.ajax({
+             type: 'POST',
+             url: '/activities/' + activityUrn + '/comments',
+             data: {
+                 "message": commentText,
+                 "id": params.id,
+                 "name": params.name
+             },
+             success: function(data) {
+               commentBox.hide('fast');
+               var commentActivity = data;
+               console.log(commentActivity);
+               var renderedComment = applyTemplate(commentActivity, "#template-render-event-comment"); // Render the template corresponding to the comment event just created
+               commentBox.parent().find(".comments").prepend(renderedComment);
+               commentTextArea.val(""); // clear entered text
+               showTimeAgoDates();
+             },
+             error: function(data, textStatus, errorThrown) {
+               // alert("Error posting comment: " + errorThrown);
+             }
+           });
+         } else {
+           commentBox.effect('shake', { times: 2 }, 200);
+         }
+       });
+
+       $(".cancel-comment").click(function () {
+         $(this).parents(".comment-box").hide('fast');
+       });
+
+       $(".add-like").click(function () {
+         link = $(this);
+         m = link.attr('id').match("like-(.*)");
+         objectId = m[1];
+         isLiked = "Unlike" == link.html().trim();
+
+         $.ajax({
+           type: isLiked ? 'DELETE' : 'PUT',
+           url: '/me/likes/member:' + params.id + "/" + objectId.replace('_', ':'),
+           data: "{}",
+           success: function(data) {
+             link.text(isLiked ? "Like" : "Unlike");
+           },
+           error: function(data, textStatus, errorThrown) {
+             // alert("Error liking activity: " + errorThrown);
+           }
+         });
+       });
     }
 
     createUploader();

@@ -40,27 +40,6 @@ padding: 0;
     margin-left: 20px;
 }
 
-.photoset .photoset_row {
-    width: 500px;
-    white-space: nowrap;
-    overflow: hidden;
-    margin-top: 10px;
-}
-
-.photoset .photoset_row:first-child {
-    margin-top: 0;
-}
-
-.photoset .photoset_row .photoset_photo {
-    display: inline-block;
-    vertical-align: top;
-    margin-left: 10px;
-}
-
-.photoset .photoset_row .photoset_photo:first-child {
-    margin-left: 0 !important;
-}
-
 .post_photos_header {
     float: left;
     padding-left: 20px;
@@ -99,3 +78,416 @@ padding: 0;
     margin-left: 20px;
 }
 
+.update-box-container {
+  margin-bottom: 0;
+}
+.update-box {
+  background-color: #EFEFEF;
+  margin: 10px 0 20px 0;
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 1;
+}
+.update-box .modal-user {
+  float: left;
+  margin: 10px;
+}
+.update-box .modal-user .photo {
+  border: 1px solid #CCC;
+  background-color: white;
+  padding: 2px;
+}
+.update-box .modal-user img {
+  height: 30px;
+  width: 30px;
+}
+.update-box .modal-body {
+  padding: 10px;
+}
+.update-box .modal-footer {
+  padding: 10px;
+}
+.update-box .modal-body .share-btn {
+  float: right;
+}
+.update-box textarea {
+  margin: 0;
+  height: 25px;
+  width: 410px;
+}
+
+.update-box textarea:focus {
+}
+
+.comment-box share-btn {
+  width: 200px;
+}
+
+.comment-box {
+  width: 260px;
+  /* Shake animation is clipped by bg: why?! */
+  z-index: 99999999;
+  display: none;
+}
+
+.comment-box textarea {
+  margin: 0;
+  width: 360px;
+}
+
+.topbar input {
+  width: 270px;
+}
+
+#stream {
+  padding-bottom: 20px;
+}
+
+.content-summary {
+  padding: 10px;
+}
+
+.update {
+  border-bottom: 1px solid #DDD;
+  margin-bottom: 10px;
+  margin-left: 0px;
+}
+
+.update .photo {
+  border: 1px solid #DDD;
+  background-color: white;
+  margin-left: 0;
+  padding: 2px;
+  height: 48px;
+  width: 48px;
+  margin-bottom: 10px;
+}
+
+.update .article {
+  padding: 5px 0 0 0;
+}
+
+.update .name {
+  display: inline-block;
+  padding-right: 3px;
+  font-weight: bold;
+}
+
+.update .title {
+  display: block;
+  padding-right: 3px;
+  font-weight: bold;
+}
+
+.update .description {
+  display: block;
+  padding-right: 3px;
+}
+
+.update .image {
+  float: left;
+  display: block;
+  padding-right: 3px;
+}
+
+.update .image img {
+  background-color: white;
+  border: 1px solid #DDD;
+  float: left;
+  height: 80px;
+  margin-right: 10px;
+  padding: 3px;
+  width: 80px;
+}
+
+.update .article-title, .update .article-photo .article-description {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.update .via {
+  color: #888;
+}
+
+.update .article-title {
+  padding: 5px 0 0 5px;
+  width: 288px;
+}
+
+.update .photo img {
+  height: 48px;
+  width: 48px;
+}
+
+.update .name {
+  display: inline-block;
+  padding-right: 3px;
+  font-weight: bold;
+}
+
+.update p {
+  display: inline;
+}
+
+.update .body {
+  color: #333;
+  margin-left: 10px;
+  padding-bottom: 10px;
+}
+
+.update .body p {
+  margin-bottom: 3px;
+}
+
+.update .body .update-actions {
+  color: #888;
+}
+
+.update-actions a, .update-actions span {
+  font-size: 11px;
+}
+
+#stream-updates {
+  min-height: 200px;
+  overflow: hidden;
+}
+
+#stream-updates .spinner {
+  left: 270px;
+  top: 40px;
+}
+
+/* Admin */
+.save-templates {
+  margin-top: -50px;
+  float: right;
+  text-align: right;
+  position: relative;
+  top: 36px;
+}
+
+.urn {
+  width: 522px;
+}
+
+.secondary-nav .session {
+  width: 216px;
+}
+
+.secondary-nav .session a {
+  color: white;
+  overflow: hidden;
+  text-shadow: black 0 -1px 1px;
+}
+
+.secondary-nav .session .photo {
+  background-color: #DADADA;
+  float: left;
+  height: 34px;
+  margin: 3px 9px 0 0;
+  padding: 1px;
+  width: 34px;
+}
+
+#templates-editor-container, #bql-editor-container, #bql-editor-mappings-container {
+  border: 1px solid #DDD;
+  display: block;
+  clear: both;
+  width: 810px;
+}
+
+#templates-editor, #bql-editor {
+  width: 100%;
+}
+
+#bql-editor-results-preview {
+  border: 3px solid #DDD;
+  padding: 10px;
+  box-shadow: #666 0 2px 4px;
+  -webkit-box-shadow: #666 0 2px 4px;
+  width: 650px;
+}
+
+#bql-editor-results-preview .spinner {
+  position: relative;
+  top: 20px;
+  padding: 20px;
+}
+
+#bql-editor-description, #bql-editor-urn {
+  width: 318px;
+}
+
+#bql-editor-save {
+  display: none;
+}
+
+.bql-naming {
+  margin-bottom: 0;
+}
+
+.saved-urns-contaier {
+  clear: both;
+}
+
+#urns-list .span5 p {
+  height: 36px;
+  overflow: hidden;
+}
+
+#urns-list .saved-urn {
+  background: transparent url("/images/wheels.png") scroll no-repeat 0 0;
+  display: block;
+  padding-bottom: 18px;
+  word-wrap: break-word;
+}
+
+#urns-list .saved-urn a {
+  font-weight: bold;
+}
+
+#urns-list .saved-urn a, #urns-list .saved-urn p {
+  padding: 0 0 0 35px;
+}
+
+.bql {
+  clear: both;
+}
+
+#bql-editor-try, #bql-editor-avro {
+  margin: 10px 10px 10px 0;
+}
+
+#bql-editor-avro {
+
+}
+
+.admin h3 {
+  float: left;
+  width: 300px;
+}
+
+.admin form {
+  clear: both;
+}
+
+.admin .urn {
+  clear: both;
+}
+
+/* About */
+ul.team {
+  margin: 0;
+  padding: 10px 0 0 0;
+}
+
+ul.team li {
+  float: left;
+  list-style-type: none;
+  height: 80px;
+  width: 165px;
+}
+
+ul.team li span {
+  display: block;
+  float: right;
+  width: 100px;
+}
+
+ul.team li img {
+  background-color: white;
+  border: 1px solid #DDD;
+  display: block;
+  height: 48px;
+  float: left;
+  padding: 3px;
+  width: 48px;
+}
+
+/* Stock */
+.stock span.stock-name {
+  color: #333;
+  font-weight: bold;
+}
+
+.stock .up, .stock .down {
+  padding-left:30px;
+}
+
+.stock .up {
+  background: transparent url(/images/stocks/stock-up.png) no-repeat scroll 5px 0px;
+}
+
+.stock .down {
+  background: transparent url(/images/stocks/stock-down.png) no-repeat scroll 5px 0px;
+}
+
+.stock .up {
+  color: green;
+}
+
+.stock .down {
+  color: red;
+}
+
+.stock .update-actions a {
+  font-size: 11px;
+}
+
+/* Diff */
+.diff-inline {
+}
+
+.comments {
+  list-style-type: none;
+  margin: 0;
+  min-height: 36px;
+}
+
+.update-likes, .comments li, .comment-box {
+  background-color: #EBF5FB;
+  border-bottom: 1px solid #D6EAF4;
+  border-top: 1px solid #FFF;
+  color: black;
+  font-size: 12px;
+  margin: 0px;
+  padding: 5px;
+  width: 100%;
+}
+
+.update-likes {
+  background: #EBF5FB url("/images/like.png") scroll no-repeat 3px 2px;
+  display: inline-block;
+  padding-left: 25px;
+  width: 440px;
+}
+
+.comments .easydate {
+  color: #888;
+  display: block;
+}
+
+.comments li:last-child {
+  border: none;
+}
+
+.comment-box .cancel-comment {
+  margin-left: 3px;
+}
+
+.comment-box .comment-textarea {
+  margin: 5px 0 10px 0;
+}
+
+.comments .photo {
+  height: 25px;
+  margin-right: 10px;
+  padding: 2px;
+  width: 25px;
+}
+
+.comments .photo img {
+  height: 25px;
+  width: 25px;
+}

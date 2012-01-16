@@ -11,8 +11,10 @@ import io.viper.core.server.file.HttpChunkRelayProxy;
 import io.viper.core.server.file.StaticFileContentInfoProvider;
 import io.viper.core.server.file.StaticFileServerHandler;
 import io.viper.core.server.file.ThumbnailFileContentInfoProvider;
+import io.viper.core.server.router.DeleteRoute;
 import io.viper.core.server.router.GetRoute;
 import io.viper.core.server.router.PostRoute;
+import io.viper.core.server.router.PutRoute;
 import io.viper.core.server.router.Route;
 import io.viper.core.server.router.RouteHandler;
 import io.viper.core.server.router.RouteResponse;
@@ -33,8 +35,11 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,6 +55,7 @@ public class PhotoServer
     int port,
     String staticFileRoot,
     String uploadDir,
+    String backendHost,
     HttpJSONClient publishClient,
     PhotosController photosController
   )
@@ -70,6 +76,7 @@ public class PhotoServer
         uploadDir,
         staticFileRoot,
         localhost,
+        backendHost,
         publishClient,
         photosController);
 
@@ -101,6 +108,7 @@ public class PhotoServer
     final FileContentInfoProvider _staticFileProvider;
     final FileContentInfoProvider _photoFileProvider;
     final String _downloadHostname;
+    final String _backendHost;
     final HttpJSONClient _publishClient;
     final PhotosController _photosController;
 
@@ -108,6 +116,7 @@ public class PhotoServer
                                  String uploadFileRoot,
                                  String staticFileRoot,
                                  String downloadHostname,
+                                 String backendHost,
                                  HttpJSONClient publishClient,
                                  PhotosController photosController)
       throws IOException, JSONException
@@ -121,8 +130,8 @@ public class PhotoServer
       _photoFileProvider = StaticFileContentInfoProvider.create(_uploadFileRoot);
       _thumbFileProvider = ThumbnailFileContentInfoProvider.create(_uploadFileRoot);
 
+      _backendHost = backendHost;
       _publishClient = publishClient;
-
       _photosController = photosController;
     }
 
@@ -189,6 +198,92 @@ public class PhotoServer
           throws Exception
         {
           return _photosController.addPhotoCommentEvent(args);
+        }
+      }));
+
+      routes.add(new PutRoute("/me/likes/$memberId/$objectId", new RouteHandler()
+      {
+        @Override
+        public RouteResponse exec(Map<String, String> args)
+          throws Exception
+        {
+          String memberId = args.get("memberId");
+          String objectId = args.get("objectId");
+
+          HttpJSONClient likeClient = HttpJSONClient.create(String.format("%s/likes/actorId=%s&objectId=%s", _backendHost, memberId, objectId));
+
+          return Util.createJsonResponse(likeClient.doPut("{}"));
+        }
+      }));
+
+      routes.add(new DeleteRoute("/me/likes/$memberId/$objectId", new RouteHandler()
+      {
+        @Override
+        public RouteResponse exec(Map<String, String> args)
+          throws Exception
+        {
+          String memberId = args.get("memberId");
+          String objectId = args.get("objectId");
+
+          HttpJSONClient likeClient = HttpJSONClient.create(String.format("%s/likes/actorId=%s&objectId=%s", _backendHost, memberId, objectId));
+
+          return Util.createJsonResponse(likeClient.doDelete());
+        }
+      }));
+
+      routes.add(new PostRoute("/activities/$activityId/comments", new RouteHandler()
+      {
+        @Override
+        public RouteResponse exec(Map<String, String> args)
+            throws Exception
+        {
+          String id = args.get("id");
+          String name = args.get("name");
+          String message = args.get("message");
+          String activityId = args.get("activityId");
+/*
+    json = {
+      "name" => session["member_name"],
+      "commenterId" => "member:#{@current_user}",
+      "commenter" => {"id" => "member:#{@current_user}"},
+      "message" => params[:message],
+      "app" => SiteConfig.app_urn
+    }.to_json
+    activity_id = "#{params[:activity_id]}"
+    create_status, headers = post("#{SiteConfig.backend_host}/threads/#{activity_id}/comments", {}, json)
+
+    comment_id = headers["x-linkedin-id"]
+    if create_status == "201"
+      status, headers, json = get("#{SiteConfig.backend_host}/threads/#{activity_id}/comments/#{comment_id}")
+    end
+
+    status create_status
+    body json
+           */
+
+          JSONObject commentRequest = new JSONObject();
+          commentRequest.put("name", name);
+          commentRequest.put("commenterId", "member:" + id);
+          commentRequest.put("message", message);
+          commentRequest.put("app", "photon");
+
+          HttpJSONClient createCommentClient = HttpJSONClient.create(String.format("%s/threads/%s/comments", _backendHost, activityId));
+          HttpJSONClient.JSONRequestResponse result = createCommentClient.doPost(commentRequest);
+          if (result.StatusCode == 201)
+          {
+            JSONObject meta = result.JsonResult.getJSONObject("meta");
+            String commentId = meta.getString("Id");
+
+            HttpJSONClient getCommentClient = HttpJSONClient.create(String.format("%s/threads/%s/comments/%s", _backendHost, activityId, commentId));
+
+            HttpJSONClient.JSONRequestResponse commentResult = getCommentClient.doQuery();
+            if (commentResult.StatusCode == 200)
+            {
+              return Util.createJsonResponse(commentResult.JsonResult);
+            }
+          }
+
+          return new RouteResponse(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
         }
       }));
 

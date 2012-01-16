@@ -51,9 +51,11 @@ public class PhotosController
   public RouteResponse getPublicPhotoFeed(Map<String, String> args)
     throws Exception
   {
+    String id = args.get("id");
     List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
     queryParams.add(new BasicNameValuePair("q", "feed"));
     queryParams.add(new BasicNameValuePair("id", "photon:public"));
+    queryParams.add(new BasicNameValuePair("viewerId", id));
     if (args.containsKey("start"))
     {
       Integer.parseInt(args.get("start"));
@@ -62,7 +64,7 @@ public class PhotosController
     if (args.containsKey("count"))
     {
       Integer.parseInt(args.get("count"));
-      queryParams.add(new BasicNameValuePair("id", args.get("count")));
+      queryParams.add(new BasicNameValuePair("count", args.get("count")));
     }
     return Util.createJsonResponse(_queryClient.doQuery(queryParams));
   }

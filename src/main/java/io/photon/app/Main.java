@@ -20,10 +20,11 @@ public class Main
     {
       String queryHost = args[0];
       String publishHost = args[1];
-      String localHostName = args[2];
-      Integer localHostPort = Integer.parseInt(args[3]);
-      String staticFileRoot = args[4];
-      String uploadDir = args[5];
+      String backendHost = args[2];
+      String localHostName = args[3];
+      Integer localHostPort = Integer.parseInt(args[4]);
+      String staticFileRoot = args[5];
+      String uploadDir = args[6];
       
       HttpJSONClient queryClient = HttpJSONClient.create(queryHost);
       HttpJSONClient publishClient = HttpJSONClient.create(publishHost);
@@ -37,6 +38,7 @@ public class Main
         localHostPort,
         staticFileRoot,
         uploadDir,
+        backendHost,
         publishClient,
         pc);
 

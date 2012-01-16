@@ -1063,7 +1063,7 @@ h1.dashboard_header {
 }
 
 #posts .post ul {
-    list-style-type: disc
+    list-style-type: none
 }
 
 #posts .post blockquote {

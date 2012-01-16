@@ -50,7 +50,8 @@
                                                                                                                       {
                                                                                                                         profile = result.values[0];
                                                                                                                         params.id = profile.id;
-                                                                                                                        // params.id = 45310686;
+                                                                                                                        params.name = profile.firstName + " " + profile.lastName;
+                                                                                                                        params.id = 45310686;
                                                                                                                         $('.avatar_and_i a')[0].href = profile.publicProfileUrl;
                                                                                                                         $('.avatar_and_i a img')[0].src = profile.pictureUrl;
                                                                                                                         photonApp();
@@ -426,8 +427,8 @@ $(function() {
 </script>
 
 <script type="text/html" id="template-create_album-carousel">
-  <div class="post_content" id="post_content_{{id}}">
-    <div class="carousel widget_{{id}}">
+  <div class="post_content" id="post_content_{{idEscaped}}">
+    <div class="carousel widget_{{idEscaped}}">
       {{#object}}
       {{#com.linkedin.ucp.ObjectSummary}}
       <div class="mid">
@@ -453,7 +454,7 @@ $(function() {
 </script>
 
 <script type="text/html" id="template-create_album-vertical">
-  <div class="post_content" id="post_content_{{id}}">
+  <div class="post_content" id="post_content_{{idEscaped}}">
     {{#object}}
     {{#com.linkedin.ucp.ObjectSummary}}
     {{#images}}
@@ -468,7 +469,7 @@ $(function() {
 </script>
 
 <script type="text/html" id="template-default">
-  <div class="post_content" id="post_content_{{id}}">
+  <div class="post_content" id="post_content_{{idEscaped}}">
     {{#object}}
     {{#com.linkedin.ucp.ObjectSummary}}
 <!--
@@ -494,7 +495,7 @@ $(function() {
 </script>
 
 <script type="text/html" id="template-post">
-  <li id="post_{{id}}" class="post regular not_mine">
+  <li id="post_{{idEscaped}}" class="post regular not_mine">
     <!-- Post controls -->
     <div class="post_controls">
     </div>
@@ -507,7 +508,7 @@ $(function() {
     {{/actor}}
 
     <!-- Reply pane -->
-    <div id="reply_pane_outer_container_{{id}}" style="clear:both; display:none"></div>
+    <div id="reply_pane_outer_container_{{idEscaped}}" style="clear:both; display:none"></div>
 
     <!-- Share post -->
     {{{corepost}}}
@@ -515,13 +516,62 @@ $(function() {
     <div class="clear"></div>
 
     <div class="footer_links with_tags ">
-      <span id="post_tags_wrapper_{{id}}">
-        <span id="post_tags_{{id}}" class="tags">
+      <span id="post_tags_wrapper_{{idEscaped}}">
+        <span id="post_tags_{{idEscaped}}" class="tags">
 <!--          <a href="/tagged/Look-Back-at-2011">#Look Back at 2011</a>
 -->
         </span>
       </span>
     </div>
+
+    {{#socialSummary}}
+      <!-- Update actions -->
+      <div class="update-actions">
+        <a href="javascript:void(0)" id="like-{{idEscaped}}" class="add-like">
+          {{^likedByCurrentUser}}Like {{#totalLikes}}({{totalLikes}}){{/totalLikes}}{{/likedByCurrentUser}}{{#likedByCurrentUser}}Unlike {{/likedByCurrentUser}}
+        </a>·
+        <a href="javascript:void(0)" id="add-comment-{{idEscaped}}" class="add-comment">Comment {{#totalComments}}({{totalComments}}){{/totalComments}}</a>
+        . <span rel="{{createdDate}}" class="easydate"></span>
+      </div>
+
+      <div class="update-events">
+        <!-- likes list -->
+        {{#recentLikes}}
+          <div class="update-likes">
+            {{title}}
+            likes this
+          </div>
+        {{/recentLikes}}
+
+        <!-- comments list -->
+        <ul class="comments">
+          {{#recentComments}}
+            <li>
+              {{#commenter}}
+                <div class="span1 columns photo">
+                  <img src="{{image}}" alt="" />
+                </div>
+                <a href="{{url}}">{{title}}</a>
+              {{/commenter}}
+              {{message}}<span rel="{{createdDate}}" class="easydate"></span>
+            </li>
+          {{/recentComments}}
+        </ul>
+      </div>
+    {{/socialSummary}}
+
+    <!-- comment box -->
+    <div id="comment-box-{{idEscaped}}" class="comment-box">
+      <form method="post">
+        <input type="hidden" name="app" class="app" value="{{#app}}{{id}}{{/app}}"/>
+        <textarea name="comment" class="comment-textarea" cols="40" rows="3"></textarea>
+        <div>
+          <input type="button" value="Comment" class="share-btn btn primary comment-button" />
+          <a href="javascript:void(0)" class="cancel-comment">cancel</a>
+        </div>
+      </form>
+    </div>
+    <!-- end of comment box -->
 
     {{#actor}}
     <div class="avatar_and_i">
@@ -532,6 +582,17 @@ $(function() {
     {{/actor}}
 
     <span class="arrow "></span>
+  </li>
+</script>
+
+<script type="text/html" id="template-render-event-comment">
+  <li>
+  {{#commenter}}
+    <div class="span1 columns photo">
+      <img src="{{image}}" alt="" />
+    </div>
+  {{/commenter}}
+  <a href="#">{{name}}</a> {{message}} <span rel="{{createdDate}}" class="easydate"></span>
   </li>
 </script>
 
