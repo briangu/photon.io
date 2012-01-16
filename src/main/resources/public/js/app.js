@@ -73,7 +73,9 @@ var photonApp = function()
         {
             $.each(data.elements, function(key, activity)
             {
-                $('#posts').append(renderActivity(activity, '#template-post'));
+                renderResult = renderActivity(activity);
+                $('#posts').append(renderResult['html']);
+                if (renderResult['applyCarousel']) applyCarousel(activity);
                 activityIdMap[activity.object.id] = activity.id;
             });
 
@@ -168,8 +170,50 @@ var photonApp = function()
     /**
      * Just takes an activity and template id, and adds the resulting html to the stream
      */
-    function renderActivity(activity, templateId)
+    function renderActivity(activity)
     {
+        origId = activity.id;
+        activity.id = activity.id.replace(':', '_')
+
+        useCarousel = false;
+
+        if (activity.verb.type == "photon:create_album")
+        {
+            images = new Array();
+            properties = activity['object']['com.linkedin.ucp.ObjectSummary']['properties'];
+            $.each(properties, function(idx, val){
+                content = JSON.parse(val.content);
+                images.push({'thumbnail': content['thumbnail']});
+            });
+            activity['object']['com.linkedin.ucp.ObjectSummary'].images = images;
+
+            if (images.length < 3)
+            {
+                corePost = applyTemplate(activity, '#template-create_album-vertical');
+            }
+            else
+            {
+                corePost = applyTemplate(activity, '#template-create_album-carousel');
+                useCarousel = true;
+            }
+        }
+        else
+        {
+            corePost = applyTemplate(activity, '#template-default');
+        }
+
+        activity.corepost = corePost;
+
+        result = {};
+        result['html'] = applyTemplate(activity, "#template-post");
+        result['applyCarousel'] = useCarousel;
+
+        activity.id = origId
+
+        return result;
+    }
+
+    function applyTemplate(activity, templateId) {
         var template = $(templateId).html();
         return Mustache.to_html(template, activity);
     }
@@ -232,7 +276,9 @@ var photonApp = function()
 
                 $.each(data.elements, function(key, activity)
                 {
-                    $('#posts .is_mine').after(renderActivity(activity, '#template-post'));
+                    renderResult = renderActivity(activity);
+                    $('#posts .is_mine').after(renderResult['html']);
+                    if (renderResult['applyCarousel']) applyCarousel(activity);
                     activityIdMap[activity.object.id] = activity.id;
                 });
 
@@ -240,6 +286,23 @@ var photonApp = function()
                 showTimeAgoDates();
             });
         });
+    }
+
+    function applyCarousel(activity)
+    {
+        id = activity.id.replace(':','_');
+
+        $(".widget_"+id+" .jCarouselLite").jCarouselLite({
+            btnNext: ".widget_"+id+" .next",
+            btnPrev: ".widget_"+id+" .prev",
+            speed: 800
+        });
+
+        $(".widget_"+id+" img").click(function() {
+            console.log(id);
+            $(this).parents('.carousel').children('.mid').children('img').attr("src", $(this).attr("src"));
+//            $(".widget_"+id+" .mid img").attr("src", $(this).attr("src"));
+        })
     }
 
     createUploader();

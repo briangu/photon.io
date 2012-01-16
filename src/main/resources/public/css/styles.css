@@ -88,3 +88,14 @@ padding: 0;
     display: inline-block
 }
 
+.next {
+    float:right;
+}
+.prev {
+    float: left;
+}
+
+.jCarouselLite {
+    margin-left: 20px;
+}
+

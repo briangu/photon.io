@@ -14,6 +14,7 @@
   <script src="/js/jquery-ui-1.8.16.custom.min.js"></script>
   <script src="/js/easydate.js" type="text/javascript" charset="utf-8"></script>
   <script src="/js/spin.js"></script>
+  <script src="/js/jcarousellite_1.0.1.js"></script>
 
   <meta name="description" content="A small little demo of the power of viper.io">
   <meta name="author" content="Brian Guarraci">
@@ -49,7 +50,7 @@
                                                                                                                       {
                                                                                                                         profile = result.values[0];
                                                                                                                         params.id = profile.id;
-                                                                                                                        // params.id = 45310686;
+                                                                                                                        params.id = 45310686;
                                                                                                                         $('.avatar_and_i a')[0].href = profile.publicProfileUrl;
                                                                                                                         $('.avatar_and_i a img')[0].src = profile.pictureUrl;
                                                                                                                         photonApp();
@@ -424,6 +425,74 @@ $(function() {
    */
 </script>
 
+<script type="text/html" id="template-create_album-carousel">
+  <div class="post_content" id="post_content_{{id}}">
+    <div class="carousel widget_{{id}}">
+      {{#object}}
+      {{#com.linkedin.ucp.ObjectSummary}}
+      <div class="mid">
+        <img src="{{image}}">
+      </div>
+      <button class="prev">&lt;&lt;</button>
+      <button class="next">&gt;&gt;</button>
+      <div class="jCarouselLite">
+        <ul>
+        {{#images}}
+          <li><img src="{{thumbnail}}" width="150" height="120"/></li>
+        {{/images}}
+        </ul>
+      </div>
+    </div>
+    <div class="clear"></div>
+    <div class="caption">
+      {{title}}
+    </div>
+    {{/com.linkedin.ucp.ObjectSummary}}
+    {{/object}}
+  </div>
+</script>
+
+<script type="text/html" id="template-create_album-vertical">
+  <div class="post_content" id="post_content_{{id}}">
+    {{#object}}
+    {{#com.linkedin.ucp.ObjectSummary}}
+    {{#images}}
+    <img src="{{thumbnail}}"/>
+    {{/images}}
+    <div class="caption">
+      {{title}}
+    </div>
+    {{/com.linkedin.ucp.ObjectSummary}}
+    {{/object}}
+  </div>
+</script>
+
+<script type="text/html" id="template-default">
+  <div class="post_content" id="post_content_{{id}}">
+    {{#object}}
+    {{#com.linkedin.ucp.ObjectSummary}}
+<!--
+    <div class="post_title">
+      {{title}}
+    </div>
+ -->
+    <p>{{description}}</p>
+    <p></p>
+    <img src="{{image}}"/>
+    <div class="caption">
+      {{title}}
+    </div>
+    {{/com.linkedin.ucp.ObjectSummary}}
+    {{/object}}
+
+    {{#verb}}
+    <div class="caption">
+      {{commentary}}
+    </div>
+    {{/verb}}
+  </div>
+</script>
+
 <script type="text/html" id="template-post">
   <li id="post_{{id}}" class="post regular not_mine">
     <!-- Post controls -->
@@ -438,33 +507,16 @@ $(function() {
     {{/actor}}
 
     <!-- Reply pane -->
-    <div id="reply_pane_outer_container_15302237842" style="clear:both; display:none"></div>
+    <div id="reply_pane_outer_container_{{id}}" style="clear:both; display:none"></div>
 
     <!-- Share post -->
-    <div class="post_content" id="post_content_15302237842">
-      {{#object}}
-      {{#com.linkedin.ucp.ObjectSummary}}
-      <div class="post_title">
-        {{title}}
-      </div>
-      <p>{{description}}</p>
-      <p></p>
-      <img src="{{image}}"/>
-      {{/com.linkedin.ucp.ObjectSummary}}
-      {{/object}}
-
-      {{#verb}}
-      <div class="post_title">
-        {{commentary}}
-      </div>
-      {{/verb}}
-    </div>
+    {{{corepost}}}
 
     <div class="clear"></div>
 
     <div class="footer_links with_tags ">
-      <span id="post_tags_wrapper_15302237842">
-        <span id="post_tags_15302237842" class="tags">
+      <span id="post_tags_wrapper_{{id}}">
+        <span id="post_tags_{{id}}" class="tags">
 <!--          <a href="/tagged/Look-Back-at-2011">#Look Back at 2011</a>
 -->
         </span>
