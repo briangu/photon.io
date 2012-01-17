@@ -298,6 +298,43 @@ var photonApp = function()
        });
     }
 
+    $('#text_input_form').submit(
+      function(e) {
+        msg = $('#text_caption').val();
+        $.post('/text/add', {
+                  id: params.id,
+                  msg: msg
+               }, function(response)
+               {
+                 fetchActivityList[response.meta.Id] = 0;
+                 hideInput();
+               });
+        return false;
+      }
+    );
+
+    $('#photo_input_form').submit(
+      function(e) {
+        msg = $('#photo_caption').val();
+
+        $.post('/photos/add', {
+                   id: params.id,
+                   msg: msg,
+                   photoList: JSON.stringify(photoList)
+               }, function(response)
+               {
+                 fetchActivityList[response.meta.Id] = 0;
+                 hideInput();
+               });
+
+        return false;
+      }
+    );
+
+    $(".cancel-post").click(function () {
+      $(this).parents(".post_input").hide('fast');
+    });
+
     $('#search_form').submit(
       function(e) {
         keywords = $('#search_query').val();

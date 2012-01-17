@@ -491,3 +491,7 @@ ul.team li img {
   height: 25px;
   width: 25px;
 }
+
+.cancel-post {
+  margin-left: 3px;
+}
