@@ -159,7 +159,7 @@ var photonApp = function()
         {
             if ($('#auto_pagination_loader'))
             {
-                $('#auto_pagination_loader').show("fast")
+                $('#auto_pagination_loader').show()
             }
             loading_next_page = true;
             $('auto_pagination_loader_loading').show();
