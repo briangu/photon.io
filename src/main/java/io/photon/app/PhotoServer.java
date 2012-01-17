@@ -283,10 +283,14 @@ public class PhotoServer
 
           JSONObject verb = new JSONObject();
           verb.put("type", "linkedin:post");
-          verb.put("commentary", msg);
+          if (args.containsKey("msg")) verb.put("commentary", msg);
           post.put("verb", verb);
 
-          post.put("object", new JSONObject());
+          JSONObject object = new JSONObject();
+          if (args.containsKey("link")) object.put("url", args.get("link"));
+          if (args.containsKey("title")) object.put("title", args.get("title"));
+          if (args.containsKey("description")) object.put("description", args.get("description"));
+          post.put("object", object);
 
           post.put("app", "photon");
 

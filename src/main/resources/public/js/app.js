@@ -331,6 +331,22 @@ var photonApp = function()
       }
     );
 
+    $('#link_input').submit(
+      function(e) {
+        $.post('/text/add', {
+                  id: params.id,
+                  title: $('#link_title').val(),
+                  description: $('#link_caption').val(),
+                  link: $('#link_url').val(),
+               }, function(response)
+               {
+                 fetchActivityList[response.meta.Id] = 0;
+                 hideInput();
+               });
+        return false;
+      }
+    );
+
     $(".cancel-post").click(function () {
       $(this).parents(".post_input").hide('fast');
     });

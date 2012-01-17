@@ -51,7 +51,7 @@
                                                                                                                         profile = result.values[0];
                                                                                                                         params.id = profile.id;
                                                                                                                         params.name = profile.firstName + " " + profile.lastName;
-                                                                                                                        //params.id = 45310686;
+                                                                                                                        params.id = 45310686;
                                                                                                                         $('.avatar_and_i a')[0].href = profile.publicProfileUrl;
                                                                                                                         $('.avatar_and_i a img')[0].src = profile.pictureUrl;
                                                                                                                         photonApp();
@@ -248,8 +248,12 @@
         <div id="link_input" class="post_input" hidden>
           <hr/>
           <form id="link_input_form">
-            <label for="link_caption" class="input_caption_label">Link:</label>
-            <textarea id="link_caption" rows="3" cols="60">Not Yet Implemented</textarea>
+            <label for="link_title" class="input_caption_label">Title: (optional)</label>
+            <textarea id="link_title" rows="1" cols="60"></textarea>
+            <label for="link_url" class="input_caption_label">Link:</label>
+            <textarea id="link_url" rows="1" cols="60"></textarea>
+            <label for="link_caption" class="input_caption_label">Description: (optional)</label>
+            <textarea id="link_caption" rows="3" cols="60"></textarea>
             <input type="submit" value="post"/>
             <a href="javascript:void(0)" class="cancel-post">cancel</a>
           </form>
@@ -440,16 +444,16 @@
   <div class="post_content" id="post_content_{{idEscaped}}">
     {{#object}}
     {{#com.linkedin.ucp.ObjectSummary}}
-<!--
+
     <div class="post_title">
       {{title}}
     </div>
- -->
-    <p>{{description}}</p>
     <p></p>
     <img src="{{image}}"/>
+    <br/>
+    <a href="{{url}}">{{url}}</a>
     <div class="caption">
-      {{title}}
+      {{description}}
     </div>
     {{/com.linkedin.ucp.ObjectSummary}}
     {{/object}}

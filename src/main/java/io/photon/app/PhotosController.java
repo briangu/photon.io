@@ -118,7 +118,7 @@ public class PhotosController
     properties.put(property);
     JSONObject object = new JSONObject();
     object.put("type", "photon:photo");
-    object.put("title", "a photo");
+    object.put("title", "a photo album");
     object.put("image", thumbnail);
     object.put("url", url);
     object.put("properties", properties);
