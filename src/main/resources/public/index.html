@@ -60,13 +60,13 @@
 
     function hideInput()
     {
-      $('#text_input').attr('hidden', true);
-      $('#photo_input').attr('hidden', true);
-      $('#quote_input').attr('hidden', true);
-      $('#link_input').attr('hidden', true);
-      $('#chat_input').attr('hidden', true);
-      $('#audio_input').attr('hidden', true);
-      $('#video_input').attr('hidden', true);
+      $('#text_input').hide();
+      $('#photo_input').hide();
+      $('#quote_input').hide();
+      $('#link_input').hide();
+      $('#chat_input').hide();
+      $('#audio_input').hide();
+      $('#video_input').hide();
 
       $('#text_caption').val("");
 
@@ -78,7 +78,7 @@
     function enableInput(inputName)
     {
       hideInput();
-      $(inputName).removeAttr('hidden');
+      $(inputName).show();
     }
   </script>
 </head>
