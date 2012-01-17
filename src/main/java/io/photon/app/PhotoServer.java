@@ -241,25 +241,6 @@ public class PhotoServer
           String name = args.get("name");
           String message = args.get("message");
           String activityId = args.get("activityId");
-/*
-    json = {
-      "name" => session["member_name"],
-      "commenterId" => "member:#{@current_user}",
-      "commenter" => {"id" => "member:#{@current_user}"},
-      "message" => params[:message],
-      "app" => SiteConfig.app_urn
-    }.to_json
-    activity_id = "#{params[:activity_id]}"
-    create_status, headers = post("#{SiteConfig.backend_host}/threads/#{activity_id}/comments", {}, json)
-
-    comment_id = headers["x-linkedin-id"]
-    if create_status == "201"
-      status, headers, json = get("#{SiteConfig.backend_host}/threads/#{activity_id}/comments/#{comment_id}")
-    end
-
-    status create_status
-    body json
-           */
 
           JSONObject commentRequest = new JSONObject();
           commentRequest.put("name", name);

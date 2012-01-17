@@ -35,16 +35,7 @@ public class PhotosController
     queryParams.add(new BasicNameValuePair("q", "feed"));
     queryParams.add(new BasicNameValuePair("id", "photon:member"));
     queryParams.add(new BasicNameValuePair("member", String.format("member:%s", id)));
-    if (args.containsKey("start"))
-    {
-      Integer.parseInt(args.get("start"));
-      queryParams.add(new BasicNameValuePair("start", args.get("start")));
-    }
-    if (args.containsKey("count"))
-    {
-      Integer.parseInt(args.get("count"));
-      queryParams.add(new BasicNameValuePair("id", args.get("count")));
-    }
+    handleStartCount(args, queryParams);
     return Util.createJsonResponse(_queryClient.doQuery(queryParams));
   }
 
@@ -54,8 +45,22 @@ public class PhotosController
     String id = args.get("id");
     List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
     queryParams.add(new BasicNameValuePair("q", "feed"));
-    queryParams.add(new BasicNameValuePair("id", "photon:public"));
     queryParams.add(new BasicNameValuePair("viewerId", id));
+    handleStartCount(args, queryParams);
+    if (args.containsKey("keywords"))
+    {
+      queryParams.add(new BasicNameValuePair("keywords", args.get("keywords")));
+      queryParams.add(new BasicNameValuePair("id", "photon:keywords"));
+    }
+    else
+    {
+      queryParams.add(new BasicNameValuePair("id", "photon:public"));
+    }
+    return Util.createJsonResponse(_queryClient.doQuery(queryParams));
+  }
+
+  private void handleStartCount(Map<String, String> args, List<NameValuePair> queryParams )
+  {
     if (args.containsKey("start"))
     {
       Integer.parseInt(args.get("start"));
@@ -66,7 +71,6 @@ public class PhotosController
       Integer.parseInt(args.get("count"));
       queryParams.add(new BasicNameValuePair("count", args.get("count")));
     }
-    return Util.createJsonResponse(_queryClient.doQuery(queryParams));
   }
 
   public RouteResponse getPosts(Map<String, String> args)

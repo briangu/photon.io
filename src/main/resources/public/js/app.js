@@ -3,6 +3,8 @@ var photonApp = function()
     var start = 0;
     var count = 10;
     var loading_next_page = false;
+    var keywords = "";
+    var disableAutoPaginate = false;
 
     function createUploader()
     {
@@ -69,8 +71,11 @@ var photonApp = function()
     {
         loading_next_page = true;
         showSpinner();
-        $.getJSON('/feeds/public?id=' + params.id + '&start=' + start + "&count=" + count, function(data)
+
+        $.getJSON('/feeds/public?id=' + params.id + '&start=' + start + "&count=" + count + "&keywords=" + keywords, function(data)
         {
+            disableAutoPaginate = (data.elements.length < count);
+
             $.each(data.elements, function(key, activity)
             {
                 renderResult = renderActivity(activity);
@@ -85,37 +90,6 @@ var photonApp = function()
 
             loading_next_page = false;
         });
-    }
-
-    var _imgInfo;
-
-    function imageData(imgInfo)
-    {
-        _imgInfo = imgInfo
-        var url = imgInfo[0];
-        var photoId = url.substring(url.lastIndexOf("/") + 1);
-        var threadId = activityIdMap["urn:photo:" + photoId];
-
-        $.getJSON('/photos/photocomments/?threadId=' + threadId, function(data)
-                  {
-                      $('#comment-stream').remove();
-                      var html = "<div id='comment-stream' class='container' style='margin-left: 50px'>";
-                      var i = 0;
-                      $.each(data.elements, function(key, activity)
-                      {
-                          if (i++ >= 3) return;
-                          html += renderActivity(activity, "#template-photo-comment");
-                      })
-
-                      html += Mustache.to_html($("#template-photo-comment-box").html())
-
-                      html += "<br/><a href='" + url + "' target='_blank'>" + url + "</a><br/>";
-                      html += "</div>";
-
-                      $('#lightbox-container-image-data-box').prepend(html);
-
-                      attachCommentHandlers(imgInfo, threadId);
-                  });
     }
 
     function showTimeAgoDates()
@@ -176,7 +150,7 @@ var photonApp = function()
 
     function auto_paginator()
     {
-        if (loading_next_page) return;
+        if (loading_next_page || disableAutoPaginate) return;
 
         var posts = $('#posts > li');
         var is_scrollable = $(document).height() - $(window).height() <= $(window).scrollTop() + 50;
@@ -193,9 +167,9 @@ var photonApp = function()
         }
         else
         {
-            if ($('auto_pagination_loader'))
+            if ($('#auto_pagination_loader'))
             {
-                $('auto_pagination_loader').hide()
+                $('#auto_pagination_loader').hide()
             }
         }
     }
@@ -257,7 +231,6 @@ var photonApp = function()
         $(".widget_"+id+" img").click(function() {
             console.log(id);
             $(this).parents('.carousel').children('.mid').children('img').attr("src", $(this).attr("src"));
-//            $(".widget_"+id+" .mid img").attr("src", $(this).attr("src"));
         })
     }
 
@@ -324,6 +297,16 @@ var photonApp = function()
          });
        });
     }
+
+    $('#search_form').submit(
+      function(e) {
+        keywords = $('#search_query').val();
+        start = 0;
+        $('.not_mine').remove();
+        _getPublicFeed();
+        return false;
+      }
+    );
 
     createUploader();
     _getPublicFeed();

@@ -51,7 +51,7 @@
                                                                                                                         profile = result.values[0];
                                                                                                                         params.id = profile.id;
                                                                                                                         params.name = profile.firstName + " " + profile.lastName;
-                                                                                                                        //params.id = 45310686;
+                                                                                                                        params.id = 45310686;
                                                                                                                         $('.avatar_and_i a')[0].href = profile.publicProfileUrl;
                                                                                                                         $('.avatar_and_i a img')[0].src = profile.pictureUrl;
                                                                                                                         photonApp();
@@ -200,10 +200,8 @@ $(function() {
 
     </ul>
 -->
-    <form method="get" action="/search" id="search_form">
+    <form method="get" id="search_form">
       <input type="text" name="q" id="search_query" placeholder="Search Tags" value="">
-      <input type="hidden" name="t" value="eismcc">
-      <input type="hidden" name="scope" id="search_scope" value="all_of_tumblr">
 
       <div id="search_controls_wrapper">
         <div id="search_controls_button" onclick="just_clicked_search_menu = true;">▾</div>
