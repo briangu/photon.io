@@ -157,6 +157,10 @@ var photonApp = function()
 
         if (is_scrollable)
         {
+            if ($('#auto_pagination_loader'))
+            {
+                $('#auto_pagination_loader').show("fast")
+            }
             loading_next_page = true;
             $('auto_pagination_loader_loading').show();
             $('auto_pagination_loader_failure').hide();
