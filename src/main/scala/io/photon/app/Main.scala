@@ -28,7 +28,7 @@ class Main(hostname: String, port: Int, uploads: String, thumbs: String) extends
         tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
 //        tmp = tmp.replace("{{dyn-data}}", _db.getEvents(user).toString())
         tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
-        tmp = tmp.replace("{{dyn-profileimg}}", session.twitter.getProfileImage(session.twitter.getScreenName, ProfileImage.NORMAL).getURL)
+        tmp = tmp.replace("{{dyn-profileimg}}", session.twitter.getProfileImage(session.twitter.getScreenName, ProfileImage.MINI).getURL)
         new HtmlResponse(tmp)
       }
     }))

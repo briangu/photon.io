@@ -15,10 +15,16 @@ import org.json.JSONObject
 import io.viper.core.server.Util
 import javax.imageio.ImageIO
 import com.thebuzzmedia.imgscalr.{Scalr, AsyncScalr}
+import org.jboss.netty.handler.codec.http.HttpHeaders._
 
 class FileUploadEventListener(hostname: String, thumbFileRoot: String, thumbWidth: Int, thumbHeight: Int) extends HttpChunkRelayEventListener {
 
-  def onStart(props: Map[String, String]) : String = Util.base64Encode(UUID.randomUUID())
+  var _props: Map[String, String] = null
+
+  def onStart(props: Map[String, String]) : String = {
+    _props = props
+    Util.base64Encode(UUID.randomUUID())
+  }
 
   def onCompleted(fileKey: String, clientChannel: Channel) = sendResponse(fileKey, clientChannel, true)
 
@@ -38,7 +44,8 @@ class FileUploadEventListener(hostname: String, thumbFileRoot: String, thumbWidt
         jsonResponse.put("key", fileKey)
       }
 
-      response.setContent(ChannelBuffers.wrappedBuffer(jsonResponse.toString(2).getBytes("UTF-8")))
+      response.setContent(ChannelBuffers.wrappedBuffer(jsonResponse.toString().getBytes("UTF-8")))
+
       clientChannel.write(response).addListener(ChannelFutureListener.CLOSE)
     }
     catch {
