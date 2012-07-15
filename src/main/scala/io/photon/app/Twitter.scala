@@ -85,19 +85,17 @@ object TwitterCLI {
   }
 }
 
-class TwitterLogin(handler: TwitterRouteHandler, sessions: TwitterSessionService, callbackUrl: String) extends TwitterGetRoute("/login", handler, sessions, callbackUrl) {}
+class TwitterConfig(val loginRoute: String, val logoutRoute: String, val callbackRoute: String, val callbackUrl: String, val sessions: TwitterSessionService) {}
 
-class TwitterCallback(sessions: TwitterSessionService) extends TwitterGetRoute("/callback", null, sessions) {}
+class TwitterLogin(handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterGetRoute(config.loginRoute, handler, config) {}
+class TwitterCallback(config: TwitterConfig) extends TwitterGetRoute("/" + config.callbackRoute, null, config) {}
+class TwitterLogout(handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterGetRoute(config.logoutRoute, handler, config) {}
 
-class TwitterLogout(handler: TwitterRouteHandler, sessions: TwitterSessionService) extends TwitterGetRoute("/logout", handler, sessions)
-
-class TwitterSession(val id: String, val twitter: Twitter, var requestToken: RequestToken) {}
+class TwitterSession(val id: String, val twitter: Twitter, var requestToken: RequestToken, var postLoginRoute: String) {}
 
 trait TwitterSessionService {
   def getSession(key: String): TwitterSession
-
   def setSession(key: String, session: TwitterSession)
-
   def deleteSession(key: String)
 }
 
@@ -108,13 +106,11 @@ object SimpleTwitterSession {
 
 class SimpleTwitterSession extends TwitterSessionService {
   def getSession(key: String): TwitterSession = SimpleTwitterSession.sessions.get(key).getOrElse(null)
-
   def setSession(key: String, session: TwitterSession) = SimpleTwitterSession.sessions.put(key, session)
-
   def deleteSession(key: String) = SimpleTwitterSession.sessions.remove(key)
 }
 
-class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod, protected val sessions: TwitterSessionService, callbackUrl: String = null) extends Route(route) {
+class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod, protected val config: TwitterConfig) extends Route(route) {
 
   val SESSION_NAME = "photon-session"
 
@@ -129,37 +125,27 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
     }
 
     val request = e.asInstanceOf[MessageEvent].getMessage.asInstanceOf[HttpRequest]
-    val cookieString = request.getHeader(HttpHeaders.Names.COOKIE)
-    val (sessionId, cookies) = getSessionId(cookieString)
+    val (sessionId, cookies) = getSessionId(request.getHeader(HttpHeaders.Names.COOKIE))
 
-    val response = if (sessionId == null) {
+    val response = if (sessionId == null || config.sessions.getSession(sessionId) == null) {
       try {
-        if (callbackUrl == null) {
-          new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST)
-        } else {
-          val twitter = new TwitterFactory().getInstance()
-          val requestToken = twitter.getOAuthRequestToken(callbackUrl)
-          val sessionId = UUID.randomUUID().toString
-          val session = new TwitterSession(sessionId, twitter, requestToken)
-          sessions.setSession(sessionId, session)
+        val twitter = new TwitterFactory().getInstance()
+        val requestToken = twitter.getOAuthRequestToken(config.callbackUrl)
+        val sessionId = UUID.randomUUID().toString
+        val session = new TwitterSession(sessionId, twitter, requestToken, request.getUri)
+        config.sessions.setSession(sessionId, session)
 
-          val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND)
-          response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
-          response.setHeader("Location", requestToken.getAuthenticationURL)
-          response
-        }
+        val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND)
+        response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
+        response.setHeader("Location", requestToken.getAuthenticationURL)
+        response
       } catch {
         case e: TwitterException => throw new RuntimeException("failed to login")
       }
     } else {
-      val session = sessions.getSession(sessionId)
+      val session = config.sessions.getSession(sessionId)
       val path = RouteUtil.parsePath(request.getUri())
-      if (session == null) {
-        val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND)
-        response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(null, cookies))
-        response.setHeader("Location", "/login")
-        response
-      } else if (path.size > 0 && path.get(0).equalsIgnoreCase("callback")) {
+      if (path.size > 0 && path.get(0).equals(config.callbackRoute)) {
         val args = RouteUtil.extractQueryParams(new URI(request.getUri()))
         val verifier = args.get("oauth_verifier")
         try {
@@ -167,7 +153,7 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
           session.requestToken = null
           val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND)
           response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
-          response.setHeader("Location", "/")
+          response.setHeader("Location", session.postLoginRoute)
           response
         } catch {
           case e: TwitterException => new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST)
@@ -178,26 +164,25 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
           args.putAll(RouteUtil.extractQueryParams(new URI(request.getUri())))
 
           val routeResponse = handler.asInstanceOf[TwitterRouteHandler].exec(session, args)
-          val keepalive = isKeepAlive(request)
           if (routeResponse.HttpResponse == null) {
             val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK)
             response.setContent(wrappedBuffer("{\"status\": true}".getBytes()))
             response
-          }
-          else {
+          } else {
             val response = routeResponse.HttpResponse
-            if (keepalive) {
+            if (isKeepAlive(request)) {
               response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
               setContentLength(response, response.getContent().readableBytes())
-            }
-            else {
+            } else {
               response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.CLOSE)
             }
-            if (sessions.getSession(sessionId) == null) {
+
+            if (config.sessions.getSession(sessionId) == null) {
               response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(null, cookies))
             } else {
               response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
             }
+
             response
           }
         } catch {
@@ -258,8 +243,8 @@ trait TwitterRouteHandler extends RouteHandler {
   def exec(args: java.util.Map[String, String]): RouteResponse = null
 }
 
-class TwitterGetRoute(route: String, handler: TwitterRouteHandler, sessions: TwitterSessionService, callbackUrl: String = null) extends TwitterRestRoute(route, handler, HttpMethod.GET, sessions, callbackUrl) {}
-class TwitterPostRoute(route: String, handler: TwitterRouteHandler, sessions: TwitterSessionService) extends TwitterRestRoute(route, handler, HttpMethod.POST, sessions) {}
-class TwitterPutRoute(route: String, handler: TwitterRouteHandler, sessions: TwitterSessionService) extends TwitterRestRoute(route, handler, HttpMethod.PUT, sessions) {}
-class TwitterDeleteRoute(route: String, handler: TwitterRouteHandler, sessions: TwitterSessionService) extends TwitterRestRoute(route, handler, HttpMethod.DELETE, sessions) {}
+class TwitterGetRoute(route: String, handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterRestRoute(route, handler, HttpMethod.GET, config) {}
+class TwitterPostRoute(route: String, handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterRestRoute(route, handler, HttpMethod.POST, config) {}
+class TwitterPutRoute(route: String, handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterRestRoute(route, handler, HttpMethod.PUT, config) {}
+class TwitterDeleteRoute(route: String, handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterRestRoute(route, handler, HttpMethod.DELETE, config) {}
 

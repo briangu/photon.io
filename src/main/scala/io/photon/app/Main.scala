@@ -22,6 +22,8 @@ class Main(hostname: String, port: Int, uploads: String, thumbs: String) extends
 
     addRoute(new HttpChunkProxyHandler("/u/", new FileChunkProxy(uploads), new FileUploadEventListener(hostname, thumbs, 640, 480)))
 
+    val config = new TwitterConfig("/login", "/logout", "callback", "http://%s:%d/callback".format(hostname, port), sessions)
+
     addRoute(new TwitterLogin(
       new TwitterRouteHandler {
         override
@@ -31,10 +33,9 @@ class Main(hostname: String, port: Int, uploads: String, thumbs: String) extends
           new RouteResponse(response)
         }
       },
-      sessions,
-      "http://%s:%d/callback".format(hostname, port)))
+      config))
 
-    addRoute(new TwitterCallback(sessions))
+    addRoute(new TwitterCallback(config))
 
     addRoute(new TwitterLogout(
       new TwitterRouteHandler {
@@ -45,7 +46,7 @@ class Main(hostname: String, port: Int, uploads: String, thumbs: String) extends
           response.setHeader("Location", "/")
           new RouteResponse(response)
         }
-    },
-    sessions))
+      },
+      config))
   }
 }
