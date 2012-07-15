@@ -2,8 +2,9 @@ package io.photon.app
 
 import io.viper.core.server.file.{StaticFileServerHandler, HttpChunkProxyHandler, FileChunkProxy}
 import io.viper.common.{StaticFileContentInfoProviderFactory, ViperServer, NestServer}
-import io.viper.core.server.router.{RouteResponse, RouteHandler}
-import org.jboss.netty.handler.codec.http.{HttpResponseStatus, HttpVersion, DefaultHttpResponse}
+import io.viper.core.server.router.{RouteResponse}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus, HttpVersion, DefaultHttpResponse}
+import org.jboss.netty.handler.codec.http.HttpVersion._
 
 
 object Main {
@@ -21,15 +22,29 @@ class Main(hostname: String, port: Int, uploads: String, thumbs: String) extends
 
     addRoute(new HttpChunkProxyHandler("/u/", new FileChunkProxy(uploads), new FileUploadEventListener(hostname, thumbs, 640, 480)))
 
-    addRoute(new TwitterLogin(sessions, "http://%s:%d/callback".format(hostname, port)))
+    addRoute(new TwitterLogin(
+      new TwitterRouteHandler {
+        override
+        def exec(session: TwitterSession, args: java.util.Map[String, String]) : RouteResponse = {
+          val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND)
+          response.setHeader("Location", "/")
+          new RouteResponse(response)
+        }
+      },
+      sessions,
+      "http://%s:%d/callback".format(hostname, port)))
+
     addRoute(new TwitterCallback(sessions))
+
     addRoute(new TwitterLogout(
       new TwitterRouteHandler {
         override
         def exec(session: TwitterSession, args: java.util.Map[String, String]) : RouteResponse = {
           sessions.deleteSession(session.id)
-          new RouteResponse(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK))
-      }
+          val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND)
+          response.setHeader("Location", "/")
+          new RouteResponse(response)
+        }
     },
     sessions))
   }

@@ -85,7 +85,7 @@ object TwitterCLI {
   }
 }
 
-class TwitterLogin(sessions: TwitterSessionService, callbackUrl: String) extends TwitterGetRoute("/login", null, sessions, callbackUrl) {}
+class TwitterLogin(handler: TwitterRouteHandler, sessions: TwitterSessionService, callbackUrl: String) extends TwitterGetRoute("/login", handler, sessions, callbackUrl) {}
 
 class TwitterCallback(sessions: TwitterSessionService) extends TwitterGetRoute("/callback", null, sessions) {}
 
@@ -153,12 +153,13 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
       }
     } else {
       val session = sessions.getSession(sessionId)
+      val path = RouteUtil.parsePath(request.getUri())
       if (session == null) {
         val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND)
         response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(null, cookies))
         response.setHeader("Location", "/login")
         response
-      } else if (request.getUri.equals(callbackUrl)) {
+      } else if (path.size > 0 && path.get(0).equalsIgnoreCase("callback")) {
         val args = RouteUtil.extractQueryParams(new URI(request.getUri()))
         val verifier = args.get("oauth_verifier")
         try {
@@ -173,7 +174,6 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
         }
       } else {
         try {
-          val path = RouteUtil.parsePath(request.getUri())
           val args = RouteUtil.extractPathArgs(_route, path)
           args.putAll(RouteUtil.extractQueryParams(new URI(request.getUri())))
 
@@ -193,7 +193,11 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
             else {
               response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.CLOSE)
             }
-            response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
+            if (sessions.getSession(sessionId) == null) {
+              response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(null, cookies))
+            } else {
+              response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
+            }
             response
           }
         } catch {
@@ -229,7 +233,7 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
     cookies.foreach(cookieEncoder.addCookie)
 
     val sessionCookie = if (sessionId == null) {
-      val sessionCookie = new DefaultCookie(SESSION_NAME,  "deleted")
+      val sessionCookie = new DefaultCookie(SESSION_NAME,  "")
       sessionCookie.setMaxAge(0)
       sessionCookie
     } else {
