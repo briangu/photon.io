@@ -18,9 +18,7 @@ import com.thebuzzmedia.imgscalr.{Scalr, AsyncScalr}
 
 class FileUploadEventListener(hostname: String, thumbFileRoot: String, thumbWidth: Int, thumbHeight: Int) extends HttpChunkRelayEventListener {
 
-  def onStart(props: Map[String, String]) {
-    Util.base64Encode(UUID.randomUUID())
-  }
+  def onStart(props: Map[String, String]) : String = Util.base64Encode(UUID.randomUUID())
 
   def onCompleted(fileKey: String, clientChannel: Channel) = sendResponse(fileKey, clientChannel, true)
 
