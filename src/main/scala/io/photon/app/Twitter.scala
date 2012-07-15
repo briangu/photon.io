@@ -87,9 +87,9 @@ object TwitterCLI {
 
 class TwitterConfig(val loginRoute: String, val logoutRoute: String, val callbackRoute: String, val callbackUrl: String, val sessions: TwitterSessionService) {}
 
-class TwitterLogin(handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterGetRoute(config.loginRoute, handler, config) {}
-class TwitterCallback(config: TwitterConfig) extends TwitterGetRoute("/" + config.callbackRoute, null, config) {}
-class TwitterLogout(handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterGetRoute(config.logoutRoute, handler, config) {}
+class TwitterLogin(handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterGetRoute(config, config.loginRoute, handler) {}
+class TwitterCallback(config: TwitterConfig) extends TwitterGetRoute(config, "/" + config.callbackRoute, null) {}
+class TwitterLogout(handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterGetRoute(config, config.logoutRoute, handler) {}
 
 class TwitterSession(val id: String, val twitter: Twitter, var requestToken: RequestToken, var postLoginRoute: String) {}
 
@@ -243,8 +243,8 @@ trait TwitterRouteHandler extends RouteHandler {
   def exec(args: java.util.Map[String, String]): RouteResponse = null
 }
 
-class TwitterGetRoute(route: String, handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterRestRoute(route, handler, HttpMethod.GET, config) {}
-class TwitterPostRoute(route: String, handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterRestRoute(route, handler, HttpMethod.POST, config) {}
-class TwitterPutRoute(route: String, handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterRestRoute(route, handler, HttpMethod.PUT, config) {}
-class TwitterDeleteRoute(route: String, handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterRestRoute(route, handler, HttpMethod.DELETE, config) {}
+class TwitterGetRoute(config: TwitterConfig, route: String, handler: TwitterRouteHandler) extends TwitterRestRoute(route, handler, HttpMethod.GET, config) {}
+class TwitterPostRoute(config: TwitterConfig, route: String, handler: TwitterRouteHandler) extends TwitterRestRoute(route, handler, HttpMethod.POST, config) {}
+class TwitterPutRoute(config: TwitterConfig, route: String, handler: TwitterRouteHandler) extends TwitterRestRoute(route, handler, HttpMethod.PUT, config) {}
+class TwitterDeleteRoute(config: TwitterConfig, route: String, handler: TwitterRouteHandler) extends TwitterRestRoute(route, handler, HttpMethod.DELETE, config) {}
 
