@@ -1,50 +1,25 @@
-/* PIN CELL
---------------------------------------------------------------------------------------- */
 .item {position: absolute; width: 192px; float: left; margin: 10px 0 5px; padding: 15px 15px 0; font-size: 11px; background-color: #fff; box-shadow: 0 1px 3px rgba(34,25,25,0.4); -moz-box-shadow: 0 1px 2px rgba(34,25,25,0.4); -webkit-box-shadow: 0 1px 3px rgba(34,25,25,0.4);}
-.item .PinHolder {position: relative;}
-.item .PriceContainer {position: absolute; z-index: 2; top: -15px; left: -15px; width: 110px; height: 110px; overflow: hidden;}
-.item .price {position: absolute; z-index: 2; top: 19px; left: -28px; width: 125px; height: 22px; padding-top: 8px; text-align: center; font-size: 11px; color: #524d4d; background-color: #f2f0f0; overflow: hidden; -webkit-transform: rotate(-45deg); -moz-transform:  rotate(-45deg); -o-transform: rotate(-45deg); -ms-transform: rotate(-45deg);}
+.item .ItemHolder {position: relative;}
 .item .ImgLink {position: relative; }
 .item .ImgLink:hover {text-decoration: none;}
 .item .ImgLink img {max-width: 192px; opacity: 1; -webkit-transition: opacity 0.3s; }
 .item .ImgLink img.lazy { opacity: 0; }
-.item .PinImage { background-color: #f2f0f0; }
-.item .PinImageImg {min-height: 75px; background-color: #f2f0f0;}
+.item .ItemImage { background-color: #f2f0f0; }
+.item .ItemImageImg {min-height: 75px; background-color: #f2f0f0;}
 .item .video {position: absolute; z-index: 1; top: 50%; left: 50%; width: 50px; height: 50px; margin: -25px 0 0 -25px;}
 .item .description {margin: 10px 0 5px; overflow: hidden; word-wrap: break-word;}
 
-/* Pin Activity */
 .item.activity { background: #fff; box-shadow: 0 1px 3px rgba(34,25,25,0.4); -moz-box-shadow: 0 1px 2px rgba(34,25,25,0.4); -webkit-box-shadow: 0 1px 3px rgba(34,25,25,0.4); position: absolute }
 .item.activity div.info { background-position: 15px 0px; background-repeat: no-repeat; border-bottom: 1px solid #ccc; padding: 0 15px 10px 35px; margin: 0 -15px 15px; }
 .item.activity .actions { top: auto; }
-.pinBoard.activity { padding: 15px !important; width: 192px !important; }
-.pinBoard.activity .board, .pinBoard.activity .holder { overflow: hidden; width: 191px; }
-.pinBoard.activity .board a.link { height: 180px; width: 192px; }
-.pinBoard.activity .cover { height: 130px; }
-.pinBoard.activity .holder .cover img { width: 100%; }
-.pinBoard.activity h3, .pinBoard.activity h4 { display: none; }
-.pinBoard.activity .board { box-shadow: none; -moz-box-shadow: none; -webkit-box-shadow: none; }
-.pinBoard.activity .board .followBoard { border: none; margin-top:10px; }
-.pinBoard.activity .board .followBoard .Button { display: block; }
-.pinBoard.activity .holder .thumbs img, .pinBoard.activity .holder .thumbs .empty { width: 47px; height: 47px; }
 .user.activity a.ImgLink { width: 192px; display: block; margin-bottom: 10px; }
 .user.activity .PersonIdentity { display: none; }
 .item .stats { overflow: hidden; }
 .item .stats span { float: left; margin-right: 10px; }
 .item.activity p.stats { margin: 0.8em 0; }
-/* Pin          */ .item.activity-1 div.info { background-image: url(../images/Activity-Pin.png); }
-/* Repin        */ .item.activity-5 div.info { background-image: url(../images/Activity-Repin.png); }
-/* Like         */ .item.activity-6 div.info { background-image: url(../images/Activity-Like.png); }
-/* Comment      */ .item.activity-7 div.info { background-image: url(../images/Activity-Comment.png); }
-/* Follow Board */ .item.activity-26 div.info { background-image: url(../images/Activity-Board.png); }
-/* Follow User  */ .item.activity-45 div.info { background-image: url(../images/Activity-People.png); }
 
 .item.activity div.info p { padding: 5px 0 0 0; margin: 0; }
 .item.activity .UserImage, .item.activity .BoardImage { overflow: hidden; margin-bottom: 15px; }
-
-/* Simple pin */
-.item.simple { width: auto; padding: 5px; }
-
 
 .convo {margin: 0 -15px; padding: 10px 15px; background-color: #f2f0f0;}
 .convo:after {clear: both; display: block; height: 0; content: " "; visibility: hidden;}
@@ -59,24 +34,3 @@ a.convo:active {color: #221919; background-color: #e1dfdf;}
 .attribution a {color: #8c7e7e;}
 .attribution p {display: table-cell; max-width: 156px; height: 30px; vertical-align: middle;}
 .attribution .NoImage {height: auto; margin: 0;}
-
-.AttributionSource {padding-top:1px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; padding-left: 21px; background: transparent url() 0 50% no-repeat;}
-.AttributionSourceIs_behance {background-image:url(../images/attrib/behance.png);}
-.AttributionSourceIs_etsy {background-image:url(../images/attrib/etsy.png);}
-.AttributionSourceIs_flickr {padding-left: 20px; background-image:url(../images/attrib/flickr.png);}
-.AttributionSourceIs_fivehundredpx {padding-left: 20px; background-image:url(../images/attrib/fivehundredpx.png);}
-.AttributionSourceIs_geograph {padding-left: 20px; background-image:url(../images/attrib/geograph.png);}
-.AttributionSourceIs_kickstarter {background-image:url(../images/attrib/kickstarter.png);}
-.AttributionSourceIs_slideshare {background-image:url(../images/attrib/slideshare.png);}
-.AttributionSourceIs_soundcloud {background-image:url(../images/attrib/soundcloud.png);}
-.AttributionSourceIs_vimeo {background-image:url(../images/attrib/vimeo.png);}
-.AttributionSourceIs_youtube {background-image:url(../images/attrib/youtube.png);}
-.AttributionContainerInline {margin-top: 10px; margin-bottom:0;}
-#AjaxFooter .AttributionContainerInline {margin-top: -10px; margin-bottom:20px;}
-
-.comments {margin: 0 -15px; padding: 0 15px; border-top: 1px solid #d9d4d4;}
-.comments .comment {border-top: 1px solid #fcfafa; border-bottom: 1px solid #d9d4d4; overflow: hidden;}
-.comments .comment:last-child {border-bottom-width: 0;}
-.comments .comment p {width: 156px;}
-.ReportComment {text-shadow: none; opacity: .4; transition: opacity .3s; -moz-transition: opacity .3s; -webkit-transition: opacity .3s;}
-.comment:hover .ReportComment {opacity: 1; font-weight:700;}
