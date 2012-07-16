@@ -36,7 +36,7 @@ class Main(hostname: String, port: Int, uploads: String, thumbs: String) extends
     get("/thumb/$path", new StaticFileServerHandler(StaticFileContentInfoProviderFactory.create(this.getClass, thumbs)))
     get("/d/$path", new StaticFileServerHandler(StaticFileContentInfoProviderFactory.create(this.getClass, uploads)))
 
-    addRoute(new HttpChunkProxyHandler("/u/", new FileChunkProxy(uploads), new FileUploadEventListener(hostname, thumbs, 640, 480)))
+    addRoute(new HttpChunkProxyHandler("/u/", new CloudCmdChunkProxy(uploads), new FileUploadEventListener(hostname, thumbs, 640, 480)))
 
     addRoute(new TwitterLogin(
       new TwitterRouteHandler {

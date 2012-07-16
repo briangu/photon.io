@@ -9,14 +9,19 @@
   <meta name="author" content="">
 
   <!-- Le styles -->
-  <link href="css/fileuploader.css" rel="stylesheet" type="text/css">
   <link href="/css/bootstrap.css" rel="stylesheet">
-  <style>
+  <style type="text/css">
     body {
-    padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+    padding-top: 60px;
+    padding-bottom: 40px;
+    }
+    .sidebar-nav {
+    padding: 9px 0;
     }
   </style>
   <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+  <link href="/css/dashboard.css" rel="stylesheet">
+  <link href="css/fileuploader.css" rel="stylesheet" type="text/css">
 
   <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
   <!--[if lt IE 9]>
@@ -48,11 +53,9 @@
           <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
-<!--
           <li><a href="#">Profile</a></li>
           <li class="divider"></li>
--->
-          <li><a href="/logout">Sign Out</a></li>
+          <li><a href="#">Sign Out</a></li>
         </ul>
       </div>
       <div class="nav-collapse">
@@ -68,7 +71,7 @@
 
 <div class="container-fluid">
   <div class="row-fluid">
-    <div class="span3">
+    <div class="span2">
       <div class="well sidebar-nav">
         <ul class="nav nav-list">
           <li class="nav-header">Sidebar</li>
@@ -90,14 +93,14 @@
         </ul>
       </div><!--/.well -->
     </div><!--/span-->
-    <div class="span9">
-      <div class="hero-unit">
+    <div id="gallery" class="span9">
+      <div class="hero-unit" hidden>
         <div id="photo_input" class="photo_input">
           <hr/>
-          <!-- Update Box -->
           <div class="update-box" id="update-box">
             <div class="">
               <p class="uploader-text">drag-and-drop or use the select button.</p>
+
               <div id="file-uploader-demo1">
                 <noscript>
                   <p>Please enable JavaScript to use file uploader.</p>
@@ -114,38 +117,216 @@
           </form>
         </div>
       </div>
+
       <div class="row-fluid">
         <div class="span4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn" href="#">View details »</a></p>
+          <div class="item" data-id="1234" data-width="480" data-height="640">
+            <div class="PinHolder">
+              <a href="/items/1234/" class="PinImage ImgLink">
+                <img src="/img/klimt.jpg"
+                     alt="Gustav Klimt" class="PinImageImg" />
+              </a>
+            </div>
+            <p class="description">Gustav Klimt</p>
+            <div class="convo attribution">
+              <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+                <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+              </a>
+              <p>
+                <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+              </p>
+            </div>
+          </div>
         </div><!--/span-->
         <div class="span4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn" href="#">View details »</a></p>
+          <div class="item" data-id="1234" data-width="480" data-height="640">
+            <div class="PinHolder">
+              <a href="/items/1234/" class="PinImage ImgLink">
+                <img src="http://farm5.static.flickr.com/4113/5013039697_a15e41fcd8.jpg"
+                     alt="Gustav Klimt" class="PinImageImg" />
+              </a>
+            </div>
+            <p class="description">Gustav Klimt</p>
+            <div class="convo attribution">
+              <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+                <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+              </a>
+              <p>
+                <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+              </p>
+            </div>
+          </div>
         </div><!--/span-->
         <div class="span4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn" href="#">View details »</a></p>
+          <div class="item" data-id="1234" data-width="480" data-height="640">
+            <div class="PinHolder">
+              <a href="/items/1234/" class="PinImage ImgLink">
+                <img src="http://farm5.static.flickr.com/4124/5013646314_c7eaf84918.jpg"
+                     alt="Gustav Klimt" class="PinImageImg" />
+              </a>
+            </div>
+            <p class="description">Gustav Klimt</p>
+            <div class="convo attribution">
+              <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+                <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+              </a>
+              <p>
+                <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+              </p>
+            </div>
+          </div>
         </div><!--/span-->
-      </div><!--/row-->
-      <div class="row-fluid">
         <div class="span4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn" href="#">View details »</a></p>
+          <div class="item" data-id="1234" data-width="480" data-height="640">
+            <div class="PinHolder">
+              <a href="/items/1234/" class="PinImage ImgLink">
+                <img src="http://farm5.static.flickr.com/4113/5013039951_3a47ccd509.jpg"
+                     alt="Gustav Klimt" class="PinImageImg" />
+              </a>
+            </div>
+            <p class="description">Gustav Klimt</p>
+            <div class="convo attribution">
+              <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+                <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+              </a>
+              <p>
+                <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+              </p>
+            </div>
+          </div>
         </div><!--/span-->
         <div class="span4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn" href="#">View details »</a></p>
+          <div class="item" data-id="1234" data-width="480" data-height="640">
+            <div class="PinHolder">
+              <a href="/items/1234/" class="PinImage ImgLink">
+                <img src="/img/klimt.jpg"
+                     alt="Gustav Klimt" class="PinImageImg" />
+              </a>
+            </div>
+            <p class="description">Gustav Klimt</p>
+            <div class="convo attribution">
+              <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+                <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+              </a>
+              <p>
+                <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+              </p>
+            </div>
+          </div>
         </div><!--/span-->
         <div class="span4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn" href="#">View details »</a></p>
+          <div class="item" data-id="1234" data-width="480" data-height="640">
+            <div class="PinHolder">
+              <a href="/items/1234/" class="PinImage ImgLink">
+                <img src="http://farm5.static.flickr.com/4113/5013039697_a15e41fcd8.jpg"
+                     alt="Gustav Klimt" class="PinImageImg" />
+              </a>
+            </div>
+            <p class="description">Gustav Klimt</p>
+            <div class="convo attribution">
+              <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+                <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+              </a>
+              <p>
+                <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+              </p>
+            </div>
+          </div>
+        </div><!--/span-->
+        <div class="span4">
+          <div class="item" data-id="1234" data-width="480" data-height="640">
+            <div class="PinHolder">
+              <a href="/items/1234/" class="PinImage ImgLink">
+                <img src="http://farm5.static.flickr.com/4153/5013039741_d860fb640b.jpg"
+                     alt="Gustav Klimt" class="PinImageImg" />
+              </a>
+            </div>
+            <p class="description">Gustav Klimt</p>
+            <div class="convo attribution">
+              <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+                <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+              </a>
+              <p>
+                <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+              </p>
+            </div>
+          </div>
+        </div><!--/span-->
+        <div class="span4">
+          <div class="item" data-id="1234" data-width="480" data-height="640">
+            <div class="PinHolder">
+              <a href="/items/1234/" class="PinImage ImgLink">
+                <img src="http://farm5.static.flickr.com/4113/5013039951_3a47ccd509.jpg"
+                     alt="Gustav Klimt" class="PinImageImg" />
+              </a>
+            </div>
+            <p class="description">Gustav Klimt</p>
+            <div class="convo attribution">
+              <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+                <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+              </a>
+              <p>
+                <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+              </p>
+            </div>
+          </div>
+        </div><!--/span-->
+        <div class="span4">
+          <div class="item" data-id="1234" data-width="480" data-height="640">
+            <div class="PinHolder">
+              <a href="/items/1234/" class="PinImage ImgLink">
+                <img src="/img/klimt.jpg"
+                     alt="Gustav Klimt" class="PinImageImg" />
+              </a>
+            </div>
+            <p class="description">Gustav Klimt</p>
+            <div class="convo attribution">
+              <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+                <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+              </a>
+              <p>
+                <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+              </p>
+            </div>
+          </div>
+        </div><!--/span-->
+        <div class="span4">
+          <div class="item" data-id="1234" data-width="480" data-height="640">
+            <div class="PinHolder">
+              <a href="/items/1234/" class="PinImage ImgLink">
+                <img src="http://farm5.static.flickr.com/4113/5013039697_a15e41fcd8.jpg"
+                     alt="Gustav Klimt" class="PinImageImg" />
+              </a>
+            </div>
+            <p class="description">Gustav Klimt</p>
+            <div class="convo attribution">
+              <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+                <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+              </a>
+              <p>
+                <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+              </p>
+            </div>
+          </div>
+        </div><!--/span-->
+        <div class="span4">
+          <div class="item" data-id="1234" data-width="480" data-height="640">
+            <div class="PinHolder">
+              <a href="/items/1234/" class="PinImage ImgLink">
+                <img src="http://farm5.static.flickr.com/4153/5013039741_d860fb640b.jpg"
+                     alt="Gustav Klimt" class="PinImageImg" />
+              </a>
+            </div>
+            <p class="description">Gustav Klimt</p>
+            <div class="convo attribution">
+              <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+                <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+              </a>
+              <p>
+                <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+              </p>
+            </div>
+          </div>
         </div><!--/span-->
       </div><!--/row-->
     </div><!--/span-->
@@ -154,21 +335,15 @@
   <hr>
 
   <footer>
-    <p>© OPS5 2012</p>
+    <p>&copy; OPS5 2012</p>
   </footer>
 
-</div>
+</div><!--/.fluid-container-->
+
 <!-- Le javascript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-
-<script src="/js/app.js"></script>
-<script src="/js/fileuploader.js"></script>
-<script src="/js/mustache.js"></script>
-<script src="/js/spin.js"></script>
-
-<script src="/js/bootstrap.min.js"></script>
 <script src="/js/bootstrap-transition.js"></script>
 <script src="/js/bootstrap-alert.js"></script>
 <script src="/js/bootstrap-modal.js"></script>
@@ -182,10 +357,26 @@
 <script src="/js/bootstrap-carousel.js"></script>
 <script src="/js/bootstrap-typeahead.js"></script>
 
+<script src="/js/app.js"></script>
+<script src="/js/fileuploader.js"></script>
+<script src="/js/mustache.js"></script>
+<script src="/js/spin.js"></script>
+<script src="/js/masonry.min.js"></script>
+
 <script type="text/javascript">
   var params = {}
   $(document).ready(function() {
     photonApp();
+  });
+
+  var $container = $('#gallery');
+    $container.imagesLoaded(function(){
+      $container.masonry({
+        itemSelector : '.item',
+        columnWidth: function( containerWidth ) {
+          return containerWidth / 5;
+        }
+    });
   });
 </script>
 
