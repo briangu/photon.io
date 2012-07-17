@@ -15,6 +15,8 @@ import com.thebuzzmedia.imgscalr.{Scalr, AsyncScalr}
 
 class FileUploadEventListener(hostname: String, uploadsPath: String, thumbsPath: String, thumbWidth: Int, thumbHeight: Int) extends HttpChunkRelayEventListener {
 
+  final val THUMBNAIL_CREATE_THRESHOLD = 128 * 1024
+
   var _props: Map[String, String] = null
 
   def onStart(props: Map[String, String]) : String = {
@@ -33,18 +35,28 @@ class FileUploadEventListener(hostname: String, uploadsPath: String, thumbsPath:
       val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
 
       // TODO: once we are using the cloudcmd adapters, well have to download the file first and convert it - perhaps better to do on demand.
-      if (_props.get(HttpHeaders.Names.CONTENT_TYPE).startsWith("image")) {
-        createThumbnail("%s%s%s".format(uploadsPath, File.separator, fileKey), "%s%s%s".format(thumbsPath, File.separator, fileKey))
+
+      val url = String.format("/d/%s", fileKey)
+      val contentLength = _props.get(HttpHeaders.Names.CONTENT_LENGTH).toLong
+
+      val contentType = _props.get(HttpHeaders.Names.CONTENT_TYPE)
+      val thumbnailUrl = if (contentType.startsWith("image")) {
+        if (contentLength < THUMBNAIL_CREATE_THRESHOLD) {
+          url
+        } else {
+          createThumbnail("%s%s%s".format(uploadsPath, File.separator, fileKey), "%s%s%s".format(thumbsPath, File.separator, fileKey))
+          String.format("/thumb/%s", fileKey)
+        }
       }
 
       val jsonResponse = new JSONObject()
       jsonResponse.put("success", success)
       if (success) {
-        jsonResponse.put("thumbnail_url", String.format("/thumb/%s", fileKey))
-        jsonResponse.put("url", String.format("/d/%s", fileKey))
+        jsonResponse.put("thumbnail_url", thumbnailUrl)
+        jsonResponse.put("url", url)
         jsonResponse.put("name", _props.get("filename"))
-        jsonResponse.put("type", _props.get(HttpHeaders.Names.CONTENT_TYPE))
-        jsonResponse.put("size", _props.get(HttpHeaders.Names.CONTENT_LENGTH))
+        jsonResponse.put("type", contentType)
+        jsonResponse.put("size", contentLength)
         jsonResponse.put("delete_url", String.format("/d/%s", fileKey))
         jsonResponse.put("delete_type", "DELETE")
       }
