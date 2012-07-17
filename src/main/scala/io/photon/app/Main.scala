@@ -2,10 +2,11 @@ package io.photon.app
 
 import io.viper.core.server.file.{StaticFileServerHandler, HttpChunkProxyHandler, FileChunkProxy}
 import io.viper.common.{StaticFileContentInfoProviderFactory, ViperServer, NestServer}
-import io.viper.core.server.router.{HtmlResponse, RouteResponse}
+import io.viper.core.server.router.{StatusResponse, RouteHandler, HtmlResponse, RouteResponse}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus, HttpVersion, DefaultHttpResponse}
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import twitter4j.ProfileImage
+import java.util
 
 
 object Main {
@@ -36,7 +37,7 @@ class Main(hostname: String, port: Int, uploads: String, thumbs: String) extends
     get("/thumb/$path", new StaticFileServerHandler(StaticFileContentInfoProviderFactory.create(this.getClass, thumbs)))
     get("/d/$path", new StaticFileServerHandler(StaticFileContentInfoProviderFactory.create(this.getClass, uploads)))
 
-    addRoute(new HttpChunkProxyHandler("/u/", new CloudCmdChunkProxy(uploads), new FileUploadEventListener(hostname, thumbs, 640, 480)))
+    addRoute(new HttpChunkProxyHandler("/u/", new FileChunkProxy(uploads), new FileUploadEventListener(hostname, uploads, thumbs, 640, 480)))
 
     addRoute(new TwitterLogin(
       new TwitterRouteHandler {

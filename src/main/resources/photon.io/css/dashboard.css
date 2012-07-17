@@ -34,3 +34,5 @@ a.convo:active {color: #221919; background-color: #e1dfdf;}
 .attribution a {color: #8c7e7e;}
 .attribution p {display: table-cell; max-width: 156px; height: 30px; vertical-align: middle;}
 .attribution .NoImage {height: auto; margin: 0;}
+
+.download_img { width: 80px; }

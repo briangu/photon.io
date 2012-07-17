@@ -7,17 +7,13 @@ import java.util.UUID
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.channel.ChannelFutureListener
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
-import org.jboss.netty.handler.codec.http.HttpVersion
-import org.json.JSONException
-import org.json.JSONObject
+import org.jboss.netty.handler.codec.http.{HttpHeaders, DefaultHttpResponse, HttpResponseStatus, HttpVersion}
+import org.json.{JSONArray, JSONException, JSONObject}
 import io.viper.core.server.Util
 import javax.imageio.ImageIO
 import com.thebuzzmedia.imgscalr.{Scalr, AsyncScalr}
-import org.jboss.netty.handler.codec.http.HttpHeaders._
 
-class FileUploadEventListener(hostname: String, thumbFileRoot: String, thumbWidth: Int, thumbHeight: Int) extends HttpChunkRelayEventListener {
+class FileUploadEventListener(hostname: String, uploadsPath: String, thumbsPath: String, thumbWidth: Int, thumbHeight: Int) extends HttpChunkRelayEventListener {
 
   var _props: Map[String, String] = null
 
@@ -36,15 +32,26 @@ class FileUploadEventListener(hostname: String, thumbFileRoot: String, thumbWidt
     try {
       val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
 
+      // TODO: once we are using the cloudcmd adapters, well have to download the file first and convert it - perhaps better to do on demand.
+      if (_props.get(HttpHeaders.Names.CONTENT_TYPE).startsWith("image")) {
+        createThumbnail("%s%s%s".format(uploadsPath, File.separator, fileKey), "%s%s%s".format(thumbsPath, File.separator, fileKey))
+      }
+
       val jsonResponse = new JSONObject()
       jsonResponse.put("success", success)
       if (success) {
-        jsonResponse.put("thumbnail", String.format("%s/thumb/%s", hostname, fileKey))
+        jsonResponse.put("thumbnail_url", String.format("/thumb/%s", fileKey))
         jsonResponse.put("url", String.format("/d/%s", fileKey))
-        jsonResponse.put("key", fileKey)
+        jsonResponse.put("name", _props.get("filename"))
+        jsonResponse.put("type", _props.get(HttpHeaders.Names.CONTENT_TYPE))
+        jsonResponse.put("size", _props.get(HttpHeaders.Names.CONTENT_LENGTH))
+        jsonResponse.put("delete_url", String.format("/d/%s", fileKey))
+        jsonResponse.put("delete_type", "DELETE")
       }
+      val arr = new JSONArray()
+      arr.put(jsonResponse)
 
-      response.setContent(ChannelBuffers.wrappedBuffer(jsonResponse.toString().getBytes("UTF-8")))
+      response.setContent(ChannelBuffers.wrappedBuffer(arr.toString().getBytes("UTF-8")))
 
       clientChannel.write(response).addListener(ChannelFutureListener.CLOSE)
     }
