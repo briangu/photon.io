@@ -232,7 +232,7 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
 
   def writeResponse(request: HttpRequest, response: HttpResponse, e: ChannelEvent) {
     val writeFuture = e.getChannel().write(response)
-    if (!isKeepAlive(request)) {
+    if (response.getStatus != HttpResponseStatus.OK || !isKeepAlive(request)) {
       writeFuture.addListener(ChannelFutureListener.CLOSE)
     }
   }
