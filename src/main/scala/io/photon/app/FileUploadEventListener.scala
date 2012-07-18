@@ -49,6 +49,7 @@ class FileUploadEventListener(hostname: String, uploadsPath: String, thumbsPath:
         }
       }
 
+/*
       val jsonResponse = new JSONObject()
       jsonResponse.put("success", success)
       if (success) {
@@ -64,6 +65,17 @@ class FileUploadEventListener(hostname: String, uploadsPath: String, thumbsPath:
       arr.put(jsonResponse)
 
       response.setContent(ChannelBuffers.wrappedBuffer(arr.toString().getBytes("UTF-8")))
+*/
+      val jsonResponse = new JSONObject();
+      jsonResponse.put("success", success)
+      if (success)
+      {
+        jsonResponse.put("thumbnail", String.format("%s/thumb/%s", hostname, fileKey));
+        jsonResponse.put("url", String.format("%s/d/%s", hostname, fileKey));
+        jsonResponse.put("key", fileKey);
+      }
+      response.setContent(ChannelBuffers.wrappedBuffer(jsonResponse.toString().getBytes("UTF-8")))
+
 
       clientChannel.write(response).addListener(ChannelFutureListener.CLOSE)
     }

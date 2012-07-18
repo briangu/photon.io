@@ -23,6 +23,7 @@
   <link href="/css/dashboard.css" rel="stylesheet">
   <link href="/css/jquery.fileupload-ui.css" rel="stylesheet" type="text/css">
   <link href="/css/bootstrap-image-gallery.min.css" rel="stylesheet" type="text/css">
+  <link href="/css/fileuploader.css" rel="stylesheet" type="text/css">
 
   <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
   <!--[if lt IE 9]>
@@ -94,11 +95,32 @@
 
     <div class="row-fluid">
       <div class="span9">
+        <div id="photo_input" class="post_input">
+          <hr/>
+          <!-- Update Box -->
+          <div class="update-box" id="update-box">
+            <div class="">
+              <p class="uploader-text">drag-and-drop or use the select button.</p>
+              <div id="file-uploader-demo1">
+                <noscript>
+                  <p>Please enable JavaScript to use file uploader.</p>
+                </noscript>
+              </div>
+            </div>
+          </div>
+
+          <form id="photo_input_form">
+            <label for="photo_caption" class="input_caption_label">Caption: (optional)</label>
+            <textarea id="photo_caption" rows="3" cols="60"></textarea>
+            <input type="submit" value="post"/>
+            <a href="javascript:void(0)" class="cancel-post">cancel</a>
+          </form>
+        </div>
+
+<!--
         <form id="fileupload" action="/u/" method="POST" enctype="multipart/form-data">
-          <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
           <div class="row-fluid fileupload-buttonbar">
             <div class="span7">
-              <!-- The fileinput-button span is used to style the file input field as button -->
                 <span class="btn btn-success fileinput-button">
                     <i class="icon-plus icon-white"></i>
                     <span>Add files...</span>
@@ -118,22 +140,19 @@
               </button>
               <input type="checkbox" class="toggle">
             </div>
-            <!-- The global progress information -->
             <div class="span5 fileupload-progress fade">
-              <!-- The global progress bar -->
               <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
                 <div class="bar" style="width:0%;"></div>
               </div>
-              <!-- The extended global progress information -->
               <div class="progress-extended">&nbsp;</div>
             </div>
           </div>
-          <!-- The loading indicator is shown during file processing -->
           <div class="fileupload-loading"></div>
           <br>
-          <!-- The table listing the files available for upload/download -->
           <table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
         </form>
+-->
+
         <div id="gallery" class="span9">
           <div class="row-fluid">
             <div class="span4">
@@ -240,11 +259,13 @@
 <!-- The XDomainRequest Transport is included for cross-domain file deletion for IE8+ -->
 <!--[if gte IE 8]><script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
 
+<script src="/js/fileuploader.js"></script>
+<script src="/js/app.js"></script>
 
 <script type="text/javascript">
   var params = {}
   $(document).ready(function() {
-//    photonApp();
+    photonApp();
   });
 
   var $container = $('#gallery');
