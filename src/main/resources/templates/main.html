@@ -71,114 +71,284 @@
   </div>
 </div>
 
-<div class="container-fluid">
+<div id="container-fluid" class="wrapper home-container">
   <div class="row-fluid">
-    <div class="span2">
-      <div class="well sidebar-nav">
-        <ul class="nav nav-list">
-          <li class="nav-header">Activity</li>
-          <li class="active"><a href="#">Recent</a></li>
-          <li><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
-          <li class="nav-header">Public</li>
-          <li><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
-          <li class="nav-header">Private</li>
-          <li><a href="#">Photos</a></li>
-          <li><a href="#">Documents</a></li>
-          <li><a href="#">Movies</a></li>
-          <li><a href="#">Projects</a></li>
-        </ul>
-      </div><!--/.well -->
-    </div><!--/span-->
-
-    <div class="row-fluid">
-      <div class="span9">
-        <div id="photo_input" class="post_input">
-          <hr/>
-          <!-- Update Box -->
-          <div class="update-box" id="update-box">
-            <div class="">
-              <p class="uploader-text">drag-and-drop or use the select button.</p>
-              <div id="file-uploader-demo1">
-                <noscript>
-                  <p>Please enable JavaScript to use file uploader.</p>
-                </noscript>
+    <div class="span3">
+      <div class="dashboard">
+        <div class="row-fluid">
+          <div class="" data-component-term="">
+            <div class="tweet-box">
+              <div class="tweet-box condensed">
+                <div class="tweet-button-container">
+                  <form id="fileupload" action="/u/" method="POST" enctype="multipart/form-data">
+                    <div class="row-fluid fileupload-buttonbar">
+                      <span class="btn btn-success fileinput-button">
+                          <i class="icon-plus icon-white"></i>
+                          <span>Add files...</span>
+                          <input type="file" name="files[]" multiple>
+                      </span>
+                    </div>
+                    <div>&nbsp;</div>
+                    <div class="row-fluid fileupload-loading"></div>
+                    <div class="row-fluid text-area">
+                      <div class="text-area-editor twttr-editor">
+                        <textarea class="twitter-anywhere-tweet-box-editor" style="width: 90%; margin-left: 10px; height: 75px; overflow: hidden; "></textarea>
+                        <table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
+                      </div>
+                    </div>
+                    <div class="row-fluid">
+                      <div class="tweet-button-sub-container pull-right">
+                        <a href="#" class="save-button btn disabled">Upload</a>
+                      </div>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
-
-          <form id="photo_input_form">
-            <label for="photo_caption" class="input_caption_label">Caption: (optional)</label>
-            <textarea id="photo_caption" rows="3" cols="60"></textarea>
-            <input type="submit" value="post"/>
-            <a href="javascript:void(0)" class="cancel-post">cancel</a>
-          </form>
         </div>
 
-<!--
-        <form id="fileupload" action="/u/" method="POST" enctype="multipart/form-data">
-          <div class="row-fluid fileupload-buttonbar">
-            <div class="span7">
-                <span class="btn btn-success fileinput-button">
-                    <i class="icon-plus icon-white"></i>
-                    <span>Add files...</span>
-                    <input type="file" name="files[]" multiple>
-                </span>
-              <button type="submit" class="btn btn-primary start">
-                <i class="icon-upload icon-white"></i>
-                <span>Start upload</span>
-              </button>
-              <button type="reset" class="btn btn-warning cancel">
-                <i class="icon-ban-circle icon-white"></i>
-                <span>Cancel upload</span>
-              </button>
-              <button type="button" class="btn btn-danger delete">
-                <i class="icon-trash icon-white"></i>
-                <span>Delete</span>
-              </button>
-              <input type="checkbox" class="toggle">
-            </div>
-            <div class="span5 fileupload-progress fade">
-              <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                <div class="bar" style="width:0%;"></div>
-              </div>
-              <div class="progress-extended">&nbsp;</div>
-            </div>
-          </div>
-          <div class="fileupload-loading"></div>
-          <br>
-          <table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
-        </form>
--->
+        <div>&nbsp;</div>
 
-        <div id="gallery" class="span9">
-          <div class="row-fluid">
-            <div class="span4">
-              <div class="item" data-id="1234" data-width="480" data-height="640">
-                <div class="ItemHolder">
-                  <a href="/items/1234/" class="ItemImage ImgLink">
-                    <img src="/d/n_xnl2Mvz0DarCZAuspLyQ"
-                         alt="Gustav Klimt" class="ItemImageImg" />
-                  </a>
-                </div>
-                <p class="description">Gustav Klimt</p>
-                <div class="convo attribution">
-                  <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
-                    <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
-                  </a>
-                  <p>
-                    <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="row-fluid">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+              <li class="nav-header">Activity</li>
+              <li class="active"><a href="#">Recent</a></li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li class="nav-header">Public</li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li class="nav-header">Private</li>
+              <li><a href="#">Photos</a></li>
+              <li><a href="#">Documents</a></li>
+              <li><a href="#">Movies</a></li>
+              <li><a href="#">Projects</a></li>
+            </ul>
+          </div><!--/.well -->
         </div>
       </div>
     </div>
+    <div class="span9 offset2">
+  <div id="gallery" class="">
+  <div class="row-fluid">
+  <div class="span4">
+    <div class="item" data-id="1234" data-width="480" data-height="640">
+      <div class="ItemHolder">
+        <a href="/items/1234/" class="ItemImage ImgLink">
+          <img src="/img/klimt.jpg"
+               alt="Gustav Klimt" class="ItemImageImg" />
+        </a>
+      </div>
+      <p class="description">Gustav Klimt</p>
+      <div class="convo attribution">
+        <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+          <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+        </a>
+        <p>
+          <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+        </p>
+      </div>
+    </div>
   </div>
+  <div class="span4">
+    <div class="item" data-id="1234" data-width="480" data-height="640">
+      <div class="ItemHolder">
+        <a href="/items/1234/" class="ItemImage ImgLink">
+          <img src="/img/klimt.jpg"
+               alt="Gustav Klimt" class="ItemImageImg" />
+        </a>
+      </div>
+      <p class="description">Gustav Klimt</p>
+      <div class="convo attribution">
+        <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+          <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+        </a>
+        <p>
+          <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="item" data-id="1234" data-width="480" data-height="640">
+      <div class="ItemHolder">
+        <a href="/items/1234/" class="ItemImage ImgLink">
+          <img src="/img/klimt.jpg"
+               alt="Gustav Klimt" class="ItemImageImg" />
+        </a>
+      </div>
+      <p class="description">Gustav Klimt</p>
+      <div class="convo attribution">
+        <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+          <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+        </a>
+        <p>
+          <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="item" data-id="1234" data-width="480" data-height="640">
+      <div class="ItemHolder">
+        <a href="/items/1234/" class="ItemImage ImgLink">
+          <img src="/img/klimt.jpg"
+               alt="Gustav Klimt" class="ItemImageImg" />
+        </a>
+      </div>
+      <p class="description">Gustav Klimt</p>
+      <div class="convo attribution">
+        <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+          <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+        </a>
+        <p>
+          <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="item" data-id="1234" data-width="480" data-height="640">
+      <div class="ItemHolder">
+        <a href="/items/1234/" class="ItemImage ImgLink">
+          <img src="/img/klimt.jpg"
+               alt="Gustav Klimt" class="ItemImageImg" />
+        </a>
+      </div>
+      <p class="description">Gustav Klimt</p>
+      <div class="convo attribution">
+        <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+          <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+        </a>
+        <p>
+          <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="item" data-id="1234" data-width="480" data-height="640">
+      <div class="ItemHolder">
+        <a href="/items/1234/" class="ItemImage ImgLink">
+          <img src="/img/klimt.jpg"
+               alt="Gustav Klimt" class="ItemImageImg" />
+        </a>
+      </div>
+      <p class="description">Gustav Klimt</p>
+      <div class="convo attribution">
+        <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+          <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+        </a>
+        <p>
+          <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="item" data-id="1234" data-width="480" data-height="640">
+      <div class="ItemHolder">
+        <a href="/items/1234/" class="ItemImage ImgLink">
+          <img src="/img/klimt.jpg"
+               alt="Gustav Klimt" class="ItemImageImg" />
+        </a>
+      </div>
+      <p class="description">Gustav Klimt</p>
+      <div class="convo attribution">
+        <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+          <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+        </a>
+        <p>
+          <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="item" data-id="1234" data-width="480" data-height="640">
+      <div class="ItemHolder">
+        <a href="/items/1234/" class="ItemImage ImgLink">
+          <img src="/img/klimt.jpg"
+               alt="Gustav Klimt" class="ItemImageImg" />
+        </a>
+      </div>
+      <p class="description">Gustav Klimt</p>
+      <div class="convo attribution">
+        <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+          <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+        </a>
+        <p>
+          <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="item" data-id="1234" data-width="480" data-height="640">
+      <div class="ItemHolder">
+        <a href="/items/1234/" class="ItemImage ImgLink">
+          <img src="/img/klimt.jpg"
+               alt="Gustav Klimt" class="ItemImageImg" />
+        </a>
+      </div>
+      <p class="description">Gustav Klimt</p>
+      <div class="convo attribution">
+        <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+          <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+        </a>
+        <p>
+          <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="item" data-id="1234" data-width="480" data-height="640">
+      <div class="ItemHolder">
+        <a href="/items/1234/" class="ItemImage ImgLink">
+          <img src="/img/klimt.jpg"
+               alt="Gustav Klimt" class="ItemImageImg" />
+        </a>
+      </div>
+      <p class="description">Gustav Klimt</p>
+      <div class="convo attribution">
+        <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+          <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+        </a>
+        <p>
+          <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="item" data-id="1234" data-width="480" data-height="640">
+      <div class="ItemHolder">
+        <a href="/items/1234/" class="ItemImage ImgLink">
+          <img src="/img/klimt.jpg"
+               alt="Gustav Klimt" class="ItemImageImg" />
+        </a>
+      </div>
+      <p class="description">Gustav Klimt</p>
+      <div class="convo attribution">
+        <a href="/profile/{{dyn-userid}}/" title="{{dyn-screenname}}" class="ImgLink">
+          <img src="{{dyn-profileimg}}" alt="Profile picture of {{dyn-screenname}}">
+        </a>
+        <p>
+          <a href="/profile/{{dyn-userid}}/">{{dyn-screenname}}</a> onto <a href="/{{dyn-userid}}/album/">Artists</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  </div>
+  </div>
+  </div>
+  </div>
+</div>
+</div>
 
   <hr>
 
@@ -259,13 +429,15 @@
 <!-- The XDomainRequest Transport is included for cross-domain file deletion for IE8+ -->
 <!--[if gte IE 8]><script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
 
+<!--
 <script src="/js/fileuploader.js"></script>
 <script src="/js/app.js"></script>
+-->
 
 <script type="text/javascript">
   var params = {}
   $(document).ready(function() {
-    photonApp();
+//    photonApp();
   });
 
   var $container = $('#gallery');
@@ -281,27 +453,29 @@
   <script id="template-upload" type="text/x-tmpl">
     {% for (var i=0, file; file=o.files[i]; i++) { %}
     <tr class="template-upload fade">
-      <td class="preview"><span class="fade"></span></td>
+<!--      <td class="preview"><span class="fade"></span></td> -->
       <td class="name"><span>{%=file.name%}</span></td>
-      <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+<!--      <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td> -->
       {% if (file.error) { %}
       <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>
       {% } else if (o.files.valid && !i) { %}
       <td>
-        <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar" style="width:0%;"></div></div>
+        <div class="wohpc nobm progress progress-success progress-striped active " role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar" style="width:0%;"></div></div>
       </td>
+<!--
       <td class="start">{% if (!o.options.autoUpload) { %}
         <button class="btn btn-primary">
           <i class="icon-upload icon-white"></i>
           <span>{%=locale.fileupload.start%}</span>
         </button>
         {% } %}</td>
+-->
       {% } else { %}
       <td colspan="2"></td>
       {% } %}
       <td class="cancel">{% if (!i) { %}
         <button class="btn btn-warning">
-          <i class="icon-ban-circle icon-white"></i>
+<!--          <i class="icon-ban-circle icon-white"></i> -->
           <span>{%=locale.fileupload.cancel%}</span>
         </button>
         {% } %}</td>
@@ -327,6 +501,7 @@
       <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
       <td colspan="2"></td>
       {% } %}
+<!--
       <td class="delete">
         <button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
           <i class="icon-trash icon-white"></i>
@@ -334,6 +509,7 @@
         </button>
         <input type="checkbox" name="delete" value="1">
       </td>
+-->
     </tr>
     {% } %}
   </script>

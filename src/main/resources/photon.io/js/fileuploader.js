@@ -489,8 +489,8 @@ qq.FileUploader = function(o){
                 
         template: '<div class="qq-uploader">' + 
                 '<div class="qq-upload-drop-area"><span>Drop photos here to upload</span></div>' +
-                '<div class="qq-upload-button">Select photos</div>' +
-                '<ul class="qq-upload-list"></ul>' + 
+                '<div class="qq-upload-button"></div>' +
+                '<ul class="qq-upload-list"></ul>' +
              '</div>',
 
         // template for one item in file list
@@ -579,7 +579,7 @@ qq.extend(qq.FileUploader.prototype, {
         qq.attach(document, 'dragenter', function(e){     
             if (!dz._isValidFileDrag(e)) return; 
             
-            dropArea.style.display = 'block';            
+            dropArea.style.display = 'block';
         });                 
         qq.attach(document, 'dragleave', function(e){
             if (!dz._isValidFileDrag(e)) return;            
@@ -587,7 +587,7 @@ qq.extend(qq.FileUploader.prototype, {
             var relatedTarget = document.elementFromPoint(e.clientX, e.clientY);
             // only fire when leaving document out
             if ( ! relatedTarget || relatedTarget.nodeName == "HTML"){               
-                dropArea.style.display = 'none';                                            
+                dropArea.style.display = 'none';
             }
         });                
     },

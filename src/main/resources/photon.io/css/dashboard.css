@@ -36,3 +36,41 @@ a.convo:active {color: #221919; background-color: #e1dfdf;}
 .attribution .NoImage {height: auto; margin: 0;}
 
 .download_img { width: 80px; }
+
+.nobm {
+  margin-bottom: 0px;
+}
+
+.wohpc.nobm.progress.progress-success.progress-striped {
+  width: 50px;
+  float: right;
+}
+
+.tweet-button-container {
+  width: 100%;
+}
+
+.cancel {
+  width: 50px;
+}
+
+.dashboard {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.content-main {
+}
+
+.download_img {
+  width: auto;
+  height: 32px
+}
+
+.onright {
+  float: right;
+}
+
+.btn.btn-success.fileinput-button {
+  float: right;
+}

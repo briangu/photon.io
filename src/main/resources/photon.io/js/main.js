@@ -34,6 +34,7 @@ $(function () {
         // Demo settings:
         $('#fileupload').fileupload('option', {
             url: '/u/',
+            autoUpload: false,
             multipart: false,
             acceptFileTypes: /(\.|\/)(gif|jpe?g|png|dmg)$/i,
             process: [
