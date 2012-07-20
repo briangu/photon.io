@@ -76,39 +76,35 @@
     <div class="span3">
       <div class="dashboard">
         <div class="row-fluid">
-          <div class="" data-component-term="">
-            <div class="tweet-box">
-              <div class="tweet-box condensed">
-                <div class="tweet-button-container">
-                  <form id="fileupload" action="/u/" method="POST" enctype="multipart/form-data">
-                    <div class="row-fluid fileupload-buttonbar">
-                      <span class="btn btn-success fileinput-button">
-                          <i class="icon-plus icon-white"></i>
-                          <span>Add files...</span>
-                          <input type="file" name="files[]" multiple>
-                      </span>
+          <div class="file-box">
+            <div class="file-button-container">
+              <form id="fileupload" action="/u/" method="POST" enctype="multipart/form-data">
+                <div class="row-fluid">
+                  <div class="text-area">
+                    <div class="text-area-editor">
+                      <textarea class="box-editor" style="width: 90%; margin-left: 10px; height: 75px; overflow: hidden; ">Search or tag new files...</textarea>
                     </div>
-                    <div>&nbsp;</div>
-                    <div class="row-fluid fileupload-loading"></div>
-                    <div class="row-fluid text-area">
-                      <div class="text-area-editor twttr-editor">
-                        <textarea class="twitter-anywhere-tweet-box-editor" style="width: 90%; margin-left: 10px; height: 75px; overflow: hidden; "></textarea>
-                        <table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
-                      </div>
-                    </div>
-                    <div class="row-fluid">
-                      <div class="tweet-button-sub-container pull-right">
-                        <a href="#" class="save-button btn disabled">Upload</a>
-                      </div>
-                    </div>
-                  </form>
+                  </div>
                 </div>
-              </div>
+                <div class="row-fluid">
+                  <div class="fileupload-buttonbar">
+                        <span class="btn btn-success fileinput-button">
+                            <i class="icon-plus icon-white"></i>
+                            <span>Add files...</span>
+                            <input type="file" name="files[]" multiple>
+                        </span>
+                    <a href="#" class="save-button btn disabled">Upload</a>
+                    <a href="#" class="save-button btn pull-right">Search</a>
+                  </div>
+                </div>
+                <div class="row-fluid">
+                  <br/>
+                  <table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
+                </div>
+              </form>
             </div>
           </div>
         </div>
-
-        <div>&nbsp;</div>
 
         <div class="row-fluid">
           <div class="well sidebar-nav">
@@ -436,8 +432,21 @@
 
 <script type="text/javascript">
   var params = {}
+
   $(document).ready(function() {
 //    photonApp();
+
+    $('.box-editor').change(function() {
+    });
+
+    $('.box-editor').focus(function() {
+      $('.box-editor').val("");
+    });
+
+    $('.box-editor').blur(function() {
+//      $('.box-editor').val("Search or tag new files...");
+    });
+
   });
 
   var $container = $('#gallery');

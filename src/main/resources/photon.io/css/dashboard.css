@@ -71,6 +71,9 @@ a.convo:active {color: #221919; background-color: #e1dfdf;}
   float: right;
 }
 
-.btn.btn-success.fileinput-button {
-  float: right;
+.box-editor {
+color: #AAA;
+height: 19px!important;
+min-height: 19px!important;
+overflow: hidden;
 }
