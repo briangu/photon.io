@@ -15,7 +15,7 @@ object Main {
   }
 }
 
-class Main(hostname: String, port: Int, uploads: String, thumbs: String) extends ViperServer("res:///photon.io") {
+class Main(hostname: String, port: Int, uploads: String, thumbs: String) extends ViperServer("/Users/brianguarraci/scm/photon.io/src/main/resources/photon.io") { //res:///photon.io") {
   override def addRoutes {
     val sessions = SimpleTwitterSession.instance
 
@@ -24,7 +24,7 @@ class Main(hostname: String, port: Int, uploads: String, thumbs: String) extends
     addRoute(new TwitterGetRoute(config, "/v", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
-        var tmp = FileUtils.readResourceFile(this.getClass, "/templates/main.html")
+        var tmp = FileUtils.readFile("/Users/brianguarraci/scm/photon.io/src/main/resources/templates/photon.io/main.html") //FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
         tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
         tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
 //        tmp = tmp.replace("{{dyn-data}}", _db.getEvents(user).toString())
