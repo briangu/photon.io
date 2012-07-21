@@ -191,9 +191,11 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
             response
           } else {
             val response = routeResponse.HttpResponse
+            if (response.getHeader(HttpHeaders.Names.CONTENT_LENGTH) == null) {
+              setContentLength(response, response.getContent().readableBytes())
+            }
             if (isKeepAlive(request)) {
               response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
-              setContentLength(response, response.getContent().readableBytes())
             } else {
               response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.CLOSE)
             }
@@ -201,7 +203,7 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
             if (config.sessions.getSession(sessionId) == null) {
               response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(null, cookies))
             } else {
-              response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
+              //response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
             }
 
             response

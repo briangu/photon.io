@@ -1,31 +1,11 @@
 {
-  "default": "cars",
+  "default": "fmd",
   "projections" : [
     {
-      "name": "cars",
+      "name": "fmd",
       "dimensions": 12,
       "fields": {
-        "color": 3,
-        "year": 3,
-        "model": 4,
-        "manufacturer": 2
-      }
-    },
-    {
-      "name": "tweets",
-      "doc": "TODO: support full-text search on text field",
-      "dimensions": 10,
-      "fields": {
-        "user.id": 6,
-        "user.screen_name": 2,
-        "text": 2
-      }
-    },
-    {
-      "name": "events",
-      "dimensions": 12,
-      "fields": {
-        "user.id": 12
+        "ownerId": 12
       }
     }
   ]

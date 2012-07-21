@@ -122,8 +122,8 @@ var snapclearApp = function () {
     });
     $('#fileupload').bind('fileuploadfail', function (e, data) {
       if ($('.upload-file-queue tr').size() == 1) {
-        $('.upload-list').hide();
-//        $('.upload-list').attr('hidden',true);
+//        $('.upload-list').hide();
+////        $('.upload-list').attr('hidden',true);
 
         enableUpload(false);
       } else {

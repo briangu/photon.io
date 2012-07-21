@@ -106,7 +106,7 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
       // TODO: get tags
       val tags = Set("hello")
       val fmd = createFileMeta(upload, userId, thumbHash, List(fileKey), tags)
-      val docId = storage.insert("fmd", fmd.toJson)
+      val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
 
       val arr = new JSONArray()
       arr.put(ResponseUtil.createResponseData(fmd, docId))
@@ -134,6 +134,12 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
     val fileName = upload.getFilename
     val extIndex = fileName.lastIndexOf(".")
 
+    val blocksArr = new JSONArray()
+    blockHashes.foreach(blocksArr.put)
+
+    val tagsArr = new JSONArray()
+    tags.foreach(tagsArr.put)
+
     FileMetaData.create(
       JsonUtil.createJsonObject(
         "path", fileName,
@@ -141,11 +147,11 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
         "fileext", if (extIndex >= 0) { fileName.substring(extIndex + 1) } else { null },
         "filesize", upload.length().asInstanceOf[AnyRef],
         "filedate", new Date().getTime.asInstanceOf[AnyRef],
-        "blocks", new JSONArray(blockHashes),
+        "blocks", blocksArr,
         "type", upload.getContentType,
         "thumbnail", thumbHash,
         "ownerId", ownerId.asInstanceOf[AnyRef], // TODO: investigate possible precision loss
-        "tags", new JSONArray(tags)
+        "tags", tagsArr
         ))
   }
 

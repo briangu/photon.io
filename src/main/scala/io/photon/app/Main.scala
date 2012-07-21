@@ -3,7 +3,7 @@ package io.photon.app
 import io.stored.server.Node
 import io.viper.common.{ViperServer, NestServer}
 import io.viper.core.server.router.{JsonResponse, StatusResponse, HtmlResponse, RouteResponse}
-import org.jboss.netty.handler.codec.http.{HttpVersion, HttpResponseStatus, DefaultHttpResponse}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpVersion, HttpResponseStatus, DefaultHttpResponse}
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import twitter4j.ProfileImage
 import java.util
@@ -49,7 +49,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
       override
       def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
         // TODO: prepared statement
-        val result = storage.select("select * from fmd where id in (%s)".format(args.get("docId")))
+        val result = storage.select("select * from fmd where hash = '%s'".format(args.get("docId")))
         if (result == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
@@ -71,7 +71,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
       override
       def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
         // TODO: prepared statement
-        val result = storage.select("select * from fmd where id in (%s)".format(args.get("docId")))
+        val result = storage.select("select * from fmd where hash = '%s'".format(args.get("docId")))
         if (result == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
@@ -80,6 +80,8 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
           if (raw.getLong("ownerId") == session.twitter.getId) {
             val is = adapter.loadChannel(raw.getString("thumbnail"))
             val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+            response.setHeader(HttpHeaders.Names.CONTENT_TYPE, raw.getString("type"))
+            response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, raw.getLong("filesize"))
             response.setContent(is)
             new RouteResponse(response)
           } else {
@@ -92,7 +94,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
       override
       def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
         // TODO: prepared statement
-        val result = storage.select("select * from fmd where id in (%s)".format(args.get("docId")))
+        val result = storage.select("select * from fmd where hash = '%s'".format(args.get("docId")))
         if (result == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
@@ -101,6 +103,8 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
           if (raw.getLong("ownerId") == session.twitter.getId) {
             val is = adapter.loadChannel(raw.getJSONArray("blocks").getString(0))
             val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+            response.setHeader(HttpHeaders.Names.CONTENT_TYPE, raw.getString("type"))
+            response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, raw.getLong("filesize"))
             response.setContent(is)
             new RouteResponse(response)
           } else {
