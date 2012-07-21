@@ -133,7 +133,9 @@
       </div>
     </div>
     <div class="span9 offset2">
-      <div id="gallery" class="row-fluid">
+      <div class="row-fluid">
+        <div id="gallery">
+        </div>
       </div>
     </div>
   </div>
@@ -287,25 +289,21 @@
   </script>
 
   <script type="text/html" id="template-mason-brick">
-    <div class="span4">
-      <div class="item" data-id="{{id}}" data-width="480" data-height="640">
-        <div class="ItemHolder">
-          <a href="/d/{{id}}" class="ItemImage ImgLink" title="{{name}}" rel="gallery" download="{{name}}">
-            <img src="http://photon.io:8080/t/{{id}}"
-                 alt="{{tags}}" class="ItemImageImg" />
-          </a>
-        </div>
-        <p class="description">{{tags}}</p>
-        <div class="convo attribution">
-          <a href="https://twitter.com/{{ownerId}}/" title="{{ownerId}}" class="ImgLink">
-            <img src="{{owner-profileimg}}" alt="Profile picture of {{ownerId}}">
-          </a>
-<!--
-          <p>
-            <a href="/{{ownerId}}/">{{ownerId}}</a> onto <a href="/{{ownerId}}/album/">Artists</a>
-          </p>
--->
-        </div>
+    <div class="item" data-id="{{id}}" data-width="480" data-height="640">
+      <div class="ItemHolder">
+        <a href="/d/{{id}}" class="ItemImage ImgLink" title="{{name}}" rel="gallery" download="{{name}}">
+          <img src="http://photon.io:8080/t/{{id}}"
+               alt="{{tags}}" class="ItemImageImg" />
+        </a>
+      </div>
+      <p class="description">{{tags}}</p>
+      <div class="convo attribution">
+        <a href="https://twitter.com/{{ownerId}}/" title="{{ownerId}}" class="ImgLink">
+          <img src="{{dyn-profileimg}}" alt="Profile picture of {{ownerId}}">
+        </a>
+        <p>
+          <a href="/{{ownerId}}/">{{ownerId}}</a> onto <a href="/{{ownerId}}/album/">Artists</a>
+        </p>
       </div>
     </div>
   </script>

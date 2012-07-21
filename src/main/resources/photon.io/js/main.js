@@ -161,12 +161,6 @@ var snapclearApp = function (initdata) {
 
     function initGallery(data) {
       var $gallery = $('#gallery');
-      $gallery.imagesLoaded(function(){
-        $gallery.masonry({
-          itemSelector : '.item',
-          columnWidth: 240
-        });
-      });
 
       var template = $('#template-mason-brick').html();
       $.each(initdata, function(i,x){
@@ -174,47 +168,14 @@ var snapclearApp = function (initdata) {
         $gallery = $gallery.append(h);
       });
       $gallery.masonry('reload');
+
+      $gallery.imagesLoaded(function(){
+        $gallery.masonry({
+          itemSelector : '.item',
+          columnWidth: 240
+        });
+      });
     }
 
     initGallery(initdata);
-
-/*
-    // Enable iframe cross-domain access via redirect option:
-    $('#fileupload').fileupload(
-        'option',
-        'redirect',
-        window.location.href.replace(
-            /\/[^\/]*$/,
-            '/cors/result.html?%s'
-        )
-    );
-*/
-
-/*
-        // Upload server status check for browsers with CORS support:
-        if ($.support.cors) {
-            $.ajax({
-                url: '/u/',
-                type: 'HEAD'
-            }).fail(function () {
-                $('<span class="alert alert-error"/>')
-                    .text('Upload server currently unavailable - ' +
-                            new Date())
-                    .appendTo('#fileupload');
-            });
-        }
-    } else {
-        // Load existing files:
-        $('#fileupload').each(function () {
-            var that = this;
-            $.getJSON(this.action, function (result) {
-                if (result && result.length) {
-                    $(that).fileupload('option', 'done')
-                        .call(that, null, {result: result});
-                }
-            });
-        });
-    }
-*/
-
 };
