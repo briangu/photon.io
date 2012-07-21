@@ -130,15 +130,21 @@ var snapclearApp = function (initdata) {
         enableUpload(true);
       }
     });
+
+    var template = $('#template-mason-brick').html();
+
     $('#fileupload').bind('fileuploaddone', function (e, data) {
 //      $('.upload-list').hide();
 //      enableUpload(false);
       // TODO: reset UI and clear tr's
 
       var x = JSON.parse(data.jqXHR.responseText)[0]
-      var template = $('#template-mason-brick').html();
       var h = Mustache.to_html(template, x);
-      $('#gallery').prepend(h).masonry('reload');
+      var $gallery = $('#gallery')
+      $gallery.prepend(h);
+      $gallery.imagesLoaded(function(){
+        $gallery.masonry('reload')
+      });
     });
 
     $('#fileupload')
@@ -162,7 +168,7 @@ var snapclearApp = function (initdata) {
     function initGallery(data) {
       var $gallery = $('#gallery');
 
-      var template = $('#template-mason-brick').html();
+//      var template = $('#template-mason-brick').html();
       $.each(initdata, function(i,x){
         var h = Mustache.to_html(template, x);
         $gallery = $gallery.append(h);

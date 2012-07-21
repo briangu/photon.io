@@ -229,7 +229,7 @@
   <script id="template-upload" type="text/x-tmpl">
     {% for (var i=0, file; file=o.files[i]; i++) { %}
     <tr class="template-upload fade">
-<!--      <td class="preview"><span class="fade"></span></td> -->
+      <td class="preview"><span class="fade"></span></td>
       <td class="name"><span>{%=file.name%}</span></td>
 <!--      <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td> -->
       {% if (file.error) { %}
@@ -296,13 +296,15 @@
                alt="{{tags}}" class="ItemImageImg" />
         </a>
       </div>
-      <p class="description">{{tags}}</p>
       <div class="convo attribution">
         <a href="https://twitter.com/{{ownerId}}/" title="{{ownerId}}" class="ImgLink">
           <img src="{{dyn-profileimg}}" alt="Profile picture of {{ownerId}}">
         </a>
         <p>
+<!--
           <a href="/{{ownerId}}/">{{ownerId}}</a> onto <a href="/{{ownerId}}/album/">Artists</a>
+-->
+          <a href="#">@{{ownerId}}</a> &nbsp; <p class="description"> {{tags}}</p>
         </p>
       </div>
     </div>
