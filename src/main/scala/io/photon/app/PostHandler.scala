@@ -45,13 +45,13 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
       try {
         if (decoder.isMultipart) {
           if (decoder.getBodyHttpDatas.size() == 2) {
+            // TODO: it sucks that the tags are stored on disk too.  can we make them inmemory and make file data disk?
             val fileData = decoder.getBodyHttpData("files[]")
             val tagData = decoder.getBodyHttpData("tags")
             if (fileData != null && tagData != null) {
               val upload  = fileData.asInstanceOf[FileUpload]
               val tagSet = FileUtils.readFile(tagData.asInstanceOf[DiskAttribute].getFile)
-              println(tagSet)
-              processFile(upload, session.twitter.getId, tagSet.substring(4))
+              processFile(upload, session.twitter.getScreenName, tagSet) // TODO: sanitize tagset
             } else {
               new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST)
             }
@@ -85,7 +85,7 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
     convertedRequest
   }
 
-  def processFile(upload: FileUpload, userId: Long, tags: String) : HttpResponse = {
+  def processFile(upload: FileUpload, userId: String, tags: String) : HttpResponse = {
     var fis: InputStream = null
     try {
       val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
@@ -139,7 +139,7 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
     }
   }
 
-  private def createFileMeta(upload: FileUpload, ownerId: Long, thumbHash: String, blockHashes: List[String], tags: String) : FileMetaData = {
+  private def createFileMeta(upload: FileUpload, ownerId: String, thumbHash: String, blockHashes: List[String], tags: String) : FileMetaData = {
     val fileName = upload.getFilename
     val extIndex = fileName.lastIndexOf(".")
 
@@ -159,8 +159,9 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
         "blocks", blocksArr,
         "type", upload.getContentType,
         "thumbnail", thumbHash,
-        "ownerId", ownerId.asInstanceOf[AnyRef], // TODO: investigate possible precision loss
-        "tags", tagsArr
+        "ownerId", ownerId,
+        "tags", tagsArr, // tags cloudcmd style
+        "keywords", tags // raw tags for indexing
         ))
   }
 

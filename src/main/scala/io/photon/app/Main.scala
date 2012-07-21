@@ -50,12 +50,12 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
       def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
         // TODO: prepared statement
         val result = storage.select("select * from fmd where hash = '%s'".format(args.get("docId")))
-        if (result == null) {
+        if (result == null || result.size == 0) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
           val raw = result(0).toJson
           // TODO: shared-to auth check
-          if (raw.getLong("ownerId") == session.twitter.getId) {
+          if (raw.getString("ownerId") == session.twitter.getScreenName) {
             val obj = ResponseUtil.createResponseData(FileMetaData.create(raw), raw.getString("__id"))
             val arr = new JSONArray()
             arr.put(obj)
@@ -72,12 +72,12 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
       def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
         // TODO: prepared statement
         val result = storage.select("select * from fmd where hash = '%s'".format(args.get("docId")))
-        if (result == null) {
+        if (result == null || result.size == 0) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
           val raw = result(0).toJson
           // TODO: shared-to auth check
-          if (raw.getLong("ownerId") == session.twitter.getId) {
+          if (raw.getString("ownerId") == session.twitter.getScreenName) {
             val is = adapter.loadChannel(raw.getString("thumbnail"))
             val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
             response.setHeader(HttpHeaders.Names.CONTENT_TYPE, raw.getString("type"))
@@ -95,12 +95,12 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
       def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
         // TODO: prepared statement
         val result = storage.select("select * from fmd where hash = '%s'".format(args.get("docId")))
-        if (result == null) {
+        if (result == null || result.size == 0) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
           val raw = result(0).toJson
           // TODO: shared-to auth check
-          if (raw.getLong("ownerId") == session.twitter.getId) {
+          if (raw.getString("ownerId") == session.twitter.getScreenName) {
             val is = adapter.loadChannel(raw.getJSONArray("blocks").getString(0))
             val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
             response.setHeader(HttpHeaders.Names.CONTENT_TYPE, raw.getString("type"))
