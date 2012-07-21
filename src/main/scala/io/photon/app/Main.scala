@@ -34,14 +34,24 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
 
     addRoute(new TwitterGetRoute(config, "/v", new TwitterRouteHandler {
       override
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, 0, 20)
+    }))
+
+    addRoute(new TwitterGetRoute(config, "/v/$page", new TwitterRouteHandler {
+      override
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, (math.max(args.get("page").toInt-1, 0)) * 20, 20)
+    }))
+
+    addRoute(new TwitterGetRoute(config, "/j/$page", new TwitterRouteHandler {
+      override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
-        var tmp = FileUtils.readFile("/Users/brianguarraci/scm/photon.io/src/main/resources/templates/photon.io/main.html") //FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
-        tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
-        tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
-        tmp = tmp.replace("{{dyn-data}}", toJsonArray(getChronResults(storage, session.twitter.getScreenName, 20, 0)).toString())
-        tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
-        tmp = tmp.replace("{{dyn-profileimg}}", session.twitter.getProfileImage(session.twitter.getScreenName, ProfileImage.MINI).getURL)
-        new HtmlResponse(tmp)
+        new JsonResponse(
+          toJsonArray(
+            getChronResults(
+              storage,
+              session.twitter.getScreenName,
+              20,
+              (math.max(args.get("page").toInt-1, 0)) * 20)))
       }
     }))
 
@@ -140,6 +150,16 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
     response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, is.capacity())
     response.setContent(is)
     new RouteResponse(response)
+  }
+
+  private def loadPage(session: TwitterSession, pageIdx: Int, countPerPage: Int) : RouteResponse = {
+    var tmp = FileUtils.readFile("/Users/brianguarraci/scm/photon.io/src/main/resources/templates/photon.io/main.html") //FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
+    tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
+    tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
+    tmp = tmp.replace("{{dyn-data}}", toJsonArray(getChronResults(storage, session.twitter.getScreenName, countPerPage, pageIdx)).toString())
+    tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
+    tmp = tmp.replace("{{dyn-profileimg}}", session.twitter.getProfileImage(session.twitter.getScreenName, ProfileImage.MINI).getURL)
+    new HtmlResponse(tmp)
   }
 
   private def toJsonArray(records: List[Record]) : JSONArray = {
