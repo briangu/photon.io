@@ -1,5 +1,6 @@
 package io.photon.app
 
+import io.stored.server.common.Record
 import io.stored.server.Node
 import io.viper.common.{ViperServer, NestServer}
 import io.viper.core.server.router.{JsonResponse, StatusResponse, HtmlResponse, RouteResponse}
@@ -37,7 +38,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
         var tmp = FileUtils.readFile("/Users/brianguarraci/scm/photon.io/src/main/resources/templates/photon.io/main.html") //FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
         tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
         tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
-        //        tmp = tmp.replace("{{dyn-data}}", _db.getEvents(user).toString())
+        tmp = tmp.replace("{{dyn-data}}", getTopResults(storage, session.twitter.getScreenName).toString())
         tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
         tmp = tmp.replace("{{dyn-profileimg}}", session.twitter.getProfileImage(session.twitter.getScreenName, ProfileImage.MINI).getURL)
         new HtmlResponse(tmp)
@@ -78,10 +79,10 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
           val raw = result(0).toJson
           // TODO: shared-to auth check
           if (raw.getString("ownerId") == session.twitter.getScreenName) {
-            val is = adapter.loadChannel(raw.getString("thumbnail"))
+            val is = adapter.loadChannel(raw.getString("thumbHash"))
             val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
             response.setHeader(HttpHeaders.Names.CONTENT_TYPE, raw.getString("type"))
-            response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, raw.getLong("filesize"))
+            response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, raw.getLong("thumbSize"))
             response.setContent(is)
             new RouteResponse(response)
           } else {
@@ -141,5 +142,12 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
         }
       },
       config))
+  }
+
+  private def getTopResults(storage: Node, ownerId: String) : JSONArray = {
+    val records = storage.select("select * from fmd where ownerId = '%s' order by filedate DESC limit 20".format(ownerId))
+    val arr = new JSONArray()
+    records.foreach{r : Record => arr.put(ResponseUtil.createResponseData(r.rawData, r.id)) }
+    arr
   }
 }

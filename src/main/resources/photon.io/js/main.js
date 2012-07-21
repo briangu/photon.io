@@ -1,4 +1,4 @@
-var snapclearApp = function () {
+var snapclearApp = function (initdata) {
     'use strict';
 
     function isSearchEnabled() {
@@ -138,7 +138,7 @@ var snapclearApp = function () {
       var x = JSON.parse(data.jqXHR.responseText)[0]
       var template = $('#template-mason-brick').html();
       var h = Mustache.to_html(template, x);
-      $container = $('#gallery').prepend(h).masonry('reload');
+      $('#gallery').prepend(h).masonry('reload');
     });
 
     $('#fileupload')
@@ -158,6 +158,25 @@ var snapclearApp = function () {
       .bind('fileuploaddragover', function (e) {console.log("fileuploaddragover")});
 
     initUI();
+
+    function initGallery(data) {
+      var $gallery = $('#gallery');
+      $gallery.imagesLoaded(function(){
+        $gallery.masonry({
+          itemSelector : '.item',
+          columnWidth: 240
+        });
+      });
+
+      var template = $('#template-mason-brick').html();
+      $.each(initdata, function(i,x){
+        var h = Mustache.to_html(template, x);
+        $gallery = $gallery.append(h);
+      });
+      $gallery.masonry('reload');
+    }
+
+    initGallery(initdata);
 
 /*
     // Enable iframe cross-domain access via redirect option:

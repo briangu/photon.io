@@ -96,25 +96,25 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
       adapter.store(fis, fileKey)
       val contentLength = upload.length()
       val contentType = upload.getContentType
-      val thumbHash = if (contentType.startsWith("image")) {
+      val (thumbHash, thumbSize) = if (contentType.startsWith("image")) {
         if (contentLength < THUMBNAIL_CREATE_THRESHOLD) {
-          fileKey
+          (fileKey, contentLength)
         } else {
           val ba = createThumbnail(upload.getFile)
           if (ba != null) {
             val hash = CryptoUtil.computeHash(ba)
             adapter.store(new ByteArrayInputStream(ba), hash)
-            hash
+            (hash, ba.length.toLong)
           } else {
-            null
+            (null, 0L)
           }
         }
       } else {
-        null
+        (null, 0L)
       }
 
       // TODO: support lucene backed tag search
-      val fmd = createFileMeta(upload, userId, thumbHash, List(fileKey), tags)
+      val fmd = createFileMeta(upload, userId, thumbHash, thumbSize, List(fileKey), tags)
       val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
 
       val arr = new JSONArray()
@@ -139,7 +139,7 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
     }
   }
 
-  private def createFileMeta(upload: FileUpload, ownerId: String, thumbHash: String, blockHashes: List[String], tags: String) : FileMetaData = {
+  private def createFileMeta(upload: FileUpload, ownerId: String, thumbHash: String, thumbSize: Long, blockHashes: List[String], tags: String) : FileMetaData = {
     val fileName = upload.getFilename
     val extIndex = fileName.lastIndexOf(".")
 
@@ -158,7 +158,8 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
         "filedate", new Date().getTime.asInstanceOf[AnyRef],
         "blocks", blocksArr,
         "type", upload.getContentType,
-        "thumbnail", thumbHash,
+        "thumbHash", thumbHash,
+        "thumbSize", thumbSize.asInstanceOf[AnyRef],
         "ownerId", ownerId,
         "tags", tagsArr, // tags cloudcmd style
         "keywords", tags // raw tags for indexing

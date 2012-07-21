@@ -5,6 +5,10 @@ import org.json.JSONObject
 
 object ResponseUtil {
 
+  def createResponseData(rawFmd: JSONObject, docId: String) : JSONObject = {
+    createResponseData(FileMetaData.create(rawFmd), docId)
+  }
+
   def createResponseData(fmd: FileMetaData, docId: String) : JSONObject = {
     import collection.JavaConversions._
 
