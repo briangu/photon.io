@@ -138,8 +138,8 @@
   <div class="span4">
     <div class="item" data-id="1234" data-width="480" data-height="640">
       <div class="ItemHolder">
-        <a href="/items/1234/" class="ItemImage ImgLink">
-          <img src="http://photon.io:8080/d/76c32f1727455d0369e1da0fa3ab05813db181a587b45d3a7e8f0ee36da9a075"
+        <a href="/d/82d84c518f9a5c4de2a57280d60e4a44d9440ff8c5c4cb46a0a9c56dd01fe511" class="ItemImage ImgLink" title="IMG_3329.thumb.jpg" rel="gallery" download="IMG_3329.thumb.jpg">
+          <img src="http://photon.io:8080/d/a5b4ddb72828b216ed063e78708a16fa3ea9ed6e4ccce95f7778264b7244d584"
                alt="Gustav Klimt" class="ItemImageImg" />
         </a>
       </div>
@@ -505,5 +505,30 @@
     </tr>
     {% } %}
   </script>
+
+  <script type="text/html" id="template-mason-brick">
+    <div class="span4">
+      <div class="item" data-id="{{id}}" data-width="480" data-height="640">
+        <div class="ItemHolder">
+          <a href="/d/{{id}}" class="ItemImage ImgLink" title="{{name}}" rel="gallery" download="{{name}}">
+            <img src="http://photon.io:8080/d/{{id}}"
+                 alt="{{tags}}" class="ItemImageImg" />
+          </a>
+        </div>
+        <p class="description">{{tags}}</p>
+        <div class="convo attribution">
+          <a href="https://twitter.com/{{ownerId}}/" title="{{ownerId}}" class="ImgLink">
+            <img src="{{owner-profileimg}}" alt="Profile picture of {{ownerId}}">
+          </a>
+<!--
+          <p>
+            <a href="/{{ownerId}}/">{{ownerId}}</a> onto <a href="/{{ownerId}}/album/">Artists</a>
+          </p>
+-->
+        </div>
+      </div>
+    </div>
+  </script>
+
 </body>
 </html>
