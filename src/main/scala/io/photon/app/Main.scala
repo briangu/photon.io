@@ -78,7 +78,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
           val raw = result(0).toJson
           // TODO: shared-to auth check
           if (raw.getLong("ownerId") == session.twitter.getId) {
-            val is = adapter.load(raw.getString("thumbnail"))
+            val is = adapter.loadChannel(raw.getString("thumbnail"))
             val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
             response.setContent(is)
             new RouteResponse(response)
@@ -99,7 +99,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
           val raw = result(0).toJson
           // TODO: shared-to auth check
           if (raw.getLong("ownerId") == session.twitter.getId) {
-            val is = adapter.load(raw.getJSONArray("blocks").getString(0))
+            val is = adapter.loadChannel(raw.getJSONArray("blocks").getString(0))
             val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
             response.setContent(is)
             new RouteResponse(response)
