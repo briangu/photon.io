@@ -57,6 +57,7 @@ a.convo:active {color: #221919; background-color: #e1dfdf;}
 .dashboard {
   margin-left: 20px;
   margin-right: 10px;
+  min-width: 304px;
 }
 
 .content-main {

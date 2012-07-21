@@ -1,0 +1,198 @@
+package io.photon.app
+
+import io.viper.core.server.router.Route
+import org.jboss.netty.handler.codec.http2.{FileUpload, HttpPostRequestDecoder, DefaultHttpDataFactory}
+import org.jboss.netty.channel.{ChannelFutureListener, ChannelHandlerContext, MessageEvent}
+import org.jboss.netty.handler.codec.http._
+import java.io._
+import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import org.json.{JSONException, JSONArray, JSONObject}
+import javax.imageio.ImageIO
+import com.thebuzzmedia.imgscalr.{Scalr, AsyncScalr}
+import cloudcmd.common.adapters.Adapter
+import cloudcmd.common.{JsonUtil, FileMetaData, MetaUtil}
+import java.util.Date
+import io.stored.server.Node
+import io.stored.common.CryptoUtil
+
+class PostHandler(route: String, sessions: TwitterSessionService, storage: Node, adapter: Adapter, thumbWidth: Int, thumbHeight: Int) extends Route(route) {
+
+  final val THUMBNAIL_CREATE_THRESHOLD = 128 * 1024
+
+  override
+  def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+    val msg = e.getMessage
+
+    if (!(msg.isInstanceOf[HttpMessage]) && !(msg.isInstanceOf[HttpChunk])) {
+      ctx.sendUpstream(e)
+      return
+    }
+
+    val request = e.getMessage.asInstanceOf[org.jboss.netty.handler.codec.http.HttpRequest]
+    if (request.getMethod != HttpMethod.POST) {
+      ctx.sendUpstream(e)
+      return
+    }
+
+    // TODO: validate session
+    val (sessionId, cookies) = sessions.getSessionId(request.getHeader(HttpHeaders.Names.COOKIE), TwitterRestRoute.SESSION_NAME)
+    val session = sessions.getSession(sessionId)
+    val response = if (session == null) {
+      new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN)
+    } else {
+      val convertedRequest = convertRequest(request)
+      val decoder = new HttpPostRequestDecoder(new DefaultHttpDataFactory(true), convertedRequest)
+      if (decoder.isMultipart) {
+        if (decoder.getBodyHttpDatas.size() == 1) {
+          val datum = decoder.getBodyHttpDatas.get(0)
+          val upload  = datum.asInstanceOf[FileUpload]
+          processFile(upload, session.twitter.getId)
+        } else {
+          new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST)
+        }
+      } else {
+        new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST)
+      }
+    }
+
+    // TODO: keepalive support
+    e.getChannel().write(response).addListener(ChannelFutureListener.CLOSE)
+  }
+
+  def convertRequest(request: HttpRequest) : org.jboss.netty.handler.codec.http2.HttpRequest = {
+    val convertedRequest =
+      new org.jboss.netty.handler.codec.http2.DefaultHttpRequest(
+        org.jboss.netty.handler.codec.http2.HttpVersion.HTTP_1_0,
+        org.jboss.netty.handler.codec.http2.HttpMethod.POST,
+        request.getUri)
+    convertedRequest.setContent(request.getContent)
+    convertedRequest.setChunked(request.isChunked)
+    import collection.JavaConversions._
+    request.getHeaders.foreach { entry =>
+      convertedRequest.setHeader(entry.getKey, entry.getValue)
+    }
+    convertedRequest
+  }
+
+  def processFile(upload: FileUpload, userId: Long) : HttpResponse = {
+    var fis: InputStream = null
+    try {
+      val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+
+      // TODO: possibly do store and thumb in parallel
+      fis = new FileInputStream(upload.getFile)
+      val fileKey = CryptoUtil.computeHashAsString(upload.getFile)
+      adapter.store(fis, fileKey)
+      val contentLength = upload.length()
+      val contentType = upload.getContentType
+      val thumbHash = if (contentType.startsWith("image")) {
+        if (contentLength < THUMBNAIL_CREATE_THRESHOLD) {
+          fileKey
+        } else {
+          val ba = createThumbnail(upload.getFile)
+          if (ba != null) {
+            val hash = CryptoUtil.computeHash(ba)
+            adapter.store(new ByteArrayInputStream(ba), hash)
+            hash
+          } else {
+            null
+          }
+        }
+      } else {
+        null
+      }
+
+      // TODO: support lucene backed tag search
+      // TODO: get tags
+      val tags = Set("hello")
+      val fmd = createFileMeta(upload, userId, thumbHash, List(fileKey), tags)
+      val docId = storage.insert("fmd", fmd.toJson)
+
+      val arr = new JSONArray()
+      arr.put(ResponseUtil.createResponseData(fmd, docId))
+
+      response.setContent(ChannelBuffers.wrappedBuffer(arr.toString().getBytes("UTF-8")))
+      response
+    }
+    catch {
+      case e: JSONException => {
+        e.printStackTrace()
+        new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR)
+      }
+      case e: UnsupportedEncodingException => {
+        e.printStackTrace()
+        new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR)
+      }
+    } finally {
+      if (fis != null) {
+        fis.close()
+      }
+    }
+  }
+
+  private def createFileMeta(upload: FileUpload, ownerId: Long, thumbHash: String, blockHashes: List[String], tags: Set[String]) : FileMetaData = {
+    val fileName = upload.getFilename
+    val extIndex = fileName.lastIndexOf(".")
+
+    FileMetaData.create(
+      JsonUtil.createJsonObject(
+        "path", fileName,
+        "filename", fileName,
+        "fileext", if (extIndex >= 0) { fileName.substring(extIndex + 1) } else { null },
+        "filesize", upload.length().asInstanceOf[AnyRef],
+        "filedate", new Date().getTime.asInstanceOf[AnyRef],
+        "blocks", new JSONArray(blockHashes),
+        "type", upload.getContentType,
+        "thumbnail", thumbHash,
+        "ownerId", ownerId.asInstanceOf[AnyRef], // TODO: investigate possible precision loss
+        "tags", new JSONArray(tags)
+        ))
+  }
+
+  private def createThumbnail(srcFile : File) : Array[Byte] = {
+    if (srcFile.exists()) {
+      val os = new ByteArrayOutputStream()
+      try {
+        val image = ImageIO.read(srcFile)
+
+        val future =
+          AsyncScalr.resize(
+            image,
+            Scalr.Method.BALANCED,
+            Scalr.Mode.FIT_TO_WIDTH,
+            thumbWidth,
+            thumbHeight,
+            Scalr.OP_ANTIALIAS)
+
+        val thumbnail = future.get()
+        if (thumbnail != null) {
+          ImageIO.write(thumbnail, "jpg", os)
+        }
+        os.toByteArray
+      }
+      catch {
+        case e: Exception => {
+          e.printStackTrace
+          null
+        }
+      }
+    } else {
+      null
+    }
+  }
+
+  def storeAsFile(buffer: ChannelBuffer, size: Int) {
+    val file = File.createTempFile("","")
+    val outputStream = new FileOutputStream(file)
+    val localfileChannel = outputStream.getChannel()
+    val byteBuffer = buffer.toByteBuffer()
+    var written = 0
+    while (written < size) {
+      written += localfileChannel.write(byteBuffer)
+    }
+    buffer.readerIndex(buffer.readerIndex() + written)
+    localfileChannel.force(false)
+    localfileChannel.close()
+  }
+}
+

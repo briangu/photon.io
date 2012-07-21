@@ -82,7 +82,7 @@ var snapclearApp = function () {
     $('#fileupload').fileupload('option', {
         url: '/u/',
         autoUpload: false,
-        multipart: false,
+        multipart: true,
         acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
         process: [
             {

@@ -97,6 +97,25 @@ trait TwitterSessionService {
   def getSession(key: String): TwitterSession
   def setSession(key: String, session: TwitterSession)
   def deleteSession(key: String)
+  def getSessionId(cookieString: String, sessionName: String): (String, List[Cookie]) = {
+    if (cookieString == null) {
+      (null, List())
+    } else {
+      import collection.JavaConversions._
+      val cookieDecoder = new CookieDecoder()
+      var sessionId : String = null
+      val cookies = cookieDecoder.decode(cookieString).flatMap {
+        cookie =>
+          if (cookie.getName.equals(sessionName)) {
+            sessionId = cookie.getValue
+            Nil
+          } else {
+            List(cookie)
+          }
+      }.toList
+      (sessionId, cookies)
+    }
+  }
 }
 
 object SimpleTwitterSession {
@@ -110,9 +129,11 @@ class SimpleTwitterSession extends TwitterSessionService {
   def deleteSession(key: String) = SimpleTwitterSession.sessions.remove(key)
 }
 
-class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod, protected val config: TwitterConfig) extends Route(route) {
-
+object TwitterRestRoute {
   val SESSION_NAME = "photon-session"
+}
+
+class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod, protected val config: TwitterConfig) extends Route(route) {
 
   val sessionKey: String = null
   val session: TwitterSession = null
@@ -202,7 +223,7 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
       var sessionId : String = null
       val cookies = cookieDecoder.decode(cookieString).flatMap {
         cookie =>
-          if (cookie.getName.equals(SESSION_NAME)) {
+          if (cookie.getName.equals(TwitterRestRoute.SESSION_NAME)) {
             sessionId = cookie.getValue
             Nil
           } else {
@@ -218,11 +239,11 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
     cookies.foreach(cookieEncoder.addCookie)
 
     val sessionCookie = if (sessionId == null) {
-      val sessionCookie = new DefaultCookie(SESSION_NAME,  "")
+      val sessionCookie = new DefaultCookie(TwitterRestRoute.SESSION_NAME,  "")
       sessionCookie.setMaxAge(0)
       sessionCookie
     } else {
-      val sessionCookie = new DefaultCookie(SESSION_NAME, sessionId)
+      val sessionCookie = new DefaultCookie(TwitterRestRoute.SESSION_NAME, sessionId)
       sessionCookie.setPath("/")
       sessionCookie
     }
