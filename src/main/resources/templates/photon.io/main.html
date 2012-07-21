@@ -134,7 +134,7 @@
     </div>
     <div class="span9 offset2">
       <div class="row-fluid">
-        <div id="gallery">
+        <div id="gallery" data-toggle="modal-gallery" data-target="#modal-gallery">
         </div>
       </div>
     </div>
@@ -289,10 +289,10 @@
   </script>
 
   <script type="text/html" id="template-mason-brick">
-    <div class="item" data-id="{{id}}" data-width="480" data-height="640">
+    <div class="item" data-id="{{id}}">
       <div class="ItemHolder">
         <a href="/d/{{id}}" class="ItemImage ImgLink" title="{{name}}" rel="gallery" download="{{name}}">
-          <img src="http://photon.io:8080/t/{{id}}"
+          <img src="/t/{{id}}"
                alt="{{tags}}" class="ItemImageImg" />
         </a>
       </div>
