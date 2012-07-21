@@ -4,7 +4,7 @@ import io.stored.server.common.Record
 import io.stored.server.Node
 import io.viper.common.{ViperServer, NestServer}
 import io.viper.core.server.router.{JsonResponse, StatusResponse, HtmlResponse, RouteResponse}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpVersion, HttpResponseStatus, DefaultHttpResponse}
+import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import twitter4j.ProfileImage
 import java.util
@@ -15,7 +15,7 @@ import cloudcmd.common.FileMetaData
 
 
 object Main {
-  val projectionConfig = new JSONObject(FileUtils.readResourceFile(this.getClass, "/config/photon.io/projections.json"));
+  val projectionConfig = new JSONObject(FileUtils.readResourceFile(this.getClass, "/config/photon.io/projections.json"))
 
   def main(args: Array[String]) {
     val storage = Node.createSingleNode("db/photon.io", projectionConfig)
@@ -38,7 +38,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
         var tmp = FileUtils.readFile("/Users/brianguarraci/scm/photon.io/src/main/resources/templates/photon.io/main.html") //FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
         tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
         tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
-        tmp = tmp.replace("{{dyn-data}}", getTopResults(storage, session.twitter.getScreenName).toString())
+        tmp = tmp.replace("{{dyn-data}}", toJsonArray(getChronResults(storage, session.twitter.getScreenName, 20, 0)).toString())
         tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
         tmp = tmp.replace("{{dyn-profileimg}}", session.twitter.getProfileImage(session.twitter.getScreenName, ProfileImage.MINI).getURL)
         new HtmlResponse(tmp)
@@ -79,12 +79,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
           val raw = result(0).toJson
           // TODO: shared-to auth check
           if (raw.getString("ownerId") == session.twitter.getScreenName) {
-            val is = adapter.loadChannel(raw.getString("thumbHash"))
-            val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-            response.setHeader(HttpHeaders.Names.CONTENT_TYPE, raw.getString("type"))
-            response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, raw.getLong("thumbSize"))
-            response.setContent(is)
-            new RouteResponse(response)
+            buildResponse(adapter, raw.getString("thumbHash"), raw.getString("type"))
           } else {
             new StatusResponse(HttpResponseStatus.FORBIDDEN)
           }
@@ -102,12 +97,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
           val raw = result(0).toJson
           // TODO: shared-to auth check
           if (raw.getString("ownerId") == session.twitter.getScreenName) {
-            val is = adapter.loadChannel(raw.getJSONArray("blocks").getString(0))
-            val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-            response.setHeader(HttpHeaders.Names.CONTENT_TYPE, raw.getString("type"))
-            response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, raw.getLong("filesize"))
-            response.setContent(is)
-            new RouteResponse(response)
+            buildResponse(adapter, raw.getJSONArray("blocks").getString(0), raw.getString("type"))
           } else {
             new StatusResponse(HttpResponseStatus.FORBIDDEN)
           }
@@ -115,7 +105,6 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
       }
     }))
 
-    //  addRoute(new HttpChunkProxyHandler("/u/", new FileChunkProxy(uploads), new FileUploadEventListener(hostname, uploads, thumbs, 640, 480)))
     addRoute(new PostHandler("/u/", sessions, storage, adapter, 640, 480))
 
     addRoute(new TwitterLogin(
@@ -144,10 +133,29 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
       config))
   }
 
-  private def getTopResults(storage: Node, ownerId: String) : JSONArray = {
-    val records = storage.select("select * from fmd where ownerId = '%s' order by filedate DESC limit 20".format(ownerId))
+  private def buildResponse(adapter: Adapter, hash: String, contentType: String) : RouteResponse = {
+    val is = adapter.loadChannel(hash)
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
+    response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, is.capacity())
+    response.setContent(is)
+    new RouteResponse(response)
+  }
+
+  private def toJsonArray(records: List[Record]) : JSONArray = {
     val arr = new JSONArray()
     records.foreach{r : Record => arr.put(ResponseUtil.createResponseData(r.rawData, r.id)) }
     arr
+  }
+
+  private def getSearchResults(storage: Node, ownerId: String, tags: String, count: Int, offset: Int) : List[Record] = {
+//    val sql = "SELECT T.HASH,T.RAWMETA FROM FT_SEARCH_DATA('%s', 0, 0) FT, DATA_INDEX T WHERE FT.TABLE='DATA_INDEX' AND T.HASH = FT.KEYS[0] AND T.OWNERID = '%s".format(tags, ownerId)
+//    storage.search(tags, ")
+//    storage.select(sql)
+    null
+  }
+
+  private def getChronResults(storage: Node, ownerId: String, count: Int, offset: Int = 0) : List[Record] = {
+    storage.select("select * from fmd where ownerId = '%s' order by filedate DESC limit %d OFFSET %d".format(ownerId, count, offset))
   }
 }
