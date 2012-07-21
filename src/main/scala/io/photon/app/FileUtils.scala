@@ -8,15 +8,17 @@ import java.nio.channels.FileChannel
 import java.nio.charset.Charset
 
 object FileUtils {
-  def readFile(path: String): String = {
-    val stream = new FileInputStream(new File(path));
+  def readFile(path: String): String = readFile(new File(path))
+
+  def readFile(file: File): String = {
+    val stream = new FileInputStream(file)
     try {
-      val fc = stream.getChannel();
-      val bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
-      return Charset.forName("UTF-8").decode(bb).toString();
+      val fc = stream.getChannel()
+      val bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size())
+      return Charset.forName("UTF-8").decode(bb).toString()
     }
     finally {
-      stream.close();
+      stream.close()
     }
   }
 

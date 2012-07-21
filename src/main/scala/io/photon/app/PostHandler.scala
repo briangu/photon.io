@@ -1,7 +1,7 @@
 package io.photon.app
 
 import io.viper.core.server.router.Route
-import org.jboss.netty.handler.codec.http2.{FileUpload, HttpPostRequestDecoder, DefaultHttpDataFactory}
+import org.jboss.netty.handler.codec.http2.{DiskAttribute, FileUpload, HttpPostRequestDecoder, DefaultHttpDataFactory}
 import org.jboss.netty.channel.{ChannelFutureListener, ChannelHandlerContext, MessageEvent}
 import org.jboss.netty.handler.codec.http._
 import java.io._
@@ -42,16 +42,27 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
     } else {
       val convertedRequest = convertRequest(request)
       val decoder = new HttpPostRequestDecoder(new DefaultHttpDataFactory(true), convertedRequest)
-      if (decoder.isMultipart) {
-        if (decoder.getBodyHttpDatas.size() == 1) {
-          val datum = decoder.getBodyHttpDatas.get(0)
-          val upload  = datum.asInstanceOf[FileUpload]
-          processFile(upload, session.twitter.getId)
+      try {
+        if (decoder.isMultipart) {
+          if (decoder.getBodyHttpDatas.size() == 2) {
+            val fileData = decoder.getBodyHttpData("files[]")
+            val tagData = decoder.getBodyHttpData("tags")
+            if (fileData != null && tagData != null) {
+              val upload  = fileData.asInstanceOf[FileUpload]
+              val tagSet = FileUtils.readFile(tagData.asInstanceOf[DiskAttribute].getFile)
+              println(tagSet)
+              processFile(upload, session.twitter.getId, tagSet.substring(4))
+            } else {
+              new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST)
+            }
+          } else {
+            new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST)
+          }
         } else {
           new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST)
         }
-      } else {
-        new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST)
+      } finally {
+        decoder.cleanFiles()
       }
     }
 
@@ -74,7 +85,7 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
     convertedRequest
   }
 
-  def processFile(upload: FileUpload, userId: Long) : HttpResponse = {
+  def processFile(upload: FileUpload, userId: Long, tags: String) : HttpResponse = {
     var fis: InputStream = null
     try {
       val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
@@ -103,8 +114,6 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
       }
 
       // TODO: support lucene backed tag search
-      // TODO: get tags
-      val tags = Set("hello")
       val fmd = createFileMeta(upload, userId, thumbHash, List(fileKey), tags)
       val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
 
@@ -130,7 +139,7 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
     }
   }
 
-  private def createFileMeta(upload: FileUpload, ownerId: Long, thumbHash: String, blockHashes: List[String], tags: Set[String]) : FileMetaData = {
+  private def createFileMeta(upload: FileUpload, ownerId: Long, thumbHash: String, blockHashes: List[String], tags: String) : FileMetaData = {
     val fileName = upload.getFilename
     val extIndex = fileName.lastIndexOf(".")
 
@@ -138,7 +147,7 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
     blockHashes.foreach(blocksArr.put)
 
     val tagsArr = new JSONArray()
-    tags.foreach(tagsArr.put)
+    tags.split(' ').foreach(tagsArr.put)
 
     FileMetaData.create(
       JsonUtil.createJsonObject(
