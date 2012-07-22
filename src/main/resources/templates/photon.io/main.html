@@ -50,6 +50,17 @@
       </a>
       <a class="brand" href="#">snapclear</a>
       <div class="btn-group pull-right">
+<!--
+        <span class="btn btn-success fileinput-button">
+          <i class="icon-plus icon-white"></i>
+          <span>Add files</span>
+          <input type="file" name="files[]" multiple>
+        </span>
+        <button class="btn btn-primary multi-share">
+          <i class="icon-share icon-white"></i>
+          <span>Select</span>
+        </button>
+-->
         <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
           <img src="{{dyn-profileimg}}"/> {{dyn-screenname}}
           <span class="caret"></span>
@@ -63,9 +74,19 @@
 
       <div class="nav-collapse">
         <ul class="nav">
-          <li class="active"><a href="#">Home</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#contact">Contact</a></li>
+          <li class="">
+            <span class="btn btn-success fileinput-button">
+              <i class="icon-plus icon-white"></i>
+              <span>Add files</span>
+              <input type="file" name="files[]" multiple>
+            </span>
+          </li>
+          <li>
+            <button class="btn btn-primary multi-share">
+              <i class="icon-share icon-white"></i>
+              <span>Select</span>
+            </button>
+          </li>
         </ul>
         <div class="ohpc">
           <form class="navbar-search">
@@ -77,15 +98,6 @@
         </div>
 
         <div class="btn-group pull-right">
-          <span class="btn btn-success fileinput-button">
-            <i class="icon-plus icon-white"></i>
-            <span>Add files</span>
-            <input type="file" name="files[]" multiple>
-          </span>
-          <button class="btn btn-primary multi-share">
-            <i class="icon-share icon-white"></i>
-            <span>Share</span>
-          </button>
         </div>
       </div>
     </div>
@@ -93,6 +105,18 @@
 </div>
 
 <div id="container-fluid" class="wrapper home-container">
+  <div class="row-fluid menu-row"  style="display: none;">
+    <header class="jumbotron subhead">
+      <div class="subnav subnav-fixed">
+        <ul class="nav nav-pills">
+          <li class=""><a href="#share">Share</a></li>
+          <li class=""><a href="#share">Edit</a></li>
+          <li class=""><a href="#share">Delete</a></li>
+          <li class=""><a href="#cancel">Cancel</a></li>
+        </ul>
+      </div>
+    </header>
+  </div>
   <div class="row-fluid">
     <div class="span3">
       <div class="dashboard">
