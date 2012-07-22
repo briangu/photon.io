@@ -20,7 +20,7 @@ object ResponseUtil {
     obj.put("name", fmd.getFilename)
     obj.put("type", rawData.getString("type"))
     obj.put("size", fmd.getFileSize)
-    obj.put("tags", fmd.getTags.mkString(" "))
+    obj.put("tags", rawData.getString("keywords"))
     obj.put("filedate", fmd.getFileDate)
     obj.put("ownerId", rawData.getString("ownerId"))
     obj.put("delete_url", String.format("/d/%s", docId))

@@ -158,10 +158,10 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
         "filedate", new Date().getTime.asInstanceOf[AnyRef],
         "blocks", blocksArr,
         "type", upload.getContentType,
+        "tags", tagsArr, // tags cloudcmd style
         "thumbHash", thumbHash,
         "thumbSize", thumbSize.asInstanceOf[AnyRef],
         "ownerId", ownerId,
-        "tags", tagsArr, // tags cloudcmd style
         "keywords", tags // raw tags for indexing
         ))
   }
