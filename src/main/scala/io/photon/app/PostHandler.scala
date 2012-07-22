@@ -5,15 +5,12 @@ import org.jboss.netty.handler.codec.http2.{DiskAttribute, FileUpload, HttpPostR
 import org.jboss.netty.channel.{ChannelFutureListener, ChannelHandlerContext, MessageEvent}
 import org.jboss.netty.handler.codec.http._
 import java.io._
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import org.json.{JSONException, JSONArray, JSONObject}
-import javax.imageio.ImageIO
-import com.thebuzzmedia.imgscalr.{Scalr, AsyncScalr}
+import org.jboss.netty.buffer.ChannelBuffers
+import org.json.{JSONException, JSONArray}
 import cloudcmd.common.adapters.Adapter
-import cloudcmd.common.{JsonUtil, FileMetaData, MetaUtil}
-import java.util.Date
 import io.stored.server.Node
 import io.stored.common.CryptoUtil
+import org.jboss.netty.handler.codec.http.HttpHeaders._
 
 class PostHandler(route: String, sessions: TwitterSessionService, storage: Node, adapter: Adapter, thumbWidth: Int, thumbHeight: Int) extends Route(route) {
 
@@ -34,7 +31,6 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
       return
     }
 
-    // TODO: validate session
     val (sessionId, cookies) = sessions.getSessionId(request.getHeader(HttpHeaders.Names.COOKIE), TwitterRestRoute.SESSION_NAME)
     val session = sessions.getSession(sessionId)
     val response = if (session == null) {
@@ -66,8 +62,17 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
       }
     }
 
-    // TODO: keepalive support
-    e.getChannel().write(response).addListener(ChannelFutureListener.CLOSE)
+    if (isKeepAlive(request)) {
+      response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+    } else {
+      response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.CLOSE)
+    }
+    setContentLength(response, response.getContent().readableBytes())
+
+    val writeFuture = e.getChannel().write(response)
+    if (!isKeepAlive(request)) {
+      writeFuture.addListener(ChannelFutureListener.CLOSE)
+    }
   }
 
   def convertRequest(request: HttpRequest) : org.jboss.netty.handler.codec.http2.HttpRequest = {
@@ -100,7 +105,7 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
         if (contentLength < THUMBNAIL_CREATE_THRESHOLD) {
           (fileKey, contentLength)
         } else {
-          val ba = createThumbnail(upload.getFile)
+          val ba = FileUtils.createThumbnail(upload.getFile, thumbWidth, thumbHeight)
           if (ba != null) {
             val hash = CryptoUtil.computeHash(ba)
             adapter.store(new ByteArrayInputStream(ba), hash)
@@ -113,12 +118,11 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
         (null, 0L)
       }
 
-      // TODO: support lucene backed tag search
-      val fmd = createFileMeta(upload, userId, thumbHash, thumbSize, List(fileKey), tags)
+      val fmd = ModelUtil.createFileMeta(upload, userId, userId, thumbHash, thumbSize, List(fileKey), tags)
       val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
 
       val arr = new JSONArray()
-      arr.put(ResponseUtil.createResponseData(fmd, docId))
+      arr.put(ModelUtil.createResponseData(fmd, docId))
 
       response.setContent(ChannelBuffers.wrappedBuffer(arr.toString().getBytes("UTF-8")))
       response
@@ -137,79 +141,6 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
         fis.close()
       }
     }
-  }
-
-  private def createFileMeta(upload: FileUpload, ownerId: String, thumbHash: String, thumbSize: Long, blockHashes: List[String], tags: String) : FileMetaData = {
-    val fileName = upload.getFilename
-    val extIndex = fileName.lastIndexOf(".")
-
-    val blocksArr = new JSONArray()
-    blockHashes.foreach(blocksArr.put)
-
-    val tagsArr = new JSONArray()
-    tags.split(' ').foreach(tagsArr.put)
-
-    FileMetaData.create(
-      JsonUtil.createJsonObject(
-        "path", fileName,
-        "filename", fileName,
-        "fileext", if (extIndex >= 0) { fileName.substring(extIndex + 1) } else { null },
-        "filesize", upload.length().asInstanceOf[AnyRef],
-        "filedate", new Date().getTime.asInstanceOf[AnyRef],
-        "blocks", blocksArr,
-        "type", upload.getContentType,
-        "tags", tagsArr, // tags cloudcmd style
-        "thumbHash", thumbHash,
-        "thumbSize", thumbSize.asInstanceOf[AnyRef],
-        "ownerId", ownerId,
-        "keywords", tags // raw tags for indexing
-        ))
-  }
-
-  private def createThumbnail(srcFile : File) : Array[Byte] = {
-    if (srcFile.exists()) {
-      val os = new ByteArrayOutputStream()
-      try {
-        val image = ImageIO.read(srcFile)
-
-        val future =
-          AsyncScalr.resize(
-            image,
-            Scalr.Method.BALANCED,
-            Scalr.Mode.FIT_TO_WIDTH,
-            thumbWidth,
-            thumbHeight,
-            Scalr.OP_ANTIALIAS)
-
-        val thumbnail = future.get()
-        if (thumbnail != null) {
-          ImageIO.write(thumbnail, "jpg", os)
-        }
-        os.toByteArray
-      }
-      catch {
-        case e: Exception => {
-          e.printStackTrace
-          null
-        }
-      }
-    } else {
-      null
-    }
-  }
-
-  def storeAsFile(buffer: ChannelBuffer, size: Int) {
-    val file = File.createTempFile("","")
-    val outputStream = new FileOutputStream(file)
-    val localfileChannel = outputStream.getChannel()
-    val byteBuffer = buffer.toByteBuffer()
-    var written = 0
-    while (written < size) {
-      written += localfileChannel.write(byteBuffer)
-    }
-    buffer.readerIndex(buffer.readerIndex() + written)
-    localfileChannel.force(false)
-    localfileChannel.close()
   }
 }
 

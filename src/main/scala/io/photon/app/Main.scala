@@ -12,12 +12,14 @@ import cloudcmd.common.adapters.{Adapter, FileAdapter}
 import org.json.{JSONArray, JSONObject}
 import java.net.URI
 import cloudcmd.common.FileMetaData
+import com.thebuzzmedia.imgscalr.AsyncScalr
 
 
 object Main {
   val projectionConfig = new JSONObject(FileUtils.readResourceFile(this.getClass, "/config/photon.io/projections.json"))
 
   def main(args: Array[String]) {
+    AsyncScalr.setServiceThreadCount(20) // TODO: set via config
     val storage = Node.createSingleNode("db/photon.io", projectionConfig)
     val adapter = new FileAdapter()
     adapter.init(null, 0, "cache", new util.HashSet[String](), new URI("file:///tmp/uploads"))
@@ -67,7 +69,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
           val raw = result(0).toJson
           // TODO: shared-to auth check
           if (raw.getString("ownerId") == session.twitter.getScreenName) {
-            val obj = ResponseUtil.createResponseData(FileMetaData.create(raw), raw.getString("__id"))
+            val obj = ModelUtil.createResponseData(FileMetaData.create(raw), raw.getString("__id"))
             val arr = new JSONArray()
             arr.put(obj)
             new JsonResponse(arr)
@@ -164,7 +166,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
 
   private def toJsonArray(records: List[Record]) : JSONArray = {
     val arr = new JSONArray()
-    records.foreach{r : Record => arr.put(ResponseUtil.createResponseData(r.rawData, r.id)) }
+    records.foreach{r : Record => arr.put(ModelUtil.createResponseData(r.rawData, r.id)) }
     arr
   }
 

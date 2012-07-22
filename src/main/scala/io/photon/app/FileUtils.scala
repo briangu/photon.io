@@ -3,9 +3,12 @@ package io.photon.app
 import java.net.{JarURLConnection, URL}
 import java.util.jar.JarFile
 import io.viper.core.server.Util
-import java.io.{FileInputStream, File, InputStream}
+import java.io._
 import java.nio.channels.FileChannel
 import java.nio.charset.Charset
+import org.jboss.netty.buffer.ChannelBuffer
+import javax.imageio.ImageIO
+import com.thebuzzmedia.imgscalr.{Scalr, AsyncScalr}
 
 object FileUtils {
   def readFile(path: String): String = readFile(new File(path))
@@ -41,6 +44,52 @@ object FileUtils {
       new String(bytes, "UTF-8")
     } else {
       readFile(url.getFile)
+    }
+  }
+
+  def storeAsFile(buffer: ChannelBuffer, size: Int) {
+    val file = File.createTempFile("","")
+    val outputStream = new FileOutputStream(file)
+    val localfileChannel = outputStream.getChannel()
+    val byteBuffer = buffer.toByteBuffer()
+    var written = 0
+    while (written < size) {
+      written += localfileChannel.write(byteBuffer)
+    }
+    buffer.readerIndex(buffer.readerIndex() + written)
+    localfileChannel.force(false)
+    localfileChannel.close()
+  }
+
+  def createThumbnail(srcFile : File, thumbWidth: Int, thumbHeight: Int) : Array[Byte] = {
+    if (srcFile.exists()) {
+      val os = new ByteArrayOutputStream()
+      try {
+        val image = ImageIO.read(srcFile)
+
+        val future =
+          AsyncScalr.resize(
+            image,
+            Scalr.Method.BALANCED,
+            Scalr.Mode.FIT_TO_WIDTH,
+            thumbWidth,
+            thumbHeight,
+            Scalr.OP_ANTIALIAS)
+
+        val thumbnail = future.get()
+        if (thumbnail != null) {
+          ImageIO.write(thumbnail, "jpg", os)
+        }
+        os.toByteArray
+      }
+      catch {
+        case e: Exception => {
+          e.printStackTrace
+          null
+        }
+      }
+    } else {
+      null
     }
   }
 }
