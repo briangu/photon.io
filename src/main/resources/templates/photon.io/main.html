@@ -109,10 +109,30 @@
     <header class="jumbotron subhead">
       <div class="subnav subnav-fixed">
         <ul class="nav nav-pills">
-          <li class=""><a href="#share">Share</a></li>
-          <li class=""><a href="#share">Edit</a></li>
-          <li class=""><a href="#share">Delete</a></li>
-          <li class=""><a href="#cancel">Cancel</a></li>
+          <li>
+            <button class="btn btn-primary disabled select-share-button subnav-btn">
+              <i class="icon-share icon-white"></i>
+              <span>Share</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="btn btn-info select-edit-button disabled subnav-btn">
+              <i class="icon-edit icon-white"></i>
+              <span>Edit</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="btn btn-danger select-delete-button disabled subnav-btn ">
+              <i class="icon-trash icon-white"></i>
+              <span>Delete</span>
+            </button>
+          </li>
+          <li>
+            <button class="btn btn-warning subnav-btn select-cancel-button">
+              <i class="icon-ban-circle icon-white"></i>
+              <span>Cancel</span>
+            </button>
+          </li>
         </ul>
       </div>
     </header>
