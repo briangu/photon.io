@@ -114,6 +114,11 @@ overflow: hidden;
 .red {
   border-style: solid;
   border-color: red;
+  cursor: pointer;
+}
+
+.sidebar-nav {
+  margin-left: 20px;
 }
 
 /* Add additional stylesheets below

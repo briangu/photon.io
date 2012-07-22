@@ -252,6 +252,17 @@ var snapclearApp = function (initdata) {
       $('.checkbox-img').attr("src", '/img/unchecked.png');
     }
 
+    function clearSelectMode() {
+      $(".icon-top-right").hide();
+      $(".item").unbind('hover');
+      $('.item').unbind('click');
+      $('.item').removeClass('red');
+      resetItemCheckboxes();
+      attachItemActions();
+      enableGalleryClick();
+      disableSelectNav();
+    }
+
     $('.item-share').click(function(e) {
       var dataId = $(this).attr('data-id');
       $('#modal-share').click(function(m){
@@ -296,11 +307,7 @@ var snapclearApp = function (initdata) {
       });
 
       $('.select-cancel-button').click(function() {
-        $(".icon-top-right").hide();
-        resetItemCheckboxes();
-        attachItemActions();
-        enableGalleryClick();
-        disableSelectNav();
+        clearSelectMode();
       });
     });
 };
