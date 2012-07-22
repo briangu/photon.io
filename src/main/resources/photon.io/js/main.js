@@ -43,6 +43,17 @@ var snapclearApp = function (initdata) {
       $('.box-editor').val(window.locale.fileupload.boxeditor)
     }
 
+    function attachItemActions() {
+      $('.item').hover(
+        function(e) {
+          $(this).find('.item-actions').show();
+        },
+        function(e) {
+          $(this).find('.item-actions').hide();
+        }
+      );
+    }
+
     function initUI() {
       resetBoxEditor();
 
@@ -135,6 +146,7 @@ var snapclearApp = function (initdata) {
       $gallery.prepend(h);
       $gallery.imagesLoaded(function(){
         $gallery.masonry('reload')
+        attachItemActions();
       });
     });
 
@@ -201,6 +213,8 @@ var snapclearApp = function (initdata) {
           });
         }
       );
+
+      attachItemActions();
     }
 
     initGallery(initdata);
@@ -208,7 +222,12 @@ var snapclearApp = function (initdata) {
     $('.item-share').click(function(e) {
       var dataId = $(this).attr('data-id');
       $('#modal-share').click(function(m){
+        // args: text => share text
+        //       ids => array of ids
+        //       sharees => screennames of share targets
+
         $(this).find('textarea').val()
+        $.post()
       })
       $('#modal-share').modal({})
     })
