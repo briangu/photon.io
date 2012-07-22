@@ -83,6 +83,7 @@ var snapclearApp = function (initdata) {
         url: '/u/',
         autoUpload: false,
         multipart: true,
+        downloadTemplate: function() {},
         acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
         process: [
             {
@@ -96,48 +97,36 @@ var snapclearApp = function (initdata) {
         ]
     });
 
-/*
-    $('#fileupload').fileupload('option', {
-        url: '/u/',
-        autoUpload: false,
-        multipart: false,
-//        acceptFileTypes: /(\.|\/)(gif|jpe?g|png|dmg)$/i,
-        process: [
-            {
-                action: 'load',
-                fileTypes: /^image\/(gif|jpeg|png)$/,
-                maxFileSize: 20000000 // 20MB
-            },
-            {
-                action: 'save'
-            }
-        ]
-    });
-*/
     $('#fileupload').bind('fileuploadadd', function (e, data) {
       $('.upload-list').show();
-//      $('.upload-list').removeAttr('hidden');
-
       enableUpload(true);  // if (!haveTags) then we will popup on Upload
     });
+
+/*
     $('#fileupload').bind('fileuploadfail', function (e, data) {
       if ($('.upload-file-queue tr').size() == 1) {
-//        $('.upload-list').hide();
-////        $('.upload-list').attr('hidden',true);
-
+        $('.upload-list').hide();
         enableUpload(false);
-      } else {
-        enableUpload(true);
+      }
+    });
+*/
+
+    $('#fileupload').bind('fileuploadstop', function (e, data) {
+      if ($('.upload-file-queue tr').size() == 1) {
+//        $('.upload-list').hide();
+        enableUpload(false);
       }
     });
 
     var template = $('#template-mason-brick').html();
 
     $('#fileupload').bind('fileuploaddone', function (e, data) {
-//      $('.upload-list').hide();
-//      enableUpload(false);
-      // TODO: reset UI and clear tr's
-
+/*
+      if ($('.upload-file-queue tr').size() == 1) {
+        $('.upload-list').hide();
+        enableUpload(false);
+      }
+*/
       var x = JSON.parse(data.jqXHR.responseText)[0]
       var h = Mustache.to_html(template, x);
       var $gallery = $('#gallery')
