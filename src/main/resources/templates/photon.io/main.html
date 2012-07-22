@@ -12,11 +12,11 @@
   <link href="/css/bootstrap.css" rel="stylesheet">
   <style type="text/css">
     body {
-    padding-top: 60px;
-    padding-bottom: 40px;
+      padding-top: 60px;
+      padding-bottom: 40px;
     }
     .sidebar-nav {
-    padding: 9px 0;
+      padding: 9px 0;
     }
   </style>
   <link href="/css/bootstrap-responsive.css" rel="stylesheet">
@@ -352,6 +352,10 @@
 
   <script type="text/html" id="template-mason-brick">
     <div class="item" data-id="{{id}}">
+      <div class="pull-right icon-top-right" style="display: none;">
+        <img class="checkbox-img" src="/img/transparent.png" role="checkbox">
+        <input type="checkbox" name="share[]" style="display: none;"/>
+      </div>
       <div class="ItemHolder">
         <a href="/d/{{id}}" class="ItemImage ImgLink" title="{{name}}" rel="gallery" download="{{name}}">
           <img src="/t/{{id}}"
@@ -359,10 +363,8 @@
         </a>
       </div>
       <div class="item-actions" style="display: none;">
-<!--    <span class=" pull-right"><span class="item-share" data-id="{{id}}" style="display: none;"><i class="icon-share"></i> share</span><input type="checkbox" name="share[]" style="display: none;"/></span> -->
         <span class="pull-right">
           <span class="item-share" data-id="{{id}}"><i class="icon-share"></i> share</span>
-          <input type="checkbox" name="share[]"/>
         </span>
       </div>
       <div class="convo attribution">

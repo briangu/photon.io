@@ -239,9 +239,26 @@ var snapclearApp = function (initdata) {
     })
 
     $('.multi-share').click(function() {
-//      unattachItemActions();
-//      $("input[name='share[]']").show();
-//      $("input[name='share[]']").filter(function(index) { return $(this).is(':checked'); })
-//      $(".item-actions").filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); })
+      $('.menu-row').show();
+
+      unattachItemActions();
+
+      $(".icon-top-right").show();
+      $("input[name='share[]']").prop('checked', false)
+
+      $(".item").hover(
+        function(e) {
+          $(this).addClass('red');
+        },
+        function(e) {
+          $(this).removeClass('red');
+        }
+      );
+
+      $('.item').click(function(e) {
+        var cd = $(this).find("input[name='share[]']");
+        cd.prop('checked', !cd.is(':checked'))
+        $(this).find('.checkbox-img').attr("src", cd.is(':checked') ? '/img/checked.png' : '/img/unchecked.png');
+      });
     });
 };

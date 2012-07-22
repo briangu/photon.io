@@ -102,6 +102,10 @@ overflow: hidden;
   padding-bottom: 20px;
 }
 
+.red {
+  border-style: solid;
+  border-color: red;
+}
 
 /* Add additional stylesheets below
 -------------------------------------------------- */
