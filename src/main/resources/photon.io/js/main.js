@@ -171,7 +171,7 @@ var snapclearApp = function (initdata) {
       $gallery.imagesLoaded(function(){
         $gallery.masonry({
           itemSelector : '.item',
-          columnWidth: 240
+          columnWidth: 230
         });
       });
 
