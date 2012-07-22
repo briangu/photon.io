@@ -81,3 +81,14 @@ overflow: hidden;
 .item-actions {
   margin-top: 10px;
 }
+
+.search-icon {
+  position: absolute;
+  top: 6px;
+  right: -6px;
+  display: block;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  z-index: 3;
+}

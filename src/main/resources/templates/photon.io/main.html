@@ -48,7 +48,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </a>
-      <a class="brand" href="#">photon.io</a>
+      <a class="brand" href="#">snapclear</a>
       <div class="btn-group pull-right">
         <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
           <img src="{{dyn-profileimg}}"/> {{dyn-screenname}}
@@ -60,13 +60,34 @@
           <li><a href="#">Sign Out</a></li>
         </ul>
       </div>
+
       <div class="nav-collapse">
         <ul class="nav">
           <li class="active"><a href="#">Home</a></li>
           <li><a href="#about">About</a></li>
           <li><a href="#contact">Contact</a></li>
         </ul>
-      </div><!--/.nav-collapse -->
+        <div class="ohpc">
+          <form class="navbar-search">
+            <span class="search-icon js-search-action">
+              <i class="icon-search" tabindex="0"></i>
+            </span>
+            <input class="search-query" type="text" id="search-query" placeholder="Search" name="q" autocomplete="off" spellcheck="false" tabindex="-1">
+          </form>
+        </div>
+
+        <div class="btn-group pull-right">
+          <span class="btn btn-success fileinput-button">
+            <i class="icon-plus icon-white"></i>
+            <span>Add files</span>
+            <input type="file" name="files[]" multiple>
+          </span>
+          <button class="btn btn-primary multi-share">
+            <i class="icon-share icon-white"></i>
+            <span>Share</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -318,7 +339,11 @@
         </a>
       </div>
       <div class="item-actions" style="display: none;">
-         <span class="item-share pull-right" data-id="{{id}}"><i class="icon-share"></i> share</span>
+<!--    <span class=" pull-right"><span class="item-share" data-id="{{id}}" style="display: none;"><i class="icon-share"></i> share</span><input type="checkbox" name="share[]" style="display: none;"/></span> -->
+        <span class="pull-right">
+          <span class="item-share" data-id="{{id}}"><i class="icon-share"></i> share</span>
+          <input type="checkbox" name="share[]"/>
+        </span>
       </div>
       <div class="convo attribution">
         <a href="https://twitter.com/{{ownerId}}/" title="{{ownerId}}" class="ImgLink">

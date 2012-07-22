@@ -46,12 +46,18 @@ var snapclearApp = function (initdata) {
     function attachItemActions() {
       $('.item').hover(
         function(e) {
-          $(this).find('.item-actions').show();
+          $(this).find('.item-actions').filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); }).show();
+//          $(".item-actions").filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); }).show();
         },
         function(e) {
-          $(this).find('.item-actions').hide();
+//          $(".item-actions").filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); }).hide();
+          $(this).find('.item-actions').filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); }).hide();
         }
       );
+    }
+
+    function unattachItemActions() {
+      $('.item').unbind('hover');
     }
 
     function initUI() {
@@ -231,4 +237,11 @@ var snapclearApp = function (initdata) {
       })
       $('#modal-share').modal({})
     })
+
+    $('.multi-share').click(function() {
+//      unattachItemActions();
+//      $("input[name='share[]']").show();
+//      $("input[name='share[]']").filter(function(index) { return $(this).is(':checked'); })
+//      $(".item-actions").filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); })
+    });
 };
