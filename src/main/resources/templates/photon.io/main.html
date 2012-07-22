@@ -174,6 +174,21 @@
   </div>
 </div>
 
+<div id="modal-share" class="modal hide fade">
+  <div class="modal-header">
+    <a class="close" data-dismiss="modal">&times;</a>
+    <h3 class="modal-title"></h3>
+  </div>
+  <div class="modal-body">
+
+    <textarea name="sharemsg">Share your photos to twitter @users.</textarea>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="btn" data-dismiss="modal">Close</a>
+    <a href="#" class="btn btn-primary">Share</a>
+  </div>
+</div>
+
   <!-- Le javascript
  ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
@@ -301,6 +316,9 @@
           <img src="/t/{{id}}"
                alt="{{tags}}" class="ItemImageImg" />
         </a>
+      </div>
+      <div class="item-actions">
+         <span class="item-share pull-right" data-id="{{id}}"><i class="icon-share"></i> share</span>
       </div>
       <div class="convo attribution">
         <a href="https://twitter.com/{{ownerId}}/" title="{{ownerId}}" class="ImgLink">

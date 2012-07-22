@@ -72,3 +72,12 @@ height: 19px!important;
 min-height: 19px!important;
 overflow: hidden;
 }
+
+.icon-top-right {
+  margin-top: -12px;
+  margin-right: -12px;
+}
+
+.item-actions {
+  margin-top: 10px;
+}

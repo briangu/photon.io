@@ -14,7 +14,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders._
 
 class PostHandler(route: String, sessions: TwitterSessionService, storage: Node, adapter: Adapter, thumbWidth: Int, thumbHeight: Int) extends Route(route) {
 
-  final val THUMBNAIL_CREATE_THRESHOLD = 128 * 1024
+  final val THUMBNAIL_CREATE_THRESHOLD = 128 * 1024 // TODO: come from config
 
   override
   def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -118,7 +118,7 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
         (null, 0L)
       }
 
-      val fmd = ModelUtil.createFileMeta(upload, userId, userId, thumbHash, thumbSize, List(fileKey), tags)
+      val fmd = ModelUtil.createFileMeta(upload, userId, userId, false, thumbHash, thumbSize, List(fileKey), tags)
       val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
 
       val arr = new JSONArray()

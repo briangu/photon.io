@@ -3,7 +3,7 @@ package io.photon.app
 import io.stored.server.common.Record
 import io.stored.server.Node
 import io.viper.common.{ViperServer, NestServer}
-import io.viper.core.server.router.{JsonResponse, StatusResponse, HtmlResponse, RouteResponse}
+import io.viper.core.server.router._
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import twitter4j.ProfileImage
@@ -27,8 +27,10 @@ object Main {
   }
 }
 
-class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends ViperServer("/Users/brianguarraci/scm/photon.io/src/main/resources/photon.io") {
+class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
+  extends ViperServer("/Users/brianguarraci/scm/photon.io/src/main/resources/photon.io") {
   //res:///photon.io") {
+
   override def addRoutes {
     val sessions = SimpleTwitterSession.instance
 
@@ -38,7 +40,6 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, 0, 20)
     }))
-
     addRoute(new TwitterGetRoute(config, "/v/$page", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, (math.max(args.get("page").toInt-1, 0)) * 20, 20)
@@ -57,19 +58,15 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
       }
     }))
 
-    // get meta-data
     addRoute(new TwitterGetRoute(config, "/m/$docId", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
-        // TODO: prepared statement
-        val result = storage.select("select * from fmd where hash = '%s'".format(args.get("docId")))
-        if (result == null || result.size == 0) {
+        val meta = getMetaById(args.get("docId"))
+        if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
-          val raw = result(0).toJson
-          // TODO: shared-to auth check
-          if (raw.getString("ownerId") == session.twitter.getScreenName) {
-            val obj = ModelUtil.createResponseData(FileMetaData.create(raw), raw.getString("__id"))
+          if (hasReadPriv(meta, session.twitter.getScreenName)) {
+            val obj = ModelUtil.createResponseData(FileMetaData.create(meta), meta.getString("__id"))
             val arr = new JSONArray()
             arr.put(obj)
             new JsonResponse(arr)
@@ -79,19 +76,15 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
         }
       }
     }))
-
     addRoute(new TwitterGetRoute(config, "/t/$docId", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
-        // TODO: prepared statement
-        val result = storage.select("select * from fmd where hash = '%s'".format(args.get("docId")))
-        if (result == null || result.size == 0) {
+        val meta = getMetaById(args.get("docId"))
+        if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
-          val raw = result(0).toJson
-          // TODO: shared-to auth check
-          if (raw.getString("ownerId") == session.twitter.getScreenName) {
-            buildResponse(adapter, raw.getString("thumbHash"), raw.getString("type"))
+          if (hasReadPriv(meta, session.twitter.getScreenName)) {
+            buildResponse(adapter, meta.getString("thumbHash"), meta.getString("type"))
           } else {
             new StatusResponse(HttpResponseStatus.FORBIDDEN)
           }
@@ -101,18 +94,50 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
     addRoute(new TwitterGetRoute(config, "/d/$docId", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
-        // TODO: prepared statement
-        val result = storage.select("select * from fmd where hash = '%s'".format(args.get("docId")))
-        if (result == null || result.size == 0) {
+        val meta = getMetaById(args.get("docId"))
+        if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
-          val raw = result(0).toJson
-          // TODO: shared-to auth check
-          if (raw.getString("ownerId") == session.twitter.getScreenName) {
-            buildResponse(adapter, raw.getJSONArray("blocks").getString(0), raw.getString("type"))
+          if (hasReadPriv(meta, session.twitter.getScreenName)) {
+            buildResponse(adapter, meta.getJSONArray("blocks").getString(0), meta.getString("type"))
           } else {
             new StatusResponse(HttpResponseStatus.FORBIDDEN)
           }
+        }
+      }
+    }))
+
+    addRoute(new TwitterPostRoute(config, "/share/$docId", new TwitterRouteHandler {
+      override
+      def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
+        // TODO: allow for share message
+
+        if (args.containsKey("sharees")) {
+          val meta = getMetaById(args.get("docId"))
+          if (meta == null) {
+            new StatusResponse(HttpResponseStatus.NOT_FOUND)
+          } else {
+            if (hasSharePriv(meta, session.twitter.getScreenName)) {
+              // TODO: validate recipients exist
+              val sharees = args.get("sharees").split(",")
+
+              val arr = new JSONArray()
+
+              // TODO: allow for new keywords/tags from the share text
+              sharees.foreach{ sharee =>
+                val reshareMeta = ModelUtil.reshareMeta(meta, sharee)
+                val fmd = FileMetaData.create(reshareMeta)
+                val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
+                arr.put(ModelUtil.createResponseData(reshareMeta, docId))
+              }
+
+              new JsonResponse(arr)
+            } else {
+              new StatusResponse(HttpResponseStatus.FORBIDDEN)
+            }
+          }
+        } else {
+          new StatusResponse(HttpResponseStatus.BAD_REQUEST)
         }
       }
     }))
@@ -143,6 +168,21 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter) extends
         }
       },
       config))
+  }
+
+  private def hasReadPriv(meta: JSONObject, ownerId: String) : Boolean = isOwner(meta, ownerId) || isPublic(meta)
+  private def hasSharePriv(meta: JSONObject, ownerId: String) : Boolean = isCreator(meta, ownerId) || isPublic(meta)
+  private def isCreator(meta: JSONObject, ownerId: String) : Boolean = meta.getString("creatorId") == ownerId
+  private def isOwner(meta: JSONObject, ownerId: String) : Boolean = meta.getString("ownerId") == ownerId
+  private def isPublic(meta: JSONObject) : Boolean = meta.getBoolean("isPublic")
+
+  private def getMetaById(id: String) : JSONObject = {
+    val result = storage.select("select * from fmd where hash = '%s'".format(id)) // TODO: use prepared statements
+    if (result == null || result.size == 0) {
+      null
+    } else {
+      result(0).toJson
+    }
   }
 
   private def buildResponse(adapter: Adapter, hash: String, contentType: String) : RouteResponse = {

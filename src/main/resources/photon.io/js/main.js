@@ -204,4 +204,12 @@ var snapclearApp = function (initdata) {
     }
 
     initGallery(initdata);
+
+    $('.item-share').click(function(e) {
+      var dataId = $(this).attr('data-id');
+      $('#modal-share').click(function(m){
+        $(this).find('textarea').val()
+      })
+      $('#modal-share').modal({})
+    })
 };

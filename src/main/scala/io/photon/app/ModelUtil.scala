@@ -7,7 +7,7 @@ import java.util.Date
 
 object ModelUtil {
 
-  def createFileMeta(upload: FileUpload, creatorId: String, ownerId: String, thumbHash: String, thumbSize: Long, blockHashes: List[String], tags: String) : FileMetaData = {
+  def createFileMeta(upload: FileUpload, creatorId: String, ownerId: String, isPublic: Boolean, thumbHash: String, thumbSize: Long, blockHashes: List[String], tags: String) : FileMetaData = {
     val fileName = upload.getFilename
     val extIndex = fileName.lastIndexOf(".")
 
@@ -30,9 +30,17 @@ object ModelUtil {
         "thumbHash", thumbHash,
         "thumbSize", thumbSize.asInstanceOf[AnyRef],
         "creatorId", creatorId,
+        "isPublic", isPublic.asInstanceOf[AnyRef],
         "ownerId", ownerId,
         "keywords", tags // raw tags for indexing
       ))
+  }
+
+  def reshareMeta(meta: JSONObject, sharee: String) : JSONObject = {
+    val obj = new JSONObject(meta.toString)
+    if (obj.has("__id")) obj.remove("__id")
+    obj.put("ownerId", sharee)
+    obj
   }
 
   def createResponseData(rawFmd: JSONObject, docId: String) : JSONObject = {
@@ -52,6 +60,7 @@ object ModelUtil {
     obj.put("filedate", fmd.getFileDate)
     obj.put("creatorId", rawData.getString("creatorId"))
     obj.put("ownerId", rawData.getString("ownerId"))
+    obj.put("isPublic", rawData.getBoolean("isPublic"))
     obj.put("delete_url", String.format("/d/%s", docId))
     obj.put("delete_type", "DELETE")
     obj
