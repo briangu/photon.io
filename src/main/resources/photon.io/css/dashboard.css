@@ -42,8 +42,7 @@ a.convo:active {color: #221919; background-color: #e1dfdf;}
 }
 
 .wohpc.nobm.progress.progress-success.progress-striped {
-  width: 50px;
-  float: right;
+  width: 100px;
 }
 
 .tweet-button-container {
