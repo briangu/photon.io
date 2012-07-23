@@ -268,8 +268,6 @@ var snapclearApp = function (initdata) {
       $.post()
     })
 
-    $('.sharemsg').val(window.locale.fileupload.sharemsg);
-
     $('.sharemsg').change(function() {
 
     });
@@ -288,6 +286,15 @@ var snapclearApp = function (initdata) {
       }
     });
 
+    function resetShareModal() {
+      $('.sharemsg').val(window.locale.fileupload.sharemsg);
+      $('.share-item-list tr').remove();
+      $('.sharee-list-wrapper').hide();
+      $('.sharee-list').html('');
+    }
+
+    resetShareModal(); // TODO: cluster all init code
+
     function updateSharees() {
       var txt = $('.sharemsg').val();
       var list = txt.split(' ');
@@ -302,14 +309,14 @@ var snapclearApp = function (initdata) {
     }
 
     $('.item-share').click(function(e) {
-      $('.share-item-list tr').remove();
+      resetShareModal();
       addToShareList($(this).closest('.item'));
       $('#modal-share').modal({})
     })
 
     $('.select-share-button').click(function() {
       var selected = $('.item').filter(function(index) { return $(this).find("input[name='share[]']").is(':checked'); })
-      $('.share-item-list tr').remove();
+      resetShareModal();
       var st = $('#template-share-item').html();
       $.each(selected, function(i,item) { addToShareList(item, st) });
       $('#modal-share').modal();
