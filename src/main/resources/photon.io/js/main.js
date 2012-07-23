@@ -313,13 +313,21 @@ var snapclearApp = function (initdata) {
     $('.download-panel').show();
     $('.download-panel').draggable({ axis: "x", containment: 'parent', zIndex: 2700, scroll: false });
 
+//    $('.download-panel-header').draggable({ axis: "x", containment: 'parent', zIndex: 2700, scroll: false })
+//    $('.download-panel-footer').draggable({ axis: "x", containment: 'parent', zIndex: 2700, scroll: false })
+
     // TODO: autoresizing
-    $('.download-panel').css('top', $(document).height() - 350);
+    $('.download-panel').css('top', $(document).height() - 340);
     $('.download-panel').css('left',$(document).width() - $('.download-panel').width() - 50)
+/*
+    $('.download-panel-header').css('top', $(document).height() - 350);
+    $('.download-panel-header').css('left',$(document).width() - $('.download-panel').width() - 50)
+    $('.download-panel-footer').css('top', $(document).height() - 20);
+    $('.download-panel-footer').css('left',$(document).width() - $('.download-panel').width() - 50)
+*/
 
     $('.download-panel').scroll(function() {
-      e.preventDefault();
     });
 
-    $('.download-panel').tinyscrollbar();
+//    $('.download-panel').tinyscrollbar();
 };

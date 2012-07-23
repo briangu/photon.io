@@ -130,13 +130,52 @@ overflow: hidden;
 
 .download-panel {
   position: fixed;
-	width:450px;
+	width:475px;
   height: 350px;
 	padding:5px;
 	z-index: 9000;
 	overflow: auto;
+	overflow-x: hidden;
 }
 
+.download-panel-header {
+  position: fixed;
+	width:487px;
+  height: 20px;
+	z-index: 9001;
+  background: black;
+  margin-left: -5px;
+  margin-top: -6px;
+}
+
+.download-panel-footer {
+  position: fixed;
+	width:487px;
+  height: 20px;
+	z-index: 9002;
+  background: black;
+  margin-left: -5px;
+}
+
+.file-button-container {
+  height: 90%;
+}
+
+.download-panel-close-icon {
+margin-right: 5px;
+margin-top: 2px;
+}
+
+.download-panel-title {
+color: #fff;
+margin-left: 5px;
+margin-top: 2px;
+float: left;
+}
+
+.custom-progress {
+  max-width: 50px;
+}
 
 /* Add additional stylesheets below
 -------------------------------------------------- */
