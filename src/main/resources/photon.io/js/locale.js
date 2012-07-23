@@ -25,6 +25,7 @@ window.locale = {
         "start": "Start",
         "cancel": "Cancel",
         "destroy": "Delete",
-        'boxeditor': "Add tags for your new files..."
+        'boxeditor': "Add tags for your new files...",
+        'sharemsg': "Compose a direct message to share your files..."
     }
 };

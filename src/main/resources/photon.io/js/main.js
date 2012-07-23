@@ -268,6 +268,39 @@ var snapclearApp = function (initdata) {
       $.post()
     })
 
+    $('.sharemsg').val(window.locale.fileupload.sharemsg);
+
+    $('.sharemsg').change(function() {
+
+    });
+
+    $('.sharemsg').live('keyup', function() {
+      updateSharees();
+    });
+
+    $('.sharemsg').focus(function() {
+      $('.sharemsg').val("");
+    });
+
+    $('.sharemsg').blur(function() {
+      if ($('.sharemsg').val().length == 0) {
+        $('.sharemsg').val(window.locale.fileupload.sharemsg);
+      }
+    });
+
+    function updateSharees() {
+      var txt = $('.sharemsg').val();
+      var list = txt.split(' ');
+      var sharees = $.makeArray($(list).filter(function(idx) { return list[idx][0] == '@' && list[idx].length > 1; }));
+      if (sharees.length > 0) {
+        $('.sharee-list-wrapper').show();
+        $('.sharee-list').html(sharees.join(' '));
+      } else {
+        $('.sharee-list-wrapper').hide();
+        $('.sharee-list').html('');
+      }
+    }
+
     $('.item-share').click(function(e) {
       $('.share-item-list tr').remove();
       addToShareList($(this).closest('.item'));
@@ -297,7 +330,7 @@ var snapclearApp = function (initdata) {
       // inject ids
       // compute sharees
       // submit request
-      // close subnav
+
       $('#modal-share').modal('hide');
       clearSelectMode();
     });
