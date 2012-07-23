@@ -4,6 +4,7 @@ var snapclearApp = function (initdata) {
     function enableUpload(enable) {
       if (enable) {
         if ($('.download-panel').is(':hidden')) {
+          clearFileList();
           $('.download-panel').show();
         }
       }
@@ -11,6 +12,10 @@ var snapclearApp = function (initdata) {
 
     function haveTags() {
       return $('.box-editor').val().length > 0 && $('.box-editor').val() != window.locale.fileupload.boxeditor;
+    }
+
+    function clearFileList() {
+      $('.upload-file-queue tr').remove();
     }
 
     function haveFilesQueued() {
@@ -337,6 +342,8 @@ var snapclearApp = function (initdata) {
     }
 
     $('.download-panel-close-icon').click(function() {
+      $('.download-panel-close-icon').hide();
       $('.download-panel').hide();
+      clearFileList();
     });
 };
