@@ -144,7 +144,7 @@ overflow: hidden;
   height: 20px;
 	z-index: 9001;
   background: black;
-  margin-left: -5px;
+  margin-left: -6px;
   margin-top: -6px;
 }
 
@@ -154,11 +154,11 @@ overflow: hidden;
   height: 20px;
 	z-index: 9002;
   background: black;
-  margin-left: -5px;
+  margin-left: -6px;
 }
 
 .file-button-container {
-  height: 90%;
+  height: 85%;
 }
 
 .download-panel-close-icon {

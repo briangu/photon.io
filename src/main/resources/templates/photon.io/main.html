@@ -103,32 +103,28 @@
     </div>
     <br/>
     <div class="file-button-container">
-      <div class="container-fluid">
+      <form id="fileupload" action="/u/" method="POST" enctype="multipart/form-data">
+        <div>&nbsp;</div>
         <div class="row-fluid">
-          <form id="fileupload" action="/u/" method="POST" enctype="multipart/form-data">
-            <div>&nbsp;</div>
-            <div class="row-fluid">
-              <span class="text-area">
-                <span class="text-area-editor">
-                  <textarea id="tags" name="tags" class="box-editor" style="width: 70%; margin-left: 10px; height: 75px; overflow: hidden; "></textarea>
-                </span>
-              </span>
-              <span class="fileupload-buttonbar pull-right">
-                <button type="button" class="btn btn-primary save-button">
-                  <i class="icon-upload icon-white"></i>
-                  <span>Upload</span>
-                </button>
-              </span>
-            </div>
-            <div class="row-fluid">
-              <br/>
-              <div class="upload-list">
-                <table role="presentation" class="table table-striped upload-file-queue"><tbody class="files"></tbody></table>
-              </div>
-            </div>
-          </form>
+          <span class="text-area">
+            <span class="text-area-editor">
+              <textarea id="tags" name="tags" class="box-editor" style="width: 70%; margin-left: 10px; height: 75px; overflow: hidden; "></textarea>
+            </span>
+          </span>
+          <span class="fileupload-buttonbar pull-right">
+            <button type="submit" class="btn btn-primary save-button">
+              <i class="icon-upload icon-white"></i>
+              <span>Upload</span>
+            </button>
+          </span>
         </div>
-      </div>
+        <div class="row-fluid">
+          <br/>
+          <div class="upload-list">
+            <table role="presentation" class="table table-striped upload-file-queue"><tbody class="files"></tbody></table>
+          </div>
+        </div>
+      </form>
     </div>
     <div class="download-panel-footer"></div>
   </div>
