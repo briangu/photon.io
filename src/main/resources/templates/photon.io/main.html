@@ -127,29 +127,27 @@
     </header>
   </div>
   <div class="row-fluid">
-    <div class="span2">
-      <div class="row-fluid">
-        <div class="well sidebar-nav">
-          <ul class="nav nav-list">
-            <li class="nav-header">Activity</li>
-            <li class="active"><a href="#">Recent</a></li>
-            <li><a href="#">Link</a></li>
-            <li><a href="#">Link</a></li>
-            <li><a href="#">Link</a></li>
-            <li class="nav-header">Public</li>
-            <li><a href="#">Link</a></li>
-            <li><a href="#">Link</a></li>
-            <li class="nav-header">Private</li>
-            <li><a href="#">Photos</a></li>
-            <li><a href="#">Documents</a></li>
-            <li><a href="#">Movies</a></li>
-            <li><a href="#">Projects</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="span10">
+    <div class="span12" style="margin-left: 20px;">
       <div id="gallery" data-toggle="modal-gallery" data-target="#modal-gallery">
+        <div class="box corner-stamp">
+          <div class="well">
+            <ul class="nav nav-list">
+              <li class="nav-header">Activity</li>
+              <li class="active"><a href="#">Recent</a></li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li class="nav-header">Public</li>
+              <li><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>
+              <li class="nav-header">Private</li>
+              <li><a href="#">Photos</a></li>
+              <li><a href="#">Documents</a></li>
+              <li><a href="#">Movies</a></li>
+              <li><a href="#">Projects</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -163,33 +161,46 @@
 </div>
 
 <div class="modal file-box hide fade">
-  <div class="file-button-container">
-    <form id="fileupload" action="/u/" method="POST" enctype="multipart/form-data">
-      <div class="row-fluid">
-        <div class="text-area">
-          <div class="text-area-editor">
-            <textarea id="tags" name="tags" class="box-editor" style="width: 90%; margin-left: 10px; height: 75px; overflow: hidden; "></textarea>
+  <div class="modal-header">
+    <a class="close" data-dismiss="modal">&times;</a>
+    <h3 class="modal-title">Upload files</h3>
+  </div>
+  <div class="modal-body">
+    <div class="file-button-container">
+      <form id="fileupload" action="/u/" method="POST" enctype="multipart/form-data">
+        <div class="row-fluid">
+          <div class="text-area">
+            <div class="text-area-editor">
+              <textarea id="tags" name="tags" class="box-editor" style="width: 90%; margin-left: 10px; height: 75px; overflow: hidden; "></textarea>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="row-fluid">
-        <div class="fileupload-buttonbar">
-                    <span class="btn btn-success fileinput-button">
-                      <i class="icon-plus icon-white"></i>
-                      <span>Add files</span>
-                      <input type="file" name="files[]" multiple>
-                    </span>
-          <button type="button" class="btn btn-primary startnot save-button" disabled>
-            <i class="icon-upload icon-white"></i>
-            <span>Upload</span>
-          </button>
+        <div class="row-fluid">
+          <div class="fileupload-buttonbar">
+            <span class="btn btn-success fileinput-button">
+              <i class="icon-plus icon-white"></i>
+              <span>Add files</span>
+              <input type="file" name="files[]" multiple>
+            </span>
+          </div>
         </div>
-      </div>
-      <div class="row-fluid upload-list" style="display: none;">
-        <br/>
-        <table role="presentation" class="table table-striped upload-file-queue"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
-      </div>
-    </form>
+        <div class="row-fluid">
+          <br/>
+          <div class="upload-list">
+            <table role="presentation" class="table table-striped upload-file-queue"><tbody class="files"></tbody></table>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn" data-dismiss="modal">
+      <span>Close</span>
+    </button>
+    <button type="button" class="btn btn-primary save-button">
+      <i class="icon-upload icon-white"></i>
+      <span>Upload</span>
+    </button>
   </div>
 </div>
 
@@ -355,7 +366,7 @@
   </script>
 
   <script type="text/html" id="template-mason-brick">
-    <div class="item" data-id="{{id}}">
+    <div class="item box" data-id="{{id}}">
       <div class="pull-right icon-top-right" style="display: none;">
         <img class="checkbox-img" src="/img/transparent.png" role="checkbox">
         <input type="checkbox" name="share[]" style="display: none;"/>

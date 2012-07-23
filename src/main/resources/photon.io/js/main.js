@@ -2,10 +2,16 @@ var snapclearApp = function (initdata) {
     'use strict';
 
     function isUploadEnabled() {
-      return $('.save-button').attr('disabled') !== "disabled";
+      return $('.file-box').hasClass('in') || $('.save-button').attr('disabled') !== "disabled";
     }
 
     function enableUpload(enable) {
+      if (enable) {
+        if (!$('.file-box').hasClass('in')) {
+          $('.file-box').modal()
+        }
+      }
+
       if (enable == isUploadEnabled()) return;
       if (enable) {
         $('.save-button').removeAttr('disabled');
@@ -35,10 +41,8 @@ var snapclearApp = function (initdata) {
       $('.item').hover(
         function(e) {
           $(this).find('.item-actions').filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); }).show();
-//          $(".item-actions").filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); }).show();
         },
         function(e) {
-//          $(".item-actions").filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); }).hide();
           $(this).find('.item-actions').filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); }).hide();
         }
       );
@@ -50,8 +54,6 @@ var snapclearApp = function (initdata) {
 
     function initUI() {
       resetBoxEditor();
-
-      $('.upload-list').hide();
 
       $('.box-editor').change(function() {
         enableUpload(isUploadPending());
@@ -88,6 +90,7 @@ var snapclearApp = function (initdata) {
         url: '/u/',
         autoUpload: false,
         multipart: true,
+        filesContainer: $('#fileupload .files'),
         downloadTemplate: function() {},
         acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
         process: [
@@ -102,15 +105,17 @@ var snapclearApp = function (initdata) {
         ]
     });
 
-    $('#fileupload').bind('fileuploadadd', function (e, data) {
-      $('.upload-list').show();
+    $('#fileupload').bind('fileuploaddrop', function (e, data) {
       enableUpload(true);  // if (!haveTags) then we will popup on Upload
+    });
+
+    $('#fileupload').bind('fileuploadadd', function (e, data) {
+//      enableUpload(true);  // if (!haveTags) then we will popup on Upload
     });
 
 /*
     $('#fileupload').bind('fileuploadfail', function (e, data) {
       if ($('.upload-file-queue tr').size() == 1) {
-        $('.upload-list').hide();
         enableUpload(false);
       }
     });
@@ -118,7 +123,6 @@ var snapclearApp = function (initdata) {
 
     $('#fileupload').bind('fileuploadstop', function (e, data) {
       if ($('.upload-file-queue tr').size() == 1) {
-//        $('.upload-list').hide();
         enableUpload(false);
       }
     });
@@ -126,16 +130,10 @@ var snapclearApp = function (initdata) {
     var template = $('#template-mason-brick').html();
 
     $('#fileupload').bind('fileuploaddone', function (e, data) {
-/*
-      if ($('.upload-file-queue tr').size() == 1) {
-        $('.upload-list').hide();
-        enableUpload(false);
-      }
-*/
       var x = JSON.parse(data.jqXHR.responseText)[0]
       var h = Mustache.to_html(template, x);
       var $gallery = $('#gallery')
-      $gallery.prepend(h);
+      $('.corner-stamp').append(h);
       $gallery.imagesLoaded(function(){
         $gallery.masonry('reload')
         attachItemActions();
@@ -170,8 +168,9 @@ var snapclearApp = function (initdata) {
 
       $gallery.imagesLoaded(function(){
         $gallery.masonry({
-          itemSelector : '.item',
-          columnWidth: 230
+          itemSelector : '.box',
+          columnWidth: 230,
+          cornerStampSelector: '.corner-stamp'
         });
       });
 
@@ -179,7 +178,6 @@ var snapclearApp = function (initdata) {
         navSelector  : '#page-nav',    // selector for the paged navigation
         nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
         itemSelector : '.item',     // selector for all items you'll retrieve
-        debug        : true,
         dataType     : 'json',
         loading      : {
             finishedMsg: 'No more pages to load.',
@@ -234,13 +232,13 @@ var snapclearApp = function (initdata) {
 
     function enableSelectActions() {
       $('.select-share-button').removeClass('disabled');
-      $('.select-edit-button').removeClass('disabled');
-      $('.select-delete-button').removeClass('disabled');
+//      $('.select-edit-button').removeClass('disabled');
+//      $('.select-delete-button').removeClass('disabled');
     }
     function disableSelectActions() {
       $('.select-share-button').addClass('disabled');
-      $('.select-edit-button').addClass('disabled');
-      $('.select-delete-button').addClass('disabled');
+//      $('.select-edit-button').addClass('disabled');
+//      $('.select-delete-button').addClass('disabled');
     }
 
     function haveSelectedItems() {
