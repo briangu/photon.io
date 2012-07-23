@@ -106,6 +106,10 @@ var snapclearApp = function (initdata) {
         ]
     });
 
+    $('#fileupload').bind('fileuploadsubmit', function (e, data) {
+      data.formData = {'tags': $('#tags').val()};
+    });
+
     $('#fileupload').bind('fileuploaddrop', function (e, data) {
       enableUpload(true);  // if (!haveTags) then we will popup on Upload
     });
