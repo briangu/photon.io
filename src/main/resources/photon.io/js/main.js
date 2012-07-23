@@ -348,7 +348,15 @@ var snapclearApp = function (initdata) {
       $('#modal-share input[id="ids"]').val(ids)
       $('#modal-share input[id="sharees"]').val(sharees)
 
-      $('#form-share-modal').submit();
+      $.ajax({
+        type: 'POST',
+        url: '/share',
+        async: false,
+        data: $("#form-share-modal").serialize(),
+        success: function() { alert('success')},
+        error: function() { alert('failed to share!'); },
+        dataType: 'json'
+      });
 
       $('#modal-share').modal('hide');
       clearSelectMode();
