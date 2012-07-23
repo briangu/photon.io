@@ -298,6 +298,8 @@ var snapclearApp = function (initdata) {
       // compute sharees
       // submit request
       // close subnav
+      $('#modal-share').modal('hide');
+      clearSelectMode();
     });
 
     $('.select-cancel-button').click(function() {
