@@ -161,9 +161,22 @@ overflow: hidden;
   height: 85%;
 }
 
-.download-panel-close-icon {
+.fileupload-tags-textarea {
+padding-left: 15px;
+}
+
+.fileupload-buttonbar {
+padding-right: 15px;
+}
+
+.download-panel-action-icons {
 margin-right: 5px;
 margin-top: 2px;
+}
+
+.download-panel-minimize-icon {
+  position: relative;
+  top: 4px;
 }
 
 .download-panel-title {

@@ -99,16 +99,20 @@
       <span class="pull-left download-panel-title">
         <i class="icon-upload icon-white"></i> <span>Upload files</span>
       </span>
-      <span class="pull-right download-panel-close-icon"><i class="icon-remove icon-white"></i></span>
+      <span </span>
+      <span class="pull-right download-panel-action-icons">
+        <span class="download-panel-minimize-icon"><i class="icon-minus icon-white"></i></span>
+        <span class="download-panel-close-icon"><i class="icon-remove icon-white"></i></span>
+      </span>
     </div>
     <br/>
     <div class="file-button-container">
       <form id="fileupload" action="/u/" method="POST" enctype="multipart/form-data">
         <div>&nbsp;</div>
         <div class="row-fluid">
-          <span class="text-area">
+          <span class="fileupload-tags-textarea">
             <span class="text-area-editor">
-              <textarea id="tags" name="tags" class="box-editor" style="width: 70%; margin-left: 10px; height: 75px; overflow: hidden; "></textarea>
+              <textarea id="tags" name="tags" class="box-editor" style="width: 70%; overflow: hidden; "></textarea>
             </span>
           </span>
           <span class="fileupload-buttonbar pull-right">
@@ -337,8 +341,7 @@
       <td class="name">
         <a href="{%=file.url%}" title="{%=file.name%}" rel="{%=file.thumbnail_url&&'gallery'%}" download="{%=file.name%}">{%=file.name%}</a>
       </td>
-<!--      <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
--->
+      <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
       <td colspan="2"></td>
       {% } %}
 <!--
