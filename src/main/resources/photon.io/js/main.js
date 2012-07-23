@@ -309,4 +309,17 @@ var snapclearApp = function (initdata) {
         clearSelectMode();
       });
     });
+
+    $('.download-panel').show();
+    $('.download-panel').draggable({ axis: "x", containment: 'parent', zIndex: 2700, scroll: false });
+
+    // TODO: autoresizing
+    $('.download-panel').css('top', $(document).height() - 350);
+    $('.download-panel').css('left',$(document).width() - $('.download-panel').width() - 50)
+
+    $('.download-panel').scroll(function() {
+      e.preventDefault();
+    });
+
+    $('.download-panel').tinyscrollbar();
 };

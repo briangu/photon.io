@@ -128,6 +128,16 @@ overflow: hidden;
   border-radius: 5px;
 }
 
+.download-panel {
+  position: fixed;
+	width:450px;
+  height: 350px;
+	padding:5px;
+	z-index: 9000;
+	overflow: auto;
+}
+
+
 /* Add additional stylesheets below
 -------------------------------------------------- */
 /*

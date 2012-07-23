@@ -25,6 +25,6 @@ window.locale = {
         "start": "Start",
         "cancel": "Cancel",
         "destroy": "Delete",
-        'boxeditor': "Search or tag new files..."
+        'boxeditor': "Add tags for your new files..."
     }
 };
