@@ -1,22 +1,11 @@
 var snapclearApp = function (initdata) {
     'use strict';
 
-    function isUploadEnabled() {
-      return $('.file-box').hasClass('in') || $('.save-button').attr('disabled') !== "disabled";
-    }
-
     function enableUpload(enable) {
       if (enable) {
-        if (!$('.file-box').hasClass('in')) {
-          $('.file-box').modal()
+        if ($('.download-panel').is(':hidden')) {
+          $('.download-panel').show();
         }
-      }
-
-      if (enable == isUploadEnabled()) return;
-      if (enable) {
-        $('.save-button').removeAttr('disabled');
-      } else {
-        $('.save-button').attr('disabled', true);
       }
     }
 
@@ -30,7 +19,6 @@ var snapclearApp = function (initdata) {
 
     function isUploadPending() {
       return haveFilesQueued();
-      //return (haveFilesQueued() && haveTags());
     }
 
     function resetBoxEditor() {
@@ -73,13 +61,12 @@ var snapclearApp = function (initdata) {
         }
       });
 
-      $('.save-button').click(function() {
+      $('.upload-button').click(function() {
         if (!haveTags()) {
           alert("Before you upload your files, you should tag them.")
           return false;
         }
-        $('.progress').removeClass('hidden');
-        $('.name').hide();
+        toggleUploadCloseAll();
         $('.files').find('.start button').click();
         return true;
       })
@@ -92,7 +79,6 @@ var snapclearApp = function (initdata) {
         multipart: true,
         filesContainer: $('#fileupload .files'),
         fileInput: $('.nav .fileinput-button input'),
-//        downloadTemplate: function() {},
         acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
         process: [
             {
@@ -111,11 +97,11 @@ var snapclearApp = function (initdata) {
     });
 
     $('#fileupload').bind('fileuploaddrop', function (e, data) {
-      enableUpload(true);  // if (!haveTags) then we will popup on Upload
+      enableUpload(true);
     });
 
     $('#fileupload').bind('fileuploadadd', function (e, data) {
-//      enableUpload(true);  // if (!haveTags) then we will popup on Upload
+      enableUpload(true);
     });
 
 /*
@@ -130,6 +116,8 @@ var snapclearApp = function (initdata) {
       if ($('.upload-file-queue tr').size() == 1) {
         enableUpload(false);
       }
+      toggleUploadCloseAll();
+      toggleUploadPanelClosable();
     });
 
     var template = $('#template-mason-brick').html();
@@ -314,7 +302,6 @@ var snapclearApp = function (initdata) {
       });
     });
 
-    $('.download-panel').show();
     $('.download-panel').draggable({ axis: "x", containment: 'parent', zIndex: 2700, scroll: false });
 
 //    $('.download-panel-header').draggable({ axis: "x", containment: 'parent', zIndex: 2700, scroll: false })
@@ -330,8 +317,26 @@ var snapclearApp = function (initdata) {
     $('.download-panel-footer').css('left',$(document).width() - $('.download-panel').width() - 50)
 */
 
-    $('.download-panel').scroll(function() {
-    });
+    // download-panel-close-icon
+    function toggleUploadCloseAll() {
+      if ($('.upload-cancel-all-button').is(':hidden')) {
+        $('.upload-cancel-all-button').show();
+        $('.upload-button').hide();
+    } else {
+        $('.upload-button').show();
+        $('.upload-cancel-all-button').hide();
+      }
+    }
 
-//    $('.download-panel').tinyscrollbar();
+    function toggleUploadPanelClosable() {
+      if ($('.download-panel-close-icon').is(':hidden')) {
+        $('.download-panel-close-icon').show();
+      } else {
+        $('.download-panel-close-icon').hide();
+      }
+    }
+
+    $('.download-panel-close-icon').click(function() {
+      $('.download-panel').hide();
+    });
 };

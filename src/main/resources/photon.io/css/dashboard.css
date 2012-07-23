@@ -174,7 +174,12 @@ margin-right: 5px;
 margin-top: 2px;
 }
 
+.download-panel-close-icon {
+  cursor: pointer;
+}
+
 .download-panel-minimize-icon {
+  cursor: pointer;
   position: relative;
   top: 4px;
 }
