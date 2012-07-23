@@ -259,32 +259,39 @@ var snapclearApp = function (initdata) {
       disableSelectNav();
     }
 
-    $('.item-share').click(function(e) {
-      var dataId = $(this).attr('data-id');
-      $('#modal-share').click(function(m){
-        // args: text => share text
-        //       ids => array of ids
-        //       sharees => screennames of share targets
+    $('.share-dialog-button').click(function(m){
+      // args: text => share text
+      //       ids => array of ids
+      //       sharees => screennames of share targets
 
-        $(this).find('textarea').val()
-        $.post()
-      })
+      $(this).find('textarea').val()
+      $.post()
+    })
+
+    $('.item-share').click(function(e) {
+      $('.share-item-list tr').remove();
+      addToShareList($(this).closest('.item'));
       $('#modal-share').modal({})
     })
 
     $('.select-share-button').click(function() {
       var selected = $('.item').filter(function(index) { return $(this).find("input[name='share[]']").is(':checked'); })
-      // init share modal
       $('.share-item-list tr').remove();
       var st = $('#template-share-item').html();
-      $.each(selected, function(i,item) {
-        var data = { 'name': $(item).find('.ItemImage').attr('title')};
-        data['thumb'] = $(item).find('.ItemImageImg').attr('src')
-        $('.share-item-list').append(Mustache.to_html(st, data));
-      });
-
+      $.each(selected, function(i,item) { addToShareList(item, st) });
       $('#modal-share').modal();
     });
+
+    function addToShareList(item, st) {
+      if (st == undefined) {
+        st = $('#template-share-item').html();
+      }
+      var data = {};
+      data['id'] = $(item).attr('data-id');
+      data['name'] = $(item).find('.ItemImage').attr('title');
+      data['thumb'] = $(item).find('.ItemImageImg').attr('src')
+      $('.share-item-list').append(Mustache.to_html(st, data));
+    }
 
     $('.share-dialog-button').click(function() {
       // inject ids
