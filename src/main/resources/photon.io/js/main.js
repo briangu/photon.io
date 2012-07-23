@@ -91,6 +91,7 @@ var snapclearApp = function (initdata) {
         autoUpload: false,
         multipart: true,
         filesContainer: $('#fileupload .files'),
+        fileInput: $('.nav .fileinput-button input'),
         downloadTemplate: function() {},
         acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
         process: [
