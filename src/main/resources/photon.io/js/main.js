@@ -277,7 +277,9 @@ var snapclearApp = function (initdata) {
     });
 
     $('.sharemsg').focus(function() {
-      $('.sharemsg').val("");
+      if ($('.sharemsg').val() === window.locale.fileupload.sharemsg) {
+        $('.sharemsg').val('');
+      };
     });
 
     $('.sharemsg').blur(function() {
@@ -334,9 +336,19 @@ var snapclearApp = function (initdata) {
     }
 
     $('.share-dialog-button').click(function() {
-      // inject ids
-      // compute sharees
-      // submit request
+      if ($('.sharee-list').html().length == 0) {
+        alert("You didn't specifiy any recipients.  Use @ notation to specify a Twitter user.")
+        return false;
+      }
+
+      var rawSharees = $('.sharee-list').html().split(' ');
+      var sharees = rawSharees.map(function(item){ if (item[0] == '@') { return item.substr(1); } else { return item; } })
+      var ids = $.makeArray($('.share-item-list').find('td[data-id]').attr('data-id')).join(',')
+
+      $('#modal-share input[id="ids"]').val(ids)
+      $('#modal-share input[id="sharees"]').val(sharees)
+
+      $('#form-share-modal').submit();
 
       $('#modal-share').modal('hide');
       clearSelectMode();
