@@ -272,7 +272,32 @@ var snapclearApp = function (initdata) {
       $('#modal-share').modal({})
     })
 
-    $('.multi-share').click(function() {
+    $('.select-share-button').click(function() {
+      var selected = $('.item').filter(function(index) { return $(this).find("input[name='share[]']").is(':checked'); })
+      // init share modal
+      $('.share-item-list tr').remove();
+      var st = $('#template-share-item').html();
+      $.each(selected, function(i,item) {
+        var data = { 'name': $(item).find('.ItemImage').attr('title')};
+        data['thumb'] = $(item).find('.ItemImageImg').attr('src')
+        $('.share-item-list').append(Mustache.to_html(st, data));
+      });
+
+      $('#modal-share').modal();
+    });
+
+    $('.share-dialog-button').click(function() {
+      // inject ids
+      // compute sharees
+      // submit request
+      // close subnav
+    });
+
+    $('.select-cancel-button').click(function() {
+      clearSelectMode();
+    });
+
+    $('.multi-select').click(function() {
       enableSelectNav();
       unattachItemActions();
       disableGalleryClick();
@@ -301,28 +326,14 @@ var snapclearApp = function (initdata) {
           }
         }
       });
-
-      $('.select-cancel-button').click(function() {
-        clearSelectMode();
-      });
     });
 
     $('.download-panel').draggable({ axis: "x", containment: 'parent', zIndex: 2700, scroll: false });
 
-//    $('.download-panel-header').draggable({ axis: "x", containment: 'parent', zIndex: 2700, scroll: false })
-//    $('.download-panel-footer').draggable({ axis: "x", containment: 'parent', zIndex: 2700, scroll: false })
-
     // TODO: autoresizing
     $('.download-panel').css('top', $(document).height() - 340);
     $('.download-panel').css('left',$(document).width() - $('.download-panel').width() - 50)
-/*
-    $('.download-panel-header').css('top', $(document).height() - 350);
-    $('.download-panel-header').css('left',$(document).width() - $('.download-panel').width() - 50)
-    $('.download-panel-footer').css('top', $(document).height() - 20);
-    $('.download-panel-footer').css('left',$(document).width() - $('.download-panel').width() - 50)
-*/
 
-    // download-panel-close-icon
     function toggleUploadCloseAll() {
       if ($('.upload-cancel-all-button').is(':hidden')) {
         $('.upload-cancel-all-button').show();

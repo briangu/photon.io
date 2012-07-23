@@ -37,6 +37,14 @@ a.convo:active {color: #221919; background-color: #e1dfdf;}
 
 .download_img { width: 80px; }
 
+#modal-share {
+  width: 450px;
+}
+
+.sharemsg {
+  width: 370px;
+}
+
 .nobm {
   margin-bottom: 0px;
 }
@@ -122,7 +130,9 @@ overflow: hidden;
 }
 
 .corner-stamp {
-  width: 192px;
+  margin-left:10px;
+  margin-top: 10px;
+  width: 200px;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
@@ -193,6 +203,10 @@ float: left;
 
 .custom-progress {
   max-width: 50px;
+}
+
+.share-item-list {
+  max-height: 300px;
 }
 
 /* Add additional stylesheets below
