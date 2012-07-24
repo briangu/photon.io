@@ -30,6 +30,8 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
   extends ViperServer("/Users/brianguarraci/scm/photon.io/src/main/resources/photon.io") {
   //res:///photon.io") {
 
+  final val PAGE_SIZE = 25
+
   override def addRoutes {
     val sessions = SimpleTwitterSession.instance
 
@@ -37,11 +39,11 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
 
     addRoute(new TwitterGetRoute(config, "/v", new TwitterRouteHandler {
       override
-      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, 0, 20)
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, 0, PAGE_SIZE)
     }))
     addRoute(new TwitterGetRoute(config, "/v/$page", new TwitterRouteHandler {
       override
-      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, (math.max(args.get("page").toInt-1, 0)) * 20, 20)
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, (math.max(args.get("page").toInt-1, 0)) * PAGE_SIZE, PAGE_SIZE)
     }))
 
     addRoute(new TwitterGetRoute(config, "/j/$page", new TwitterRouteHandler {
@@ -52,8 +54,8 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
             getChronResults(
               storage,
               session.twitter.getScreenName,
-              20,
-              (math.max(args.get("page").toInt-1, 0)) * 20)))
+              PAGE_SIZE,
+              (math.max(args.get("page").toInt-1, 0)) * PAGE_SIZE)))
       }
     }))
 
