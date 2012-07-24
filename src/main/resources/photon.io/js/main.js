@@ -43,6 +43,12 @@ var snapclearApp = function (initdata) {
           $(this).find('.item-actions').filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); }).hide();
         }
       );
+
+      $(item).find('.item-share').click(function(e) {
+        resetShareModal();
+        addToShareList($(this).closest('.item'));
+        $('#modal-share').modal({})
+      })
     }
 
     function unattachItemsActions() {
@@ -310,12 +316,6 @@ var snapclearApp = function (initdata) {
         $('.sharee-list').html('');
       }
     }
-
-    $('.item-share').click(function(e) {
-      resetShareModal();
-      addToShareList($(this).closest('.item'));
-      $('#modal-share').modal({})
-    })
 
     $('.select-share-button').click(function() {
       var selected = $('.item').filter(function(index) { return $(this).find("input[name='share[]']").is(':checked'); })
