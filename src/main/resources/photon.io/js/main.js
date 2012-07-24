@@ -31,7 +31,7 @@ var snapclearApp = function (initdata) {
     }
 
     function attachItemsActions() {
-      $('.item').each(function(idx, item) { attachItemActions(item); });
+      $('.item[data-sharable="true"]').each(function(idx, item) { attachItemActions(item); });
     }
 
     function attachItemActions(item) {
@@ -187,10 +187,6 @@ var snapclearApp = function (initdata) {
         nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
         itemSelector : '.item',     // selector for all items you'll retrieve
         dataType     : 'json',
-        loading      : {
-            finishedMsg: 'No more pages to load.',
-            img: '/img/loading.gif'
-        },
         template     : function(data) {
           var $div = $('<div/>')
           $.each(data, function(i,x){
@@ -203,10 +199,12 @@ var snapclearApp = function (initdata) {
           var $newElems = $( newElements ).css({ opacity: 0 });
           $newElems.imagesLoaded(function(){
 
+            var sels = $($newElems.children()).filter(function(index) { return !!!$(this).attr('data-sharable'); })
+
             if (inSelectMode()) {
-              $($newElems.children()).each(function (idx, item) { attachItemSelectActions(item); });
+              $(sels).each(function (idx, item) { attachItemSelectActions(item); });
             } else {
-              $($newElems.children()).each(function (idx, item) { attachItemActions(item); });
+              $(sels).each(function (idx, item) { attachItemActions(item); });
             }
 
             $newElems.animate({ opacity: 1 });
@@ -377,7 +375,7 @@ var snapclearApp = function (initdata) {
 
     function attachSelectActions() {
       disableGalleryClick();
-      $(".item").each(function (idx,item) { attachItemSelectActions(item); });
+      $('.item[data-sharable="true"]').each(function (idx,item) { attachItemSelectActions(item); });
     }
 
     function attachItemSelectActions(item) {
