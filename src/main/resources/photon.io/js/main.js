@@ -429,4 +429,11 @@ var snapclearApp = function (initdata) {
       $('.download-panel').hide();
       clearFileList();
     });
+
+    $('.fileinput-button').popover({
+      delay: { show: 750, hide: 100 },
+      placement: 'bottom',
+      title: "Add files...",
+      content: "Add files by drag-n-drop anywhere on the page or by using the file dialog."
+    })
 };

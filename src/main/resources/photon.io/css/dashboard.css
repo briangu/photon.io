@@ -19,6 +19,8 @@
 .creatorInfo p {display: table-cell; max-width: 156px; height: 30px; vertical-align: middle;}
 .creatorInfo .NoImage {height: auto; margin: 0;}
 
+.popover {z-index:12000;}
+
 .download_img { width: 80px; }
 
 .item-actions {
