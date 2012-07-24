@@ -20,7 +20,7 @@ object Main {
     AsyncScalr.setServiceThreadCount(20) // TODO: set via config
     val storage = Node.createSingleNode("db/photon.io", projectionConfig)
     val adapter = new FileAdapter()
-    adapter.init(null, 0, "cache", new java.util.HashSet[String](), new URI("file:///tmp/uploads"))
+    adapter.init(null, 0, "cache", new java.util.HashSet[String](), new URI("file:///Users/brianguarraci/uploads"))
     NestServer.run(8080, new Main("photon.io", 8080, storage, adapter))
   }
 }

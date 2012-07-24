@@ -2,14 +2,12 @@ package io.photon.app
 
 import io.viper.core.server.router.{RouteResponse, RouteUtil, RouteHandler, Route}
 import twitter4j.{ProfileImage, Twitter, TwitterException, TwitterFactory}
-import java.io.{InputStreamReader, BufferedReader}
+import java.io.{File, InputStreamReader, BufferedReader}
 import twitter4j.auth.{RequestToken, AccessToken}
-import java.util
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
 import collection.mutable
-import util.UUID
 import org.jboss.netty.handler.codec.http.HttpHeaders.isKeepAlive
 import org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer
 import org.jboss.netty.handler.codec.http.HttpHeaders.setContentLength
@@ -137,6 +135,12 @@ object SimpleTwitterSession {
   val instance = new SimpleTwitterSession
 }
 
+object WhiteListService {
+  def inWhiteList(screenname: String): Boolean = {
+    new File("whitelist/%s".format(screenname)).exists
+  }
+}
+
 class SimpleTwitterSession extends TwitterSessionService {
   def getSession(key: String): TwitterSession = SimpleTwitterSession.sessions.get(key).getOrElse(null)
   def setSession(key: String, session: TwitterSession) = SimpleTwitterSession.sessions.put(key, session)
@@ -166,7 +170,7 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
       try {
         val twitter = new TwitterFactory().getInstance()
         val requestToken = twitter.getOAuthRequestToken(config.callbackUrl)
-        val sessionId = UUID.randomUUID().toString
+        val sessionId = java.util.UUID.randomUUID().toString
         val session = new TwitterSession(sessionId, twitter, requestToken, request.getUri)
         config.sessions.setSession(sessionId, session)
 
@@ -186,10 +190,19 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
         try {
           session.twitter.getOAuthAccessToken(session.requestToken, verifier)
           session.requestToken = null
-          val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND)
-          response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
-          response.setHeader("Location", session.postLoginRoute)
-          response
+
+          if (userInWhiteList(session.twitter.getScreenName)) {
+            val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND)
+            response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
+            response.setHeader("Location", session.postLoginRoute)
+            response
+          } else {
+            config.sessions.deleteSession(session.id)
+            val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND)
+            response.setHeader("Location", "/")
+            response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(null, cookies))
+            response
+          }
         } catch {
           case e: TwitterException => new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST)
         }
@@ -233,6 +246,10 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
       }
     }
     if (response != null) writeResponse(request, response, e)
+  }
+
+  def userInWhiteList(screenname: String) : Boolean = {
+    WhiteListService.inWhiteList(screenname)
   }
 
   def getSessionId(cookieString: String): (String, List[Cookie]) = {

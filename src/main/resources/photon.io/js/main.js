@@ -430,8 +430,12 @@ var snapclearApp = function (initdata) {
       clearFileList();
     });
 
+    $('.fileinput-button').click(function() {
+      $('.fileinput-button').popover('hide');
+    })
+
     $('.fileinput-button').popover({
-      delay: { show: 750, hide: 100 },
+      delay: 750, // { show: 750, hide: 100 },
       placement: 'bottom',
       title: "Add files...",
       content: "Add files by drag-n-drop anywhere on the page or by using the file dialog."
