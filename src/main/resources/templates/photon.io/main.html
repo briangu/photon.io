@@ -292,6 +292,7 @@
 <script src="/js/jquery.fileupload-fp.js"></script>
 <script src="/js/jquery.fileupload-ui.js"></script>
 <script src="/js/locale.js"></script>
+<script src="/js/easydate.js"></script>
 <script src="/js/main.js"></script>
 <!--[if gte IE 8]><script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
 
@@ -391,17 +392,14 @@
           </a>
           <div class="item-info">
             <div>
-              <div>
-                <a href="#">@{{creatorId}}</a>
-              </div>
-              <div class="description">{{name}}
-              </div>
+              <div class="easydate pull-right" data-filedate="{{filedate}}"></div>
+              <div><a href="https://twitter.com/{{creatorId}}">@{{creatorId}}</a></div>
+              <div class="description">{{name}}</div>
             </div>
           </div>
         </span>
       </div>
     </div>
   </script>
-
 </body>
 </html>

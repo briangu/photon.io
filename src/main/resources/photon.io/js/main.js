@@ -145,6 +145,7 @@ var snapclearApp = function (initdata) {
       $gallery.imagesLoaded(function(){
         $gallery.masonry('reload')
         attachItemsActions();
+        showTimeAgoDates();
       });
     });
 
@@ -165,6 +166,12 @@ var snapclearApp = function (initdata) {
       .bind('fileuploaddragover', function (e) {console.log("fileuploaddragover")});
 
     initUI();
+
+    function showTimeAgoDates() {
+      $(".easydate").each(function() {
+        $(this).html($.easydate.format_date(new Date(parseInt($(this).attr("data-filedate"), 10))));
+      });
+    }
 
     function initGallery(data) {
       var $gallery = $('#gallery');
@@ -189,10 +196,10 @@ var snapclearApp = function (initdata) {
         dataType     : 'json',
         template     : function(data) {
           var $div = $('<div/>')
-          $.each(data, function(i,x){
-            $div.append(Mustache.to_html(template, x));
-          });
-          return $div
+            $.each(data, function(i,x){
+              $div.append(Mustache.to_html(template, x));
+            });
+            return $div
           },
         },
         function( newElements ) {
@@ -209,11 +216,13 @@ var snapclearApp = function (initdata) {
 
             $newElems.animate({ opacity: 1 });
             $('#gallery').masonry('appended', $newElems, true );
+            showTimeAgoDates();
           });
         }
       );
 
       attachItemsActions();
+      showTimeAgoDates();
     }
 
     initGallery(initdata);
