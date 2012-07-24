@@ -111,11 +111,11 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
             adapter.store(new ByteArrayInputStream(ba), hash)
             (hash, ba.length.toLong)
           } else {
-            ("cfea477462b700122eccfc8f60880fbb4ea7711d6a49edda75bbc79fc0eb93cd", 6401L)
+            ("76b321f040f6035c65b048821dcd373bf96dfbba1ffc0a739d5b4da2116180c4", 17639L)
           }
         }
       } else {
-        ("cfea477462b700122eccfc8f60880fbb4ea7711d6a49edda75bbc79fc0eb93cd", 6401L)
+        ("76b321f040f6035c65b048821dcd373bf96dfbba1ffc0a739d5b4da2116180c4", 17639L)
       }
 
       val fmd = ModelUtil.createFileMeta(upload, userId, userId, false, thumbHash, thumbSize, List(fileKey), tags)
