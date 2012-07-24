@@ -7,6 +7,12 @@ import java.util.Date
 
 object ModelUtil {
 
+  def hasReadPriv(meta: JSONObject, ownerId: String) : Boolean = isOwner(meta, ownerId) || isPublic(meta)
+  def hasSharePriv(meta: JSONObject, ownerId: String) : Boolean = isCreator(meta, ownerId) || isPublic(meta)
+  def isCreator(meta: JSONObject, ownerId: String) : Boolean = meta.getString("creatorId") == ownerId.toLowerCase
+  def isOwner(meta: JSONObject, ownerId: String) : Boolean = meta.getString("ownerId") == ownerId.toLowerCase
+  def isPublic(meta: JSONObject) : Boolean = meta.getBoolean("isPublic")
+
   def createFileMeta(upload: FileUpload, creatorId: String, ownerId: String, isPublic: Boolean, thumbHash: String, thumbSize: Long, blockHashes: List[String], tags: String) : FileMetaData = {
     val fileName = upload.getFilename
     val extIndex = fileName.lastIndexOf(".")
@@ -61,6 +67,7 @@ object ModelUtil {
     obj.put("creatorId", rawData.getString("creatorId"))
     obj.put("ownerId", rawData.getString("ownerId"))
     obj.put("isPublic", rawData.getBoolean("isPublic"))
+    obj.put("isSharable", hasSharePriv(fmd.getRawData, rawData.getString("ownerId")))
     obj.put("delete_url", String.format("/d/%s", docId))
     obj.put("delete_type", "DELETE")
     obj

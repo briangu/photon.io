@@ -66,7 +66,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
         if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
-          if (hasReadPriv(meta, session.twitter.getScreenName)) {
+          if (ModelUtil.hasReadPriv(meta, session.twitter.getScreenName)) {
             val obj = ModelUtil.createResponseData(FileMetaData.create(meta), meta.getString("__id"))
             val arr = new JSONArray()
             arr.put(obj)
@@ -84,7 +84,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
         if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
-          if (hasReadPriv(meta, session.twitter.getScreenName)) {
+          if (ModelUtil.hasReadPriv(meta, session.twitter.getScreenName)) {
             buildResponse(adapter, meta.getString("thumbHash"), meta.getString("type"))
           } else {
             new StatusResponse(HttpResponseStatus.FORBIDDEN)
@@ -99,7 +99,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
         if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
-          if (hasReadPriv(meta, session.twitter.getScreenName)) {
+          if (ModelUtil.hasReadPriv(meta, session.twitter.getScreenName)) {
             buildResponse(adapter, meta.getJSONArray("blocks").getString(0), meta.getString("type"))
           } else {
             new StatusResponse(HttpResponseStatus.FORBIDDEN)
@@ -118,7 +118,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
         val docIds = args.get("ids").split(',')
         var metas = getMetaListById(docIds.toList)
         if (metas.length != docIds.length) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
-        metas = metas.filter(m => hasSharePriv(m.rawData, session.twitter.getScreenName))
+        metas = metas.filter(m => ModelUtil.hasSharePriv(m.rawData, session.twitter.getScreenName))
         if (metas.length != docIds.length) return new StatusResponse(HttpResponseStatus.FORBIDDEN)
 
         val sharees = args.get("sharees").split(',')
@@ -169,12 +169,6 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
       },
       config))
   }
-
-  private def hasReadPriv(meta: JSONObject, ownerId: String) : Boolean = isOwner(meta, ownerId) || isPublic(meta)
-  private def hasSharePriv(meta: JSONObject, ownerId: String) : Boolean = isCreator(meta, ownerId) || isPublic(meta)
-  private def isCreator(meta: JSONObject, ownerId: String) : Boolean = meta.getString("creatorId") == ownerId.toLowerCase
-  private def isOwner(meta: JSONObject, ownerId: String) : Boolean = meta.getString("ownerId") == ownerId.toLowerCase
-  private def isPublic(meta: JSONObject) : Boolean = meta.getBoolean("isPublic")
 
   private def getMetaById(id: String) : JSONObject = {
     val result = storage.select("select * from fmd where hash = '%s'".format(id)) // TODO: use prepared statements

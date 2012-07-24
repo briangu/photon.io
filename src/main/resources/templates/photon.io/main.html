@@ -370,15 +370,19 @@
         <img class="checkbox-img" src="/img/transparent.png" role="checkbox">
         <input type="checkbox" name="share[]" style="display: none;"/>
       </div>
+      <div class="item-actions" style="display: none;">
+          <span class="item-share" data-id="{{id}}" style="cursor: pointer;">
+            <a class="btn inline-share-button">
+              <i class="icon-share"></i>
+              <span>Share</span>
+            </a>
+          </span>
+      </div>
       <div class="ItemHolder center">
         <a href="/d/{{id}}" class="ItemImage ImgLink" title="{{name}}" rel="gallery" download="{{name}}">
           <img src="/t/{{id}}" alt="{{tags}}" class="ItemImageImg" />
         </a>
-      </div>
-      <div class="item-actions" style="display: none;">
-        <span class="pull-right">
-          <span class="item-share" data-id="{{id}}" style="cursor: pointer;"><i class="icon-share"></i> share</span>
-        </span>
+        <div class="description">{{name}}</div>
       </div>
       <div class="convo attribution">
         <a href="https://twitter.com/{{ownerId}}/" title="{{ownerId}}" class="ImgLink">

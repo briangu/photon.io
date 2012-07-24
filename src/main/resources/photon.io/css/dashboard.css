@@ -38,6 +38,19 @@ a.convo:active {color: #221919; background-color: #e1dfdf;}
 
 .download_img { width: 80px; }
 
+.item-actions {
+margin-top: -10px;
+margin-left: 125px;
+color: white;
+height: 20px;
+position: absolute;
+z-index: 30;
+}
+
+.inline-share-button {
+background-color: f2f0f0;
+}
+
 #modal-share {
   width: 450px;
 }
@@ -85,10 +98,6 @@ overflow: hidden;
 .icon-top-right {
   margin-top: -12px;
   margin-right: -12px;
-}
-
-.item-actions {
-  margin-top: 10px;
 }
 
 .search-icon {
