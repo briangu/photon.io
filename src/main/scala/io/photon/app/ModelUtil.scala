@@ -29,9 +29,9 @@ object ModelUtil {
         "tags", tagsArr, // tags cloudcmd style
         "thumbHash", thumbHash,
         "thumbSize", thumbSize.asInstanceOf[AnyRef],
-        "creatorId", creatorId,
+        "creatorId", creatorId.toLowerCase,
         "isPublic", isPublic.asInstanceOf[AnyRef],
-        "ownerId", ownerId,
+        "ownerId", ownerId.toLowerCase,
         "keywords", tags // raw tags for indexing
       ))
   }
@@ -39,7 +39,7 @@ object ModelUtil {
   def reshareMeta(meta: JSONObject, sharee: String) : JSONObject = {
     val obj = new JSONObject(meta.toString)
     if (obj.has("__id")) obj.remove("__id")
-    obj.put("ownerId", sharee)
+    obj.put("ownerId", sharee.toLowerCase)
     obj
   }
 

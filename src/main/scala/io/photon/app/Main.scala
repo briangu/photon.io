@@ -170,8 +170,8 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
 
   private def hasReadPriv(meta: JSONObject, ownerId: String) : Boolean = isOwner(meta, ownerId) || isPublic(meta)
   private def hasSharePriv(meta: JSONObject, ownerId: String) : Boolean = isCreator(meta, ownerId) || isPublic(meta)
-  private def isCreator(meta: JSONObject, ownerId: String) : Boolean = meta.getString("creatorId") == ownerId
-  private def isOwner(meta: JSONObject, ownerId: String) : Boolean = meta.getString("ownerId") == ownerId
+  private def isCreator(meta: JSONObject, ownerId: String) : Boolean = meta.getString("creatorId") == ownerId.toLowerCase
+  private def isOwner(meta: JSONObject, ownerId: String) : Boolean = meta.getString("ownerId") == ownerId.toLowerCase
   private def isPublic(meta: JSONObject) : Boolean = meta.getBoolean("isPublic")
 
   private def getMetaById(id: String) : JSONObject = {
@@ -226,6 +226,6 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
   }
 
   private def getChronResults(storage: Node, ownerId: String, count: Int, offset: Int = 0) : List[Record] = {
-    storage.select("select * from fmd where ownerId = '%s' order by filedate DESC limit %d OFFSET %d".format(ownerId, count, offset))
+    storage.select("select * from fmd where ownerId = '%s' order by filedate DESC limit %d OFFSET %d".format(ownerId.toLowerCase, count, offset))
   }
 }
