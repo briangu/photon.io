@@ -184,7 +184,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
   }
 
   private def getMetaListById(ids: List[String]) : List[Record] = {
-    val ws = ids.map("'%s'".format(_)).mkString
+    val ws = ids.map("'%s'".format(_)).mkString(",")
     val result = storage.select("select * from fmd where hash in (%s)".format(ws)) // TODO: use prepared statements
     if (result == null || result.size == 0) {
       List()

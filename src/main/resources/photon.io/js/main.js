@@ -344,7 +344,7 @@ var snapclearApp = function (initdata) {
 
       var rawSharees = $('.sharee-list').html().split(' ');
       var sharees = rawSharees.map(function(item){ if (item[0] == '@') { return item.substr(1); } else { return item; } })
-      var ids = $.makeArray($('.share-item-list').find('td[data-id]').attr('data-id')).join(',')
+      var ids = $.makeArray($('.share-item-list').find('td[data-id]').map(function(idx,item) { return $(item).attr('data-id'); })).join(',')
 
       $('#modal-share input[id="ids"]').val(ids)
       $('#modal-share input[id="sharees"]').val(sharees)
