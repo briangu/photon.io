@@ -385,15 +385,23 @@
         <div class="description">{{tags}}</div>
       </div>
       <div class="convo attribution">
-        <a href="https://twitter.com/{{ownerId}}/" title="{{ownerId}}" class="ImgLink">
-          <img src="{{dyn-profileimg}}" alt="Profile picture of {{ownerId}}">
-        </a>
-        <p>
-<!--
-          <a href="/{{ownerId}}/">{{ownerId}}</a> onto <a href="/{{ownerId}}/album/">Artists</a>
--->
-          <a href="#">@{{ownerId}}</a> &nbsp; <p class="description"> {{name}}</p>
-        </p>
+        <span>
+          <a href="https://twitter.com/{{ownerId}}/" title="{{ownerId}}" class="ImgLink">
+            <img src="{{dyn-profileimg}}" alt="Profile picture of {{ownerId}}">
+          </a>
+          <div class="item-info">
+            <div>
+              <!--
+                        <a href="/{{ownerId}}/">{{ownerId}}</a> onto <a href="/{{ownerId}}/album/">Artists</a>
+              -->
+              <div>
+                <a href="#">@{{ownerId}}</a>
+              </div>
+              <div class="description">{{name}}
+              </div>
+            </div>
+          </div>
+        </span>
       </div>
     </div>
   </script>

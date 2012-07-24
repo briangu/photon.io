@@ -7,7 +7,7 @@
 .item .ItemImage { background-color: #FFFFFF; }
 .item .ItemImageImg {min-height: 75px; background-color: #FFFFFF;}
 .item .video {position: absolute; z-index: 1; top: 50%; left: 50%; width: 50px; height: 50px; margin: -25px 0 0 -25px;}
-.item .description {margin: 10px 0 5px; overflow: hidden; word-wrap: break-word;}
+.item .description {overflow: hidden; word-wrap: break-word;}
 
 
 .item.activity { background: #fff; box-shadow: 0 1px 3px rgba(34,25,25,0.4); -moz-box-shadow: 0 1px 2px rgba(34,25,25,0.4); -webkit-box-shadow: 0 1px 3px rgba(34,25,25,0.4); position: absolute }
