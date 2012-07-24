@@ -318,6 +318,7 @@ var snapclearApp = function (initdata) {
     }
 
     $('.select-share-button').click(function() {
+      if ($('.select-share-button').hasClass('disabled')) return;
       var selected = $('.item').filter(function(index) { return $(this).find("input[name='share[]']").is(':checked'); })
       resetShareModal();
       var st = $('#template-share-item').html();
