@@ -27,10 +27,10 @@ object Main {
 }
 
 class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
-  extends ViperServer("/Users/brianguarraci/scm/photon.io/src/main/resources/photon.io") {
-  //res:///photon.io") {
+  extends ViperServer("res:///photon.io") {
 
   final val PAGE_SIZE = 25
+  final val MAIN_TEMPLATE = FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
 
   override def addRoutes {
     val sessions = SimpleTwitterSession.instance
@@ -205,7 +205,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
   }
 
   private def loadPage(session: TwitterSession, pageIdx: Int, countPerPage: Int) : RouteResponse = {
-    var tmp = FileUtils.readFile("/Users/brianguarraci/scm/photon.io/src/main/resources/templates/photon.io/main.html") //FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
+    var tmp = MAIN_TEMPLATE.toString
     tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
     tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
     tmp = tmp.replace("{{dyn-data}}", toJsonArray(getChronResults(storage, session.twitter.getScreenName, countPerPage, pageIdx)).toString())
