@@ -227,8 +227,8 @@ var snapclearApp = function (initdata) {
     }
 
     function enableGalleryClick() {
-      $('.ItemImage').unbind('click')
-      $('.ItemImage').attr('rel', 'gallery');
+      $('.ItemThumb').unbind('click')
+      $('.ItemThumb').attr('rel', 'gallery');
     }
 
     function enableSelectNav() {
@@ -332,8 +332,8 @@ var snapclearApp = function (initdata) {
       }
       var data = {};
       data['id'] = $(item).attr('data-id');
-      data['name'] = $(item).find('.ItemImage').attr('title');
-      data['thumb'] = $(item).find('.ItemImageImg').attr('src')
+      data['name'] = $(item).find('.ItemThumb').attr('title');
+      data['thumb'] = $(item).find('.ItemThumbImg').attr('src')
       $('.share-item-list').append(Mustache.to_html(st, data));
     }
 
