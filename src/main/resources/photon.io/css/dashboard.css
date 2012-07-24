@@ -14,10 +14,10 @@
 .iteminfo .ImgLink {float: left; margin-right: 6px; width: 30px;}
 .iteminfo .ImgLink img {width: 30px; height: 30px;}
 
-.ownerinfo {margin-top: 10px; color: #ad9c9c;}
-.ownerinfo a {color: #8c7e7e;}
-.ownerinfo p {display: table-cell; max-width: 156px; height: 30px; vertical-align: middle;}
-.ownerinfo .NoImage {height: auto; margin: 0;}
+.creatorInfo {margin-top: 10px; color: #ad9c9c;}
+.creatorInfo a {color: #8c7e7e;}
+.creatorInfo p {display: table-cell; max-width: 156px; height: 30px; vertical-align: middle;}
+.creatorInfo .NoImage {height: auto; margin: 0;}
 
 .download_img { width: 80px; }
 

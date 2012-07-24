@@ -47,7 +47,7 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
             if (fileData != null && tagData != null) {
               val upload  = fileData.asInstanceOf[FileUpload]
               val tagSet = FileUtils.readFile(tagData.asInstanceOf[DiskAttribute].getFile)
-              processFile(upload, session.twitter.getScreenName, tagSet) // TODO: sanitize tagset
+              processFile(session, upload, tagSet) // TODO: sanitize tagset
             } else {
               new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST)
             }
@@ -90,7 +90,7 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
     convertedRequest
   }
 
-  def processFile(upload: FileUpload, userId: String, tags: String) : HttpResponse = {
+  def processFile(session: TwitterSession, upload: FileUpload, tags: String) : HttpResponse = {
     var fis: InputStream = null
     try {
       val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
@@ -118,11 +118,12 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
         ("76b321f040f6035c65b048821dcd373bf96dfbba1ffc0a739d5b4da2116180c4", 17639L)
       }
 
+      val userId = session.twitter.getScreenName
       val fmd = ModelUtil.createFileMeta(upload, userId, userId, false, thumbHash, thumbSize, List(fileKey), tags)
       val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
 
       val arr = new JSONArray()
-      arr.put(ModelUtil.createResponseData(fmd, docId))
+      arr.put(ModelUtil.createResponseData(session, fmd, docId))
 
       response.setContent(ChannelBuffers.wrappedBuffer(arr.toString().getBytes("UTF-8")))
       response

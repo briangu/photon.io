@@ -1,7 +1,7 @@
 package io.photon.app
 
 import io.viper.core.server.router.{RouteResponse, RouteUtil, RouteHandler, Route}
-import twitter4j.{Twitter, TwitterException, TwitterFactory}
+import twitter4j.{ProfileImage, Twitter, TwitterException, TwitterFactory}
 import java.io.{InputStreamReader, BufferedReader}
 import twitter4j.auth.{RequestToken, AccessToken}
 import java.util
@@ -91,7 +91,21 @@ class TwitterLogin(handler: TwitterRouteHandler, config: TwitterConfig) extends 
 class TwitterCallback(config: TwitterConfig) extends TwitterGetRoute(config, "/" + config.callbackRoute, null) {}
 class TwitterLogout(handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterGetRoute(config, config.logoutRoute, handler) {}
 
-class TwitterSession(val id: String, val twitter: Twitter, var requestToken: RequestToken, var postLoginRoute: String) {}
+class TwitterSession(val id: String, val twitter: Twitter, var requestToken: RequestToken, var postLoginRoute: String) {
+
+  private val _urlCache = new mutable.HashMap[String, String] with mutable.SynchronizedMap[String, String];
+
+  def getProfileImageUrl(screenname: String) : String = {
+    if (!_urlCache.contains(screenname)) {
+      _urlCache.synchronized {
+        if (!_urlCache.contains(screenname)) {
+          _urlCache.put(screenname, twitter.getProfileImage(screenname, ProfileImage.MINI).getURL)
+        }
+      }
+    }
+    return _urlCache.get(screenname).get
+  }
+}
 
 trait TwitterSessionService {
   def getSession(key: String): TwitterSession

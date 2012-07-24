@@ -6,7 +6,6 @@ import io.viper.common.{ViperServer, NestServer}
 import io.viper.core.server.router._
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpVersion._
-import twitter4j.ProfileImage
 import cloudcmd.common.adapters.{Adapter, FileAdapter}
 import org.json.{JSONArray, JSONObject}
 import java.net.URI
@@ -51,6 +50,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
         new JsonResponse(
           toJsonArray(
+            session,
             getChronResults(
               storage,
               session.twitter.getScreenName,
@@ -67,7 +67,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
           if (ModelUtil.hasReadPriv(meta, session.twitter.getScreenName)) {
-            val obj = ModelUtil.createResponseData(FileMetaData.create(meta), meta.getString("__id"))
+            val obj = ModelUtil.createResponseData(session, FileMetaData.create(meta), meta.getString("__id"))
             val arr = new JSONArray()
             arr.put(obj)
             new JsonResponse(arr)
@@ -134,7 +134,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
             val reshareMeta = ModelUtil.reshareMeta(meta.rawData, sharee)
             val fmd = FileMetaData.create(reshareMeta)
             val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
-            arr.put(ModelUtil.createResponseData(reshareMeta, docId))
+            arr.put(ModelUtil.createResponseData(session, reshareMeta, docId))
           }
         }
 
@@ -202,15 +202,15 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
     var tmp = MAIN_TEMPLATE.toString
     tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
     tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
-    tmp = tmp.replace("{{dyn-data}}", toJsonArray(getChronResults(storage, session.twitter.getScreenName, countPerPage, pageIdx)).toString())
+    tmp = tmp.replace("{{dyn-data}}", toJsonArray(session, getChronResults(storage, session.twitter.getScreenName, countPerPage, pageIdx)).toString())
     tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
-    tmp = tmp.replace("{{dyn-profileimg}}", session.twitter.getProfileImage(session.twitter.getScreenName, ProfileImage.MINI).getURL)
+    tmp = tmp.replace("{{dyn-profileimg}}", session.getProfileImageUrl(session.twitter.getScreenName))
     new HtmlResponse(tmp)
   }
 
-  private def toJsonArray(records: List[Record]) : JSONArray = {
+  private def toJsonArray(session: TwitterSession, records: List[Record]) : JSONArray = {
     val arr = new JSONArray()
-    records.foreach{r : Record => arr.put(ModelUtil.createResponseData(r.rawData, r.id)) }
+    records.foreach{r : Record => arr.put(ModelUtil.createResponseData(session, r.rawData, r.id)) }
     arr
   }
 

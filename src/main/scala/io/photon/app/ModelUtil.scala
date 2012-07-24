@@ -49,11 +49,11 @@ object ModelUtil {
     obj
   }
 
-  def createResponseData(rawFmd: JSONObject, docId: String) : JSONObject = {
-    createResponseData(FileMetaData.create(rawFmd), docId)
+  def createResponseData(session: TwitterSession, rawFmd: JSONObject, docId: String) : JSONObject = {
+    createResponseData(session, FileMetaData.create(rawFmd), docId)
   }
 
-  def createResponseData(fmd: FileMetaData, docId: String) : JSONObject = {
+  def createResponseData(session: TwitterSession, fmd: FileMetaData, docId: String) : JSONObject = {
     val rawData = fmd.toJson.getJSONObject("data")
     val obj = new JSONObject()
     obj.put("id", docId)
@@ -66,6 +66,7 @@ object ModelUtil {
     obj.put("filedate", fmd.getFileDate)
     obj.put("creatorId", rawData.getString("creatorId"))
     obj.put("ownerId", rawData.getString("ownerId"))
+    obj.put("creatorProfileImg", session.getProfileImageUrl(rawData.getString("creatorId")))
     obj.put("isPublic", rawData.getBoolean("isPublic"))
     obj.put("isSharable", hasSharePriv(fmd.getRawData, rawData.getString("ownerId")))
     obj.put("delete_url", String.format("/d/%s", docId))
