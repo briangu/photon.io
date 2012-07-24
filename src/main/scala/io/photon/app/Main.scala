@@ -7,7 +7,6 @@ import io.viper.core.server.router._
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import twitter4j.ProfileImage
-import java.util
 import cloudcmd.common.adapters.{Adapter, FileAdapter}
 import org.json.{JSONArray, JSONObject}
 import java.net.URI
@@ -22,7 +21,7 @@ object Main {
     AsyncScalr.setServiceThreadCount(20) // TODO: set via config
     val storage = Node.createSingleNode("db/photon.io", projectionConfig)
     val adapter = new FileAdapter()
-    adapter.init(null, 0, "cache", new util.HashSet[String](), new URI("file:///tmp/uploads"))
+    adapter.init(null, 0, "cache", new java.util.HashSet[String](), new URI("file:///tmp/uploads"))
     NestServer.run(8080, new Main("photon.io", 8080, storage, adapter))
   }
 }
@@ -60,7 +59,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
 
     addRoute(new TwitterGetRoute(config, "/m/$docId", new TwitterRouteHandler {
       override
-      def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
         val meta = getMetaById(args.get("docId"))
         if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
@@ -78,7 +77,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
     }))
     addRoute(new TwitterGetRoute(config, "/t/$docId", new TwitterRouteHandler {
       override
-      def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
         val meta = getMetaById(args.get("docId"))
         if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
@@ -93,7 +92,7 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
     }))
     addRoute(new TwitterGetRoute(config, "/d/$docId", new TwitterRouteHandler {
       override
-      def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
         val meta = getMetaById(args.get("docId"))
         if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
@@ -107,38 +106,37 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
       }
     }))
 
-    addRoute(new TwitterPostRoute(config, "/share/$docId", new TwitterRouteHandler {
+    addRoute(new TwitterPostRoute(config, "/shares", new TwitterRouteHandler {
       override
-      def exec(session: TwitterSession, args: util.Map[String, String]): RouteResponse = {
-        // TODO: allow for share message
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
+        if (!args.containsKey("sharees")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
+        if (!args.containsKey("ids")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
+        if (!args.containsKey("sharemsg")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
 
-        if (args.containsKey("sharees")) {
-          val meta = getMetaById(args.get("docId"))
-          if (meta == null) {
-            new StatusResponse(HttpResponseStatus.NOT_FOUND)
-          } else {
-            if (hasSharePriv(meta, session.twitter.getScreenName)) {
-              // TODO: validate recipients exist
-              val sharees = args.get("sharees").split(",")
+        val docIds = args.get("ids").split(',')
+        var metas = getMetaListById(docIds.toList)
+        if (metas.length != docIds.length) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
+        metas = metas.filter(m => hasSharePriv(m.rawData, session.twitter.getScreenName))
+        if (metas.length != docIds.length) return new StatusResponse(HttpResponseStatus.FORBIDDEN)
 
-              val arr = new JSONArray()
+        val sharees = args.get("sharees").split(',')
+        val shareMsg = args.get("sharemsg")
 
-              // TODO: allow for new keywords/tags from the share text
-              sharees.foreach{ sharee =>
-                val reshareMeta = ModelUtil.reshareMeta(meta, sharee)
-                val fmd = FileMetaData.create(reshareMeta)
-                val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
-                arr.put(ModelUtil.createResponseData(reshareMeta, docId))
-              }
+        val arr = new JSONArray()
 
-              new JsonResponse(arr)
-            } else {
-              new StatusResponse(HttpResponseStatus.FORBIDDEN)
-            }
+        // TODO: validate sharees are mutually following
+        // TODO: dm
+
+        metas.foreach{ meta =>
+          sharees.foreach{ sharee =>
+            val reshareMeta = ModelUtil.reshareMeta(meta.rawData, sharee)
+            val fmd = FileMetaData.create(reshareMeta)
+            val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
+            arr.put(ModelUtil.createResponseData(reshareMeta, docId))
           }
-        } else {
-          new StatusResponse(HttpResponseStatus.BAD_REQUEST)
         }
+
+        new JsonResponse(arr)
       }
     }))
 
@@ -182,6 +180,16 @@ class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
       null
     } else {
       result(0).toJson
+    }
+  }
+
+  private def getMetaListById(ids: List[String]) : List[Record] = {
+    val ws = ids.map("'%s'".format(_)).mkString
+    val result = storage.select("select * from fmd where hash in (%s)".format(ws)) // TODO: use prepared statements
+    if (result == null || result.size == 0) {
+      List()
+    } else {
+      result
     }
   }
 

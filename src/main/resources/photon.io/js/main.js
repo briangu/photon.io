@@ -259,17 +259,7 @@ var snapclearApp = function (initdata) {
       disableSelectNav();
     }
 
-    $('.share-dialog-button').click(function(m){
-      // args: text => share text
-      //       ids => array of ids
-      //       sharees => screennames of share targets
-
-      $(this).find('textarea').val()
-      $.post()
-    })
-
     $('.sharemsg').change(function() {
-
     });
 
     $('.sharemsg').live('keyup', function() {
@@ -350,7 +340,7 @@ var snapclearApp = function (initdata) {
 
       $.ajax({
         type: 'POST',
-        url: '/share',
+        url: '/shares',
         async: false,
         data: $("#form-share-modal").serialize(),
         success: function() { alert('success')},

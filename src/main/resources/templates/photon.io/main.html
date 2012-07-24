@@ -228,32 +228,32 @@
 </div>
 
 <div id="modal-share" class="modal hide fade">
-  <form id="form-share-modal" action="/share" method="POST" enctype="multipart/form-data">
     <div class="modal-header">
       <a class="close" data-dismiss="modal">&times;</a>
       <h3 class="modal-title">Share files...</h3>
     </div>
     <div class="modal-body">
-      <div class="container-fluid">
-        <div class="row-fluid">
-          <textarea class="sharemsg" name="sharemsg"></textarea>
+      <form id="form-share-modal">
+        <div class="container-fluid">
+          <div class="row-fluid">
+            <textarea class="sharemsg" name="sharemsg"></textarea>
+          </div>
+          <div class="row-fluid sharee-list-wrapper">
+            <strong>Sharing to:</strong> <span class="sharee-list"></span>
+          </div>
+          <div>&nbsp;</div>
+          <div class="row-fluid">
+            <table role="presentation" class="table table-striped"><tbody class="share-item-list"></tbody></table>
+          </div>
+          <input id="ids" name="ids" type="hidden">
+          <input id="sharees" name="sharees" type="hidden">
         </div>
-        <div class="row-fluid sharee-list-wrapper">
-          <strong>Sharing to:</strong> <span class="sharee-list"></span>
-        </div>
-        <div>&nbsp;</div>
-        <div class="row-fluid">
-          <table role="presentation" class="table table-striped"><tbody class="share-item-list"></tbody></table>
-        </div>
-        <input id="ids" hidden>
-        <input id="sharees" hidden>
-      </div>
+      </form>
     </div>
     <div class="modal-footer">
       <a href="#" class="btn" data-dismiss="modal">Close</a>
       <a href="#" class="btn btn-primary share-dialog-button">Share</a>
     </div>
-  </form>
 </div>
 
   <!-- Le javascript

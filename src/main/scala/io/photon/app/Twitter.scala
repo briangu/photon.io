@@ -181,8 +181,13 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
         }
       } else {
         try {
-          val args = RouteUtil.extractPathArgs(_route, path)
-          args.putAll(RouteUtil.extractQueryParams(new URI(request.getUri())))
+          val args = if (request.getMethod == HttpMethod.POST || request.getMethod == HttpMethod.PUT) {
+            RouteUtil.extractArgs(request, _route, path)
+          } else {
+            val args = RouteUtil.extractPathArgs(_route, path)
+            args.putAll(RouteUtil.extractQueryParams(new URI(request.getUri())))
+            args
+          }
 
           val routeResponse = handler.asInstanceOf[TwitterRouteHandler].exec(session, args)
           if (routeResponse.HttpResponse == null) {
