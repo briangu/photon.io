@@ -30,8 +30,12 @@ var snapclearApp = function (initdata) {
       $('.box-editor').val(window.locale.fileupload.boxeditor)
     }
 
-    function attachItemActions() {
-      $('.item').hover(
+    function attachItemsActions() {
+      $('.item').each(function(idx, item) { attachItemActions(item); });
+    }
+
+    function attachItemActions(item) {
+      $(item).hover(
         function(e) {
           $(this).find('.item-actions').filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); }).show();
         },
@@ -41,7 +45,7 @@ var snapclearApp = function (initdata) {
       );
     }
 
-    function unattachItemActions() {
+    function unattachItemsActions() {
       $('.item').unbind('hover');
     }
 
@@ -134,7 +138,7 @@ var snapclearApp = function (initdata) {
       $('.corner-stamp').append(h);
       $gallery.imagesLoaded(function(){
         $gallery.masonry('reload')
-        attachItemActions();
+        attachItemsActions();
       });
     });
 
@@ -189,20 +193,23 @@ var snapclearApp = function (initdata) {
           return $div
           },
         },
-        // trigger Masonry as a callback
         function( newElements ) {
-          // hide new items while they are loading
           var $newElems = $( newElements ).css({ opacity: 0 });
-          // ensure that images load before adding to masonry layout
           $newElems.imagesLoaded(function(){
-            // show elems now they're ready
+
+            if (inSelectMode()) {
+              $($newElems.children()).each(function (idx, item) { attachItemSelectActions(item); });
+            } else {
+              $($newElems.children()).each(function (idx, item) { attachItemActions(item); });
+            }
+
             $newElems.animate({ opacity: 1 });
-            $('#gallery').masonry( 'appended', $newElems, true );
+            $('#gallery').masonry('appended', $newElems, true );
           });
         }
       );
 
-      attachItemActions();
+      attachItemsActions();
     }
 
     initGallery(initdata);
@@ -226,6 +233,10 @@ var snapclearApp = function (initdata) {
     function disableSelectNav() {
       $('.menu-row').hide();
       disableSelectActions();
+    }
+
+    function inSelectMode() {
+      return !$('.menu-row').is(':hidden');
     }
 
     function enableSelectActions() {
@@ -254,7 +265,7 @@ var snapclearApp = function (initdata) {
       $('.item').unbind('click');
       $('.item').removeClass('red');
       resetItemCheckboxes();
-      attachItemActions();
+      attachItemsActions();
       enableGalleryClick();
       disableSelectNav();
     }
@@ -343,7 +354,6 @@ var snapclearApp = function (initdata) {
         url: '/shares',
         async: false,
         data: $("#form-share-modal").serialize(),
-        success: function() { alert('success')},
         error: function() { alert('failed to share!'); },
         dataType: 'json'
       });
@@ -358,22 +368,24 @@ var snapclearApp = function (initdata) {
 
     $('.multi-select').click(function() {
       enableSelectNav();
-      unattachItemActions();
-      disableGalleryClick();
+      unattachItemsActions();
 
-      $(".icon-top-right").show();
       resetItemCheckboxes();
+      attachSelectActions();
+    });
 
-      $(".item").hover(
-        function(e) {
-          $(this).addClass('red');
-        },
-        function(e) {
-          $(this).removeClass('red');
-        }
-      );
+    function attachSelectActions() {
+      disableGalleryClick();
+      $(".item").each(function (idx,item) { attachItemSelectActions(item); });
+    }
 
-      $('.item').click(function(e) {
+    function attachItemSelectActions(item) {
+      $(item).find('a[rel="gallery"]').unbind('click')
+      $(item).find('a[rel="gallery"]').click(function(e) { e.preventDefault(); });
+      $(item).find('a[rel="gallery"]').removeAttr('rel')
+      $(item).find(".icon-top-right").show();
+      $(item).hover(function(e) {$(this).addClass('red');}, function(e) {$(this).removeClass('red');});
+      $(item).click(function(e) {
         var cd = $(this).find("input[name='share[]']");
         cd.prop('checked', !cd.is(':checked'))
         $(this).find('.checkbox-img').attr("src", cd.is(':checked') ? '/img/checked.png' : '/img/unchecked.png');
@@ -385,7 +397,7 @@ var snapclearApp = function (initdata) {
           }
         }
       });
-    });
+    }
 
     $('.download-panel').draggable({ axis: "x", containment: 'parent', zIndex: 2700, scroll: false });
 
