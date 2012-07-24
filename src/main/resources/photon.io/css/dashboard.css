@@ -4,8 +4,8 @@
 .item .ImgLink:hover {text-decoration: none;}
 .item .ImgLink img {max-width: 192px; opacity: 1; -webkit-transition: opacity 0.3s; }
 .item .ImgLink img.lazy { opacity: 0; }
-.item .ItemImage { background-color: #f2f0f0; }
-.item .ItemImageImg {min-height: 75px; background-color: #f2f0f0;}
+.item .ItemImage { background-color: #FFFFFF; }
+.item .ItemImageImg {min-height: 75px; background-color: #FFFFFF;}
 .item .video {position: absolute; z-index: 1; top: 50%; left: 50%; width: 50px; height: 50px; margin: -25px 0 0 -25px;}
 .item .description {margin: 10px 0 5px; overflow: hidden; word-wrap: break-word;}
 
