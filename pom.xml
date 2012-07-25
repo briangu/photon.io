@@ -185,7 +185,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>io.photon.app.Main</mainClass>
+              <mainClass>io.photon.app.Photon</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

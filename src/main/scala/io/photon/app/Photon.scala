@@ -13,7 +13,7 @@ import cloudcmd.common.FileMetaData
 import com.thebuzzmedia.imgscalr.AsyncScalr
 
 
-object Main {
+object Photon {
   val projectionConfig = new JSONObject(FileUtils.readResourceFile(this.getClass, "/config/photon.io/projections.json"))
 
   def main(args: Array[String]) {
@@ -21,11 +21,11 @@ object Main {
     val storage = Node.createSingleNode("db/photon.io", projectionConfig)
     val adapter = new FileAdapter()
     adapter.init(null, 0, "cache", new java.util.HashSet[String](), new URI("file:///Users/brianguarraci/uploads"))
-    NestServer.run(8080, new Main("photon.io", 8080, storage, adapter))
+    NestServer.run(8080, new Photon("photon.io", 8080, storage, adapter))
   }
 }
 
-class Main(hostname: String, port: Int, storage: Node, adapter: Adapter)
+class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
   extends ViperServer("res:///photon.io") {
 
   final val PAGE_SIZE = 25
