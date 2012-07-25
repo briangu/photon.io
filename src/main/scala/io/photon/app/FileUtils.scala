@@ -66,21 +66,24 @@ object FileUtils {
       val os = new ByteArrayOutputStream()
       try {
         val image = ImageIO.read(srcFile)
+        if (image != null) {
+          val future =
+            AsyncScalr.resize(
+              image,
+              Scalr.Method.BALANCED,
+              Scalr.Mode.FIT_TO_WIDTH,
+              thumbWidth,
+              thumbHeight,
+              Scalr.OP_ANTIALIAS)
 
-        val future =
-          AsyncScalr.resize(
-            image,
-            Scalr.Method.BALANCED,
-            Scalr.Mode.FIT_TO_WIDTH,
-            thumbWidth,
-            thumbHeight,
-            Scalr.OP_ANTIALIAS)
-
-        val thumbnail = future.get()
-        if (thumbnail != null) {
-          ImageIO.write(thumbnail, "jpg", os)
+          val thumbnail = future.get()
+          if (thumbnail != null) {
+            ImageIO.write(thumbnail, "jpg", os)
+          }
+          os.toByteArray
+        } else {
+          null
         }
-        os.toByteArray
       }
       catch {
         case e: Exception => {
