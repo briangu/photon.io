@@ -85,7 +85,7 @@ class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
           if (ModelUtil.hasReadPriv(meta, session.twitter.getScreenName)) {
-            buildResponse(adapter, meta.getString("thumbHash"), meta.getString("type"))
+            buildDownloadResponse(adapter, meta.getString("thumbHash"), meta.getString("type"))
           } else {
             new StatusResponse(HttpResponseStatus.FORBIDDEN)
           }
@@ -100,7 +100,7 @@ class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
           if (ModelUtil.hasReadPriv(meta, session.twitter.getScreenName)) {
-            buildResponse(adapter, meta.getJSONArray("blocks").getString(0), meta.getString("type"))
+            buildDownloadResponse(adapter, meta.getJSONArray("blocks").getString(0), meta.getString("type"))
           } else {
             new StatusResponse(HttpResponseStatus.FORBIDDEN)
           }
@@ -189,11 +189,12 @@ class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
     }
   }
 
-  private def buildResponse(adapter: Adapter, hash: String, contentType: String) : RouteResponse = {
+  private def buildDownloadResponse(adapter: Adapter, hash: String, contentType: String) : RouteResponse = {
     val is = adapter.loadChannel(hash)
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
     response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
     response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, is.capacity())
+    response.setHeader(HttpHeaders.Names.EXPIRES, "Expires: Thu, 29 Oct 2020 17:04:19 GMT")
     response.setContent(is)
     new RouteResponse(response)
   }
