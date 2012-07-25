@@ -111,6 +111,8 @@ overflow: hidden;
   border-style: solid;
   border-color: red;
   cursor: pointer;
+  margin-left: -3px;
+  margin-top: 7px;
 }
 
 .sidebar-nav {
