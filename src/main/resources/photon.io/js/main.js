@@ -206,7 +206,7 @@ var snapclearApp = function (initdata) {
           var $newElems = $( newElements ).css({ opacity: 0 });
           $newElems.imagesLoaded(function(){
 
-            var sels = $($newElems.children()).filter(function(index) { return !!!$(this).attr('data-sharable'); })
+            var sels = $($newElems.children()).filter(function(index) { return !!$(this).attr('data-sharable'); })
 
             if (inSelectMode()) {
               $(sels).each(function (idx, item) { attachItemSelectActions(item); });
