@@ -137,7 +137,7 @@ object SimpleTwitterSession {
 
 object WhiteListService {
   def inWhiteList(screenname: String): Boolean = {
-    new File("whitelist/%s".format(screenname)).exists
+    new File("whitelist/%s".format(screenname.toLowerCase)).exists
   }
 }
 
