@@ -1,3 +1,12 @@
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+  background-color: #f7f5f5;
+}
+.sidebar-nav {
+  padding: 9px 0;
+}
+
 .item {position: absolute; width: 192px; float: left; margin: 10px 0 5px; padding: 15px 15px 0; font-size: 11px; background-color: #fff; box-shadow: 0 1px 3px rgba(34,25,25,0.4); -moz-box-shadow: 0 1px 2px rgba(34,25,25,0.4); -webkit-box-shadow: 0 1px 3px rgba(34,25,25,0.4);}
 .item .ItemHolder {position: relative;}
 .item .ImgLink {position: relative; }
@@ -20,6 +29,48 @@
 .creatorInfo .NoImage {height: auto; margin: 0;}
 
 .popover {z-index:12000;}
+
+h2 {
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 22px;
+  border-bottom: 1px solid #E1DFDF;
+}
+
+li + h2, h2 + li {padding-top: 10px;}
+
+.trends {
+margin-bottom: 20px;
+}
+
+.trends ul {
+margin-top: -4px;
+}
+
+.trends li {
+font-size: 12px;
+line-height: 14px;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+
+.toptag {
+/*
+margin: 0 -15px;
+padding: 5px 15px 5px 51px;
+overflow: hidden;
+
+position: relative;
+display: block;
+font-size: 11px;
+font-weight: normal;
+color: #221919;
+*/
+}
+
+.corner-stamp-text {
+}
 
 .download_img { width: 80px; }
 
@@ -120,8 +171,8 @@ overflow: hidden;
 }
 
 .corner-stamp {
+  background-color: white;
   margin-top: 10px;
-  width: 200px;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
