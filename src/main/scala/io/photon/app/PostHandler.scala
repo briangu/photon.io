@@ -126,8 +126,8 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Index
       }
 
       val userId = session.twitter.getScreenName
-      val fmd = ModelUtil.createFileMeta(upload, userId, userId, false, thumbHash, thumbSize, List(fileKey), tags)
-//      val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
+      val fmd = ModelUtil.createFileMeta(upload, userId, userId, false, thumbHash, thumbSize, List(fileKey), tagSet)
+      cas.store(fmd.createBlockContext, new ByteArrayInputStream(fmd.getDataAsString.getBytes("UTF-8")))
       storage.add(fmd)
 
       val arr = new JSONArray()

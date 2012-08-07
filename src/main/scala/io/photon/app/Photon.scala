@@ -13,7 +13,7 @@ import cloudcmd.common._
 import engine.IndexStorage
 import java.io.File
 import java.net.InetAddress
-import util.JsonUtil
+import util.{FileTypeUtil, JsonUtil}
 
 
 object Photon {
@@ -28,7 +28,7 @@ object Photon {
     val port = 8080
     println("booting at http://%s:%d".format(ipAddress, port))
 
-    AsyncScalr.setServiceThreadCount(20) // TODO: set via config
+    AsyncScalr.setServiceThreadCount(2) // TODO: set via config
 
     var configRoot: String = FileUtil.findConfigDir(FileUtil.getCurrentWorkingDirectory, ".cld")
     if (configRoot == null) {
@@ -106,11 +106,12 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
           if (ModelUtil.hasReadPriv(meta.getRawData, session.twitter.getScreenName)) {
-            val (thumbType, ctx) = if (meta.getRawData.has("thumbHash") && meta.getType != null) {
-              (meta.getType, new BlockContext(meta.getRawData.getString("thumbHash")))
+            var mimeType = getMimeType(meta)
+            if (mimeType == null) mimeType = FileTypeUtil.instance.getTypeFromExtension(meta.getFileExt)
+            val (thumbType, ctx) = if (meta.getRawData.has("thumbHash") && mimeType != null) {
+              (mimeType, meta.createBlockContext(meta.getRawData.getString("thumbHash")))
             } else {
-              val mimeType = getMimeType(meta)
-              if (mimeType.equals("application/octet-stream")) {
+              if (mimeType == null || !mimeType.startsWith("image")) {
                 ("image/png", new BlockContext("76b321f040f6035c65b048821dcd373bf96dfbba1ffc0a739d5b4da2116180c4", Set("t")))
               } else {
                 (mimeType, meta.createBlockContext(meta.getBlockHashes.getString(0)))

@@ -18,7 +18,7 @@ object ModelUtil {
   }
   def isPublic(meta: JSONObject) : Boolean = meta.has("isPublic") && meta.getBoolean("isPublic")
 
-  def createFileMeta(upload: FileUpload, creatorId: String, ownerId: String, isPublic: Boolean, thumbHash: String, thumbSize: Long, blockHashes: List[String], tags: String) : FileMetaData = {
+  def createFileMeta(upload: FileUpload, creatorId: String, ownerId: String, isPublic: Boolean, thumbHash: String, thumbSize: Long, blockHashes: List[String], tags: Set[String]) : FileMetaData = {
     val fileName = upload.getFilename
     val extIndex = fileName.lastIndexOf(".")
 
@@ -26,7 +26,7 @@ object ModelUtil {
     blockHashes.foreach(blocksArr.put)
 
     val tagsArr = new JSONArray()
-    tags.split(' ').filter(_.length > 0).foreach(tagsArr.put)
+    tags.foreach(tagsArr.put)
 
     FileMetaData.create(
       JsonUtil.createJsonObject(
@@ -36,14 +36,14 @@ object ModelUtil {
         "filesize", upload.length().asInstanceOf[AnyRef],
         "filedate", new Date().getTime.asInstanceOf[AnyRef],
         "blocks", blocksArr,
-        "type", upload.getContentType,
+        "mimeType", upload.getContentType,
         "tags", tagsArr, // tags cloudcmd style
         "thumbHash", thumbHash,
         "thumbSize", thumbSize.asInstanceOf[AnyRef],
         "creatorId", creatorId.toLowerCase,
         "isPublic", isPublic.asInstanceOf[AnyRef],
         "ownerId", ownerId.toLowerCase,
-        "keywords", tags // raw tags for indexing
+        "keywords", tags.mkString(" ") // raw tags for indexing
         ))
   }
 
