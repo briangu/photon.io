@@ -4,29 +4,50 @@ import io.stored.server.common.Record
 import io.stored.server.Node
 import io.viper.common.{ViperServer, NestServer}
 import io.viper.core.server.router._
+import io.viper.core.server.router.RouteResponse.RouteResponseDispose
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpVersion._
-import cloudcmd.common.adapters.{Adapter, FileAdapter}
 import org.json.{JSONArray, JSONObject}
-import java.net.URI
-import cloudcmd.common.FileMetaData
 import com.thebuzzmedia.imgscalr.AsyncScalr
+import cloudcmd.common._
+import engine.IndexStorage
+import java.io.File
+import java.net.InetAddress
+import util.JsonUtil
 
 
 object Photon {
   val projectionConfig = new JSONObject(FileUtils.readResourceFile(this.getClass, "/config/photon.io/projections.json"))
 
+  def getIpAddress: String = {
+    InetAddress.getLocalHost.getHostAddress
+  }
+
   def main(args: Array[String]) {
+    val ipAddress = getIpAddress
+    val port = 8080
+    println("booting at http://%s:%d".format(ipAddress, port))
+
     AsyncScalr.setServiceThreadCount(20) // TODO: set via config
-    val storage = Node.createSingleNode("db/photon.io", projectionConfig)
-    val adapter = new FileAdapter()
-    adapter.init(null, 0, "cache", new java.util.HashSet[String](), new URI("file:///Users/brianguarraci/uploads"))
-    NestServer.run(8080, new Photon("photon.io", 8080, storage, adapter))
+
+    var configRoot: String = FileUtil.findConfigDir(FileUtil.getCurrentWorkingDirectory, ".cld")
+    if (configRoot == null) {
+      configRoot = System.getenv("HOME") + File.separator + ".cld"
+      new File(configRoot).mkdir
+    }
+
+    CloudServices.init(configRoot)
+
+    try {
+     // val storage = Node.createSingleNode("db/photon.io", projectionConfig)
+      NestServer.run(port, new Photon(ipAddress, port, CloudServices.IndexStorage, CloudServices.CloudEngine))
+    } finally {
+      CloudServices.shutdown
+    }
   }
 }
 
-class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
-  extends ViperServer("res:///photon.io") {
+class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAddressableStorage) extends ViperServer("res:///photon.io") {
 
   final val PAGE_SIZE = 25
   final val MAIN_TEMPLATE = FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
@@ -49,7 +70,7 @@ class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
         new JsonResponse(
-          toJsonArray(
+          resultsToJsonArray(
             session,
             getChronResults(
               storage,
@@ -66,8 +87,8 @@ class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
         if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
-          if (ModelUtil.hasReadPriv(meta, session.twitter.getScreenName)) {
-            val obj = ModelUtil.createResponseData(session, FileMetaData.create(meta), meta.getString("__id"))
+          if (ModelUtil.hasReadPriv(meta.getRawData, session.twitter.getScreenName)) {
+            val obj = ModelUtil.createResponseData(session, meta, meta.getHash)
             val arr = new JSONArray()
             arr.put(obj)
             new JsonResponse(arr)
@@ -84,8 +105,18 @@ class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
         if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
-          if (ModelUtil.hasReadPriv(meta, session.twitter.getScreenName)) {
-            buildDownloadResponse(adapter, meta.getString("thumbHash"), meta.getString("type"))
+          if (ModelUtil.hasReadPriv(meta.getRawData, session.twitter.getScreenName)) {
+            val (thumbType, ctx) = if (meta.getRawData.has("thumbHash") && meta.getType != null) {
+              (meta.getType, new BlockContext(meta.getRawData.getString("thumbHash")))
+            } else {
+              val mimeType = getMimeType(meta)
+              if (mimeType.equals("application/octet-stream")) {
+                ("image/png", new BlockContext("76b321f040f6035c65b048821dcd373bf96dfbba1ffc0a739d5b4da2116180c4", Set("t")))
+              } else {
+                (mimeType, meta.createBlockContext(meta.getBlockHashes.getString(0)))
+              }
+            }
+            buildDownloadResponse(cas, ctx, thumbType)
           } else {
             new StatusResponse(HttpResponseStatus.FORBIDDEN)
           }
@@ -99,8 +130,8 @@ class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
         if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
-          if (ModelUtil.hasReadPriv(meta, session.twitter.getScreenName)) {
-            buildDownloadResponse(adapter, meta.getJSONArray("blocks").getString(0), meta.getString("type"))
+          if (ModelUtil.hasReadPriv(meta.getRawData, session.twitter.getScreenName)) {
+            buildDownloadResponse(cas, meta.createBlockContext(meta.getBlockHashes.getString(0)), getMimeType(meta))
           } else {
             new StatusResponse(HttpResponseStatus.FORBIDDEN)
           }
@@ -118,7 +149,7 @@ class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
         val docIds = args.get("ids").split(',')
         var metas = getMetaListById(docIds.toList)
         if (metas.length != docIds.length) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
-        metas = metas.filter(m => ModelUtil.hasSharePriv(m.rawData, session.twitter.getScreenName))
+        metas = metas.filter(m => ModelUtil.hasSharePriv(m.getRawData, session.twitter.getScreenName))
         if (metas.length != docIds.length) return new StatusResponse(HttpResponseStatus.FORBIDDEN)
 
         val sharees = args.get("sharees").split(',')
@@ -131,10 +162,11 @@ class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
 
         metas.foreach{ meta =>
           sharees.foreach{ sharee =>
-            val reshareMeta = ModelUtil.reshareMeta(meta.rawData, sharee)
+            val reshareMeta = ModelUtil.reshareMeta(meta.getRawData, sharee)
             val fmd = FileMetaData.create(reshareMeta)
-            val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
-            arr.put(ModelUtil.createResponseData(session, reshareMeta, docId))
+            storage.add(fmd)
+//            val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
+            arr.put(ModelUtil.createResponseData(session, reshareMeta, fmd.getHash))
           }
         }
 
@@ -142,7 +174,7 @@ class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
       }
     }))
 
-    addRoute(new PostHandler("/u/", sessions, storage, adapter, 640, 480))
+    addRoute(new PostHandler("/u/", sessions, storage, cas, 640, 480))
 
     addRoute(new TwitterLogin(
       new TwitterRouteHandler {
@@ -170,48 +202,82 @@ class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
       config))
   }
 
-  private def getMetaById(id: String) : JSONObject = {
+  private def getMimeType(fmd: FileMetaData) : String = {
+    if (fmd.getType != null) return fmd.getType
+    Option(fmd.getFileExt) match {
+      case Some("jpg") => "image/jpg"
+      case Some("gif") => "image/gif"
+      case Some("png") => "image/png"
+      case _ => "application/octet-stream"
+    }
+  }
+
+  private def getMetaById(id: String) : FileMetaData = {
+/*
     val result = storage.select("select * from fmd where hash = '%s'".format(id)) // TODO: use prepared statements
     if (result == null || result.size == 0) {
       null
     } else {
-      result(0).toJson
+      FileMetaData.create(id, result(0).toJson)
+    }
+*/
+    val result = storage.find(JsonUtil.createJsonObject("hash", id + ".meta"))
+    if (result == null || result.length == 0) {
+      null
+    } else {
+      FileMetaData.fromJson(result.getJSONObject(0))
     }
   }
 
-  private def getMetaListById(ids: List[String]) : List[Record] = {
+  private def getMetaListById(ids: List[String]) : List[FileMetaData] = {
+/*
     val ws = ids.map("'%s'".format(_)).mkString(",")
     val result = storage.select("select * from fmd where hash in (%s)".format(ws)) // TODO: use prepared statements
-    if (result == null || result.size == 0) {
+*/
+    val arr = new JSONArray
+    ids.foreach(id => arr.put(id + ".meta"))
+    val result = storage.find(JsonUtil.createJsonObject("hash", arr))
+    if (result == null || result.length() == 0) {
       List()
     } else {
-      result
+      (0 until result.length).map(idx => FileMetaData.fromJson(result.getJSONObject(idx))).toList
     }
   }
 
-  private def buildDownloadResponse(adapter: Adapter, hash: String, contentType: String) : RouteResponse = {
-    val is = adapter.loadChannel(hash)
+  private def buildDownloadResponse(cas: ContentAddressableStorage, ctx: BlockContext, contentType: String) : RouteResponse = {
+    val (is, length) = cas.load(ctx)
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
     response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
-    response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, is.capacity())
+    response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, length)
     response.setHeader(HttpHeaders.Names.EXPIRES, "Expires: Thu, 29 Oct 2020 17:04:19 GMT")
-    response.setContent(is)
-    new RouteResponse(response)
+    response.setContent(new FileChannelBuffer(is, length))
+    new RouteResponse(response, new RouteResponseDispose {
+      def dispose() { is.close }
+    })
   }
 
   private def loadPage(session: TwitterSession, pageIdx: Int, countPerPage: Int) : RouteResponse = {
     var tmp = MAIN_TEMPLATE.toString
     tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
     tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
-    tmp = tmp.replace("{{dyn-data}}", toJsonArray(session, getChronResults(storage, session.twitter.getScreenName, countPerPage, pageIdx)).toString())
-    tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
+    tmp = tmp.replace("{{dyn-data}}", resultsToJsonArray(session, getChronResults(storage, session.twitter.getScreenName, countPerPage, pageIdx)).toString())
+//    tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
     tmp = tmp.replace("{{dyn-profileimg}}", session.getProfileImageUrl(session.twitter.getScreenName))
     new HtmlResponse(tmp)
   }
 
-  private def toJsonArray(session: TwitterSession, records: List[Record]) : JSONArray = {
+  private def resultsToJsonArray(session: TwitterSession, records: List[Record]) : JSONArray = {
     val arr = new JSONArray()
     records.foreach{r : Record => arr.put(ModelUtil.createResponseData(session, r.rawData, r.id)) }
+    arr
+  }
+
+  private def resultsToJsonArray(session: TwitterSession, records: JSONArray) : JSONArray = {
+    val arr = new JSONArray()
+    (0 until records.length).map { idx =>
+      val obj = records.getJSONObject(idx)
+      arr.put(ModelUtil.createResponseData(session, obj.getJSONObject("data"), obj.getString("hash")))
+    }
     arr
   }
 
@@ -222,7 +288,16 @@ class Photon(hostname: String, port: Int, storage: Node, adapter: Adapter)
     null
   }
 
-  private def getChronResults(storage: Node, ownerId: String, count: Int, offset: Int = 0) : List[Record] = {
-    storage.select("select * from fmd where ownerId = '%s' order by filedate DESC limit %d OFFSET %d".format(ownerId.toLowerCase, count, offset))
+  private def getChronResults(storage: IndexStorage, ownerId: String, count: Int = PAGE_SIZE, offset: Int = 0) : JSONArray = {
+//    storage.select("select * from fmd where ownerId = '%s' order by filedate DESC limit %d OFFSET %d".format(ownerId.toLowerCase, count, offset))
+    val filter = JsonUtil.createJsonObject(
+//      "ownerId", ownerId,
+      "count", count.asInstanceOf[AnyRef],
+      "offset", offset.asInstanceOf[AnyRef],
+      "orderBy", JsonUtil.createJsonObject(
+        "name", "filedate",
+        "desc", true.asInstanceOf[AnyRef]
+      ))
+    storage.find(filter)
   }
 }

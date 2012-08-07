@@ -7,12 +7,12 @@ import org.jboss.netty.handler.codec.http._
 import java.io._
 import org.jboss.netty.buffer.ChannelBuffers
 import org.json.{JSONException, JSONArray}
-import cloudcmd.common.adapters.Adapter
-import io.stored.server.Node
 import io.stored.common.CryptoUtil
 import org.jboss.netty.handler.codec.http.HttpHeaders._
+import cloudcmd.common.{ContentAddressableStorage, BlockContext}
+import cloudcmd.common.engine.IndexStorage
 
-class PostHandler(route: String, sessions: TwitterSessionService, storage: Node, adapter: Adapter, thumbWidth: Int, thumbHeight: Int) extends Route(route) {
+class PostHandler(route: String, sessions: TwitterSessionService, storage: IndexStorage, cas: ContentAddressableStorage, thumbWidth: Int, thumbHeight: Int) extends Route(route) {
 
   final val THUMBNAIL_CREATE_THRESHOLD = 128 * 1024 // TODO: come from config
 
@@ -98,7 +98,9 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
       // TODO: possibly do store and thumb in parallel
       fis = new FileInputStream(upload.getFile)
       val fileKey = CryptoUtil.computeHashAsString(upload.getFile)
-      adapter.store(fis, fileKey)
+      val tagSet = tags.split(" ").filter(_.length > 0).toSet
+      val ctx = new BlockContext(fileKey, tagSet)
+      cas.store(ctx, fis)
       val contentLength = upload.length()
       val contentType = upload.getContentType
       val (thumbHash, thumbSize) = if (contentType.startsWith("image")) {
@@ -108,7 +110,12 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
           val ba = FileUtils.createThumbnail(upload.getFile, thumbWidth, thumbHeight)
           if (ba != null) {
             val hash = CryptoUtil.computeHash(ba)
-            adapter.store(new ByteArrayInputStream(ba), hash)
+            val bis = new ByteArrayInputStream(ba)
+            try {
+              cas.store(new BlockContext(hash, tagSet), bis)
+            } finally {
+              bis.close
+            }
             (hash, ba.length.toLong)
           } else {
             ("76b321f040f6035c65b048821dcd373bf96dfbba1ffc0a739d5b4da2116180c4", 17639L)
@@ -120,10 +127,11 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Node,
 
       val userId = session.twitter.getScreenName
       val fmd = ModelUtil.createFileMeta(upload, userId, userId, false, thumbHash, thumbSize, List(fileKey), tags)
-      val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
+//      val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
+      storage.add(fmd)
 
       val arr = new JSONArray()
-      arr.put(ModelUtil.createResponseData(session, fmd, docId))
+      arr.put(ModelUtil.createResponseData(session, fmd, fmd.getHash))
 
       response.setContent(ChannelBuffers.wrappedBuffer(arr.toString().getBytes("UTF-8")))
       response
