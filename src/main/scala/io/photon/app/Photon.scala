@@ -10,6 +10,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion._
 import org.json.{JSONArray, JSONObject}
 import com.thebuzzmedia.imgscalr.AsyncScalr
 import cloudcmd.common._
+import adapters.DataNotFoundException
 import engine.IndexStorage
 import java.io.File
 import java.net.InetAddress
@@ -106,7 +107,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
           if (ModelUtil.hasReadPriv(meta.getRawData, session.twitter.getScreenName)) {
-            var mimeType = getMimeType(meta)
+            var mimeType = meta.getType
             if (mimeType == null) mimeType = FileTypeUtil.instance.getTypeFromExtension(meta.getFileExt)
             val (thumbType, ctx) = if (meta.getRawData.has("thumbHash") && mimeType != null) {
               (mimeType, meta.createBlockContext(meta.getRawData.getString("thumbHash")))
@@ -132,7 +133,8 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
           if (ModelUtil.hasReadPriv(meta.getRawData, session.twitter.getScreenName)) {
-            buildDownloadResponse(cas, meta.createBlockContext(meta.getBlockHashes.getString(0)), getMimeType(meta))
+            val mimeType = if (meta.getType == null) "application/octet-stream" else meta.getType
+            buildDownloadResponse(cas, meta.createBlockContext(meta.getBlockHashes.getString(0)), mimeType)
           } else {
             new StatusResponse(HttpResponseStatus.FORBIDDEN)
           }
@@ -203,16 +205,6 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
       config))
   }
 
-  private def getMimeType(fmd: FileMetaData) : String = {
-    if (fmd.getType != null) return fmd.getType
-    Option(fmd.getFileExt) match {
-      case Some("jpg") => "image/jpg"
-      case Some("gif") => "image/gif"
-      case Some("png") => "image/png"
-      case _ => "application/octet-stream"
-    }
-  }
-
   private def getMetaById(id: String) : FileMetaData = {
 /*
     val result = storage.select("select * from fmd where hash = '%s'".format(id)) // TODO: use prepared statements
@@ -246,15 +238,21 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
   }
 
   private def buildDownloadResponse(cas: ContentAddressableStorage, ctx: BlockContext, contentType: String) : RouteResponse = {
-    val (is, length) = cas.load(ctx)
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
-    response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, length)
-    response.setHeader(HttpHeaders.Names.EXPIRES, "Expires: Thu, 29 Oct 2020 17:04:19 GMT")
-    response.setContent(new FileChannelBuffer(is, length))
-    new RouteResponse(response, new RouteResponseDispose {
-      def dispose() { is.close }
-    })
+    try {
+      val (is, length) = cas.load(ctx)
+      val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+      response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
+      response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, length)
+      response.setHeader(HttpHeaders.Names.EXPIRES, "Expires: Thu, 29 Oct 2020 17:04:19 GMT")
+      response.setContent(new FileChannelBuffer(is, length))
+      new RouteResponse(response, new RouteResponseDispose {
+        def dispose() { is.close }
+      })
+    } catch {
+      case e: DataNotFoundException => {
+        new StatusResponse(HttpResponseStatus.NOT_FOUND)
+      }
+    }
   }
 
   private def loadPage(session: TwitterSession, pageIdx: Int, countPerPage: Int) : RouteResponse = {
