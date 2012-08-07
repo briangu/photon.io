@@ -34,7 +34,8 @@ object ModelUtil {
         "filename", fileName,
         "fileext", if (extIndex >= 0) { fileName.substring(extIndex + 1) } else { null },
         "filesize", upload.length().asInstanceOf[AnyRef],
-        "filedate", new Date().getTime.asInstanceOf[AnyRef],
+        "filedate", new Date().getTime.asInstanceOf[AnyRef], // TODO: get from image meta if we have it
+        "createdDate", new Date().getTime.asInstanceOf[AnyRef],
         "blocks", blocksArr,
         "mimeType", upload.getContentType,
         "tags", tagsArr, // tags cloudcmd style

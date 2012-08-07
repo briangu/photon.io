@@ -296,7 +296,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
       "count", count.asInstanceOf[AnyRef],
       "offset", offset.asInstanceOf[AnyRef],
       "orderBy", JsonUtil.createJsonObject(
-        "name", "filedate",
+        "name", "createdDate",
         "desc", true.asInstanceOf[AnyRef]
       ))
     storage.find(filter)
