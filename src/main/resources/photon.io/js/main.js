@@ -147,7 +147,8 @@ var snapclearApp = function (initdata) {
       var x = JSON.parse(data.jqXHR.responseText)[0]
       var h = Mustache.to_html(template, x);
       var $gallery = $('#gallery')
-      $('.corner-stamp').append(h);
+//      $('.corner-stamp').append(h);
+      $gallery.prepend(h);
       $gallery.imagesLoaded(function(){
         $gallery.masonry('reload')
         attachItemsActions();

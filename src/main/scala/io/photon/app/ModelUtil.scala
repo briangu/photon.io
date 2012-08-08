@@ -37,7 +37,7 @@ object ModelUtil {
 
     val obj = new JSONObject()
     obj.put("id", id)
-    obj.put("url", String.format("/d/%s", id)) // references stored.io doc that contains the real file reference
+    obj.put("url", String.format("/d/%s", id))
     obj.put("name", fmd.getFilename)
     obj.put("type", fmd.getType)
     obj.put("size", fmd.getFileSize)
@@ -45,11 +45,11 @@ object ModelUtil {
 
     val properties = fmd.getProperties()
 
-    obj.put("thumbnail_url", "/t/%s".format(id)) // references stored.io doc that contains the real thumbnail reference
+    obj.put("thumbnail_url", "/t/%s".format(id))
     obj.put("delete_url", String.format("/d/%s", id))
     obj.put("delete_type", "DELETE")
 
-    obj.put("tags", properties.getString(fmd.getTags.mkString(" ")))
+    obj.put("tags", fmd.getTags.mkString(" "))
     obj.put("creatorName", session.getScreenName(properties.getLong("creatorId")))
     obj.put("ownerName", session.getScreenName(properties.getLong("ownerId")))
     obj.put("creatorProfileImg", session.getProfileImageUrl(properties.getLong("creatorId")))

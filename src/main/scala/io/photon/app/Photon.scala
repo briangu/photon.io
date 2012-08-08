@@ -72,7 +72,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
             session,
             getChronResults(
               storage,
-              session.twitter.getScreenName,
+              session.twitter.getId,
               PAGE_SIZE,
               (math.max(args.get("page").toInt-1, 0)) * PAGE_SIZE)))
       }
@@ -147,18 +147,19 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
         if (!args.containsKey("ids")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
         if (!args.containsKey("sharemsg")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
 
-        val docIds = args.get("ids").split(',')
-        var metas = getMetaListById(docIds.toList)
-        if (metas.length != docIds.length) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
-        metas = metas.filter(m => ModelUtil.hasSharePriv(m, session.twitter.getId))
-        if (metas.length != docIds.length) return new StatusResponse(HttpResponseStatus.FORBIDDEN)
-
         val shareeNames = args.get("sharees").split(',')
         val shareeIds = shareeNames.par.map{ name =>
           val shareeId = session.getIdFromScreenName(name)
           if (shareeId == 0) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
           shareeId
         }
+
+        val docIds = args.get("ids").split(',')
+        var metas = getMetaListById(docIds.toList)
+        if (metas.length != docIds.length) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
+        metas = metas.filter(m => ModelUtil.hasSharePriv(m, session.twitter.getId))
+        if (metas.length != docIds.length) return new StatusResponse(HttpResponseStatus.FORBIDDEN)
+
         val shareMsg = args.get("sharemsg")
 
         val arr = new JSONArray()
@@ -265,7 +266,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
     var tmp = MAIN_TEMPLATE.toString
     tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
     tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
-    tmp = tmp.replace("{{dyn-data}}", resultsToJsonArray(session, getChronResults(storage, session.twitter.getScreenName, countPerPage, pageIdx)).toString())
+    tmp = tmp.replace("{{dyn-data}}", resultsToJsonArray(session, getChronResults(storage, session.twitter.getId, countPerPage, pageIdx)).toString())
 //    tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
     tmp = tmp.replace("{{dyn-profileimg}}", session.getProfileImageUrl(session.twitter.getId))
     new HtmlResponse(tmp)
@@ -293,10 +294,10 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
     null
   }
 
-  private def getChronResults(storage: IndexStorage, ownerId: String, count: Int = PAGE_SIZE, offset: Int = 0) : JSONArray = {
+  private def getChronResults(storage: IndexStorage, ownerId: Long, count: Int = PAGE_SIZE, offset: Int = 0) : JSONArray = {
 //    storage.select("select * from fmd where ownerId = '%s' order by filedate DESC limit %d OFFSET %d".format(ownerId.toLowerCase, count, offset))
     val filter = JsonUtil.createJsonObject(
-      "properties__ownerId", ownerId,
+      "properties__ownerId", ownerId.asInstanceOf[AnyRef],  // TODO: use colon syntax for stored.io
       "count", count.asInstanceOf[AnyRef],
       "offset", offset.asInstanceOf[AnyRef],
       "orderBy", JsonUtil.createJsonObject(

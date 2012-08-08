@@ -88,16 +88,17 @@ class PostHandler(route: String, sessions: TwitterSessionService, storage: Index
     convertedRequest
   }
 
-  def processFile(session: TwitterSession, upload: FileUpload, tags: String) : HttpResponse = {
+  def processFile(session: TwitterSession, upload: FileUpload, tags: String, isPublic: Boolean = false) : HttpResponse = {
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+
+    val tagSet = tags.split(" ").filter(_.length > 0).toSet
 
     val properties = new JSONObject
     properties.put("ownerId", session.twitter.getId)
     properties.put("creatorId", session.twitter.getId)
+    properties.put("isPublic", isPublic)
 
-    val tagSet = tags.split(" ").filter(_.length > 0).toSet
-
-    val fmd = fileProcessor.add(upload.getFile, tagSet, upload.getContentType, properties)
+    val fmd = fileProcessor.add(upload.getFile, upload.getFilename, tagSet, properties, upload.getContentType)
 
     val arr = new JSONArray()
     arr.put(ModelUtil.createResponseData(session, fmd, fmd.getHash))
