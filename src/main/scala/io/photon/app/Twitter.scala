@@ -86,7 +86,7 @@ object TwitterCLI {
 class TwitterConfig(val loginRoute: String, val logoutRoute: String, val callbackRoute: String, val callbackUrl: String, val sessions: TwitterSessionService) {}
 
 class TwitterLogin(handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterGetRoute(config, config.loginRoute, handler) {}
-class TwitterCallback(config: TwitterConfig) extends TwitterGetRoute(config, "/" + config.callbackRoute, null) {}
+class TwitterAuthCallback(config: TwitterConfig) extends TwitterGetRoute(config, "/" + config.callbackRoute, null) {}
 class TwitterLogout(handler: TwitterRouteHandler, config: TwitterConfig) extends TwitterGetRoute(config, config.logoutRoute, handler) {}
 
 class TwitterSession(val id: String, val twitter: Twitter, var requestToken: RequestToken, var postLoginRoute: String) {
@@ -178,21 +178,21 @@ trait TwitterSessionService {
   }
 }
 
-object SimpleTwitterSession {
+object SimpleTwitterSessionService {
   val sessions = new collection.mutable.HashMap[String, TwitterSession] with mutable.SynchronizedMap[String, TwitterSession]
-  val instance = new SimpleTwitterSession
+  val instance = new SimpleTwitterSessionService
+}
+
+class SimpleTwitterSessionService extends TwitterSessionService {
+  def getSession(key: String): TwitterSession = SimpleTwitterSessionService.sessions.get(key).getOrElse(null)
+  def setSession(key: String, session: TwitterSession) = SimpleTwitterSessionService.sessions.put(key, session)
+  def deleteSession(key: String) = SimpleTwitterSessionService.sessions.remove(key)
 }
 
 object WhiteListService {
   def inWhiteList(screenname: String): Boolean = {
     new File("whitelist/%s".format(screenname.toLowerCase)).exists
   }
-}
-
-class SimpleTwitterSession extends TwitterSessionService {
-  def getSession(key: String): TwitterSession = SimpleTwitterSession.sessions.get(key).getOrElse(null)
-  def setSession(key: String, session: TwitterSession) = SimpleTwitterSession.sessions.put(key, session)
-  def deleteSession(key: String) = SimpleTwitterSession.sessions.remove(key)
 }
 
 object TwitterRestRoute {

@@ -13,6 +13,7 @@ import adapters.DataNotFoundException
 import engine.IndexStorage
 import java.io.File
 import java.net.InetAddress
+import srv.{CloudAdapter, SimpleAuthSessionService, HmacRouteConfig}
 import util.{FileTypeUtil, JsonUtil}
 
 
@@ -38,33 +39,33 @@ object Photon {
 
     try {
      // val storage = Node.createSingleNode("db/photon.io", projectionConfig)
-      NestServer.run(port, new Photon(ipAddress, port, CloudServices.IndexStorage, CloudServices.CloudEngine))
+      val sessions = SimpleTwitterSessionService.instance
+      val twitterConfig = new TwitterConfig("/login", "/logout", "callback", "http://%s:%d/callback".format(ipAddress, port), sessions)
+      val apiConfig = new HmacRouteConfig(SimpleAuthSessionService.instance)
+
+      NestServer.run(port, new Photon(CloudServices.IndexStorage, CloudServices.CloudEngine, twitterConfig, apiConfig))
     } finally {
       CloudServices.shutdown
     }
   }
 }
 
-class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAddressableStorage) extends ViperServer("res:///photon.io") {
+class Photon(storage: IndexStorage, cas: ContentAddressableStorage, twitterConfig: TwitterConfig, apiConfig: HmacRouteConfig) extends ViperServer("res:///photon.io") {
 
-  final val PAGE_SIZE = 25
-  final val MAIN_TEMPLATE = FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
+  final protected val PAGE_SIZE = 25
+  final protected val MAIN_TEMPLATE = FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
+
+  val _apiHandler = new CloudAdapter(cas, apiConfig)
 
   override def addRoutes {
-    val sessions = SimpleTwitterSession.instance
 
-    val config = new TwitterConfig("/login", "/logout", "callback", "http://%s:%d/callback".format(hostname, port), sessions)
+    _apiHandler.addRoutes(this)
 
-    addRoute(new TwitterGetRoute(config, "/v", new TwitterRouteHandler {
+    addRoute(new TwitterGetRoute(twitterConfig, "/v", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, 0, PAGE_SIZE)
     }))
-    addRoute(new TwitterGetRoute(config, "/v/$page", new TwitterRouteHandler {
-      override
-      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, (math.max(args.get("page").toInt-1, 0)) * PAGE_SIZE, PAGE_SIZE)
-    }))
-
-    addRoute(new TwitterGetRoute(config, "/j/$page", new TwitterRouteHandler {
+    addRoute(new TwitterGetRoute(twitterConfig, "/j/$page", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
         new JsonResponse(
@@ -77,26 +78,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
               (math.max(args.get("page").toInt-1, 0)) * PAGE_SIZE)))
       }
     }))
-
-    addRoute(new TwitterGetRoute(config, "/m/$docId", new TwitterRouteHandler {
-      override
-      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
-        val meta = getMetaById(args.get("docId"))
-        if (meta == null) {
-          new StatusResponse(HttpResponseStatus.NOT_FOUND)
-        } else {
-          if (ModelUtil.hasReadPriv(meta, session.twitter.getId)) {
-            val obj = ModelUtil.createResponseData(session, meta, meta.getHash)
-            val arr = new JSONArray()
-            arr.put(obj)
-            new JsonResponse(arr)
-          } else {
-            new StatusResponse(HttpResponseStatus.FORBIDDEN)
-          }
-        }
-      }
-    }))
-    addRoute(new TwitterGetRoute(config, "/t/$docId", new TwitterRouteHandler {
+    addRoute(new TwitterGetRoute(twitterConfig, "/t/$docId", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
         val meta = getMetaById(args.get("docId"))
@@ -122,7 +104,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
         }
       }
     }))
-    addRoute(new TwitterGetRoute(config, "/d/$docId", new TwitterRouteHandler {
+    addRoute(new TwitterGetRoute(twitterConfig, "/d/$docId", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
         val meta = getMetaById(args.get("docId"))
@@ -139,8 +121,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
         }
       }
     }))
-
-    addRoute(new TwitterPostRoute(config, "/shares", new TwitterRouteHandler {
+    addRoute(new TwitterPostRoute(twitterConfig, "/shares", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
         if (!args.containsKey("sharees")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
@@ -172,7 +153,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
             val reshareMeta = ModelUtil.reshareMeta(meta.getRawData, sharee)
             val fmd = FileMetaData.create(reshareMeta)
             storage.add(fmd)
-//            val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
+            //            val docId = storage.insert("fmd", fmd.toJson.getJSONObject("data"))
             arr.put(ModelUtil.createResponseData(session, reshareMeta, fmd.getHash))
           }
         }
@@ -180,9 +161,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
         new JsonResponse(arr)
       }
     }))
-
-    addRoute(new PostHandler("/u/", sessions, storage, cas, CloudServices.FileProcessor))
-
+    addRoute(new PostHandler("/u/", twitterConfig.sessions, storage, cas, CloudServices.FileProcessor))
     addRoute(new TwitterLogin(
       new TwitterRouteHandler {
         override
@@ -192,32 +171,22 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
           new RouteResponse(response)
         }
       },
-      config))
-
-    addRoute(new TwitterCallback(config))
-
+      twitterConfig))
+    addRoute(new TwitterAuthCallback(twitterConfig))
     addRoute(new TwitterLogout(
       new TwitterRouteHandler {
         override
         def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
-          sessions.deleteSession(session.id)
+          twitterConfig.sessions.deleteSession(session.id)
           val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND)
           response.setHeader("Location", "/")
           new RouteResponse(response)
         }
       },
-      config))
+      twitterConfig))
   }
 
-  private def getMetaById(id: String) : FileMetaData = {
-/*
-    val result = storage.select("select * from fmd where hash = '%s'".format(id)) // TODO: use prepared statements
-    if (result == null || result.size == 0) {
-      null
-    } else {
-      FileMetaData.create(id, result(0).toJson)
-    }
-*/
+  protected def getMetaById(id: String) : FileMetaData = {
     val result = storage.find(JsonUtil.createJsonObject("hash", id + ".meta"))
     if (result == null || result.length == 0) {
       null
@@ -226,11 +195,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
     }
   }
 
-  private def getMetaListById(ids: List[String]) : List[FileMetaData] = {
-/*
-    val ws = ids.map("'%s'".format(_)).mkString(",")
-    val result = storage.select("select * from fmd where hash in (%s)".format(ws)) // TODO: use prepared statements
-*/
+  protected def getMetaListById(ids: List[String]) : List[FileMetaData] = {
     val arr = new JSONArray
     ids.foreach(id => arr.put(id + ".meta"))
     val result = storage.find(JsonUtil.createJsonObject("hash", arr))
@@ -241,7 +206,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
     }
   }
 
-  private def buildDownloadResponse(cas: ContentAddressableStorage, ctx: BlockContext, contentType: String, fileName: String = null) : RouteResponse = {
+  protected def buildDownloadResponse(cas: ContentAddressableStorage, ctx: BlockContext, contentType: String, fileName: String = null) : RouteResponse = {
     try {
       val (is, length) = cas.load(ctx)
       val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
@@ -262,40 +227,15 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
     }
   }
 
-  private def loadPage(session: TwitterSession, pageIdx: Int, countPerPage: Int) : RouteResponse = {
-    var tmp = MAIN_TEMPLATE.toString
-    tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
-    tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
-    tmp = tmp.replace("{{dyn-data}}", resultsToJsonArray(session, getChronResults(storage, session.twitter.getId, countPerPage, pageIdx)).toString())
-//    tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
-    tmp = tmp.replace("{{dyn-profileimg}}", session.getProfileImageUrl(session.twitter.getId))
-    new HtmlResponse(tmp)
-  }
-
-  private def resultsToJsonArray(session: TwitterSession, records: List[Record]) : JSONArray = {
-    val arr = new JSONArray()
-    records.foreach{r : Record => arr.put(ModelUtil.createResponseData(session, r.rawData, r.id)) }
-    arr
-  }
-
-  private def resultsToJsonArray(session: TwitterSession, records: JSONArray) : JSONArray = {
-    val arr = new JSONArray()
-    (0 until records.length).map { idx =>
-      val obj = records.getJSONObject(idx)
-      arr.put(ModelUtil.createResponseData(session, obj.getJSONObject("data"), obj.getString("hash")))
-    }
-    arr
-  }
-
-  private def getSearchResults(storage: Node, ownerId: String, tags: String, count: Int, offset: Int) : List[Record] = {
-//    val sql = "SELECT T.HASH,T.RAWMETA FROM FT_SEARCH_DATA('%s', 0, 0) FT, DATA_INDEX T WHERE FT.TABLE='DATA_INDEX' AND T.HASH = FT.KEYS[0] AND T.OWNERID = '%s".format(tags, ownerId)
-//    storage.search(tags, ")
-//    storage.select(sql)
+  protected def getSearchResults(storage: Node, ownerId: String, tags: String, count: Int, offset: Int) : List[Record] = {
+    //    val sql = "SELECT T.HASH,T.RAWMETA FROM FT_SEARCH_DATA('%s', 0, 0) FT, DATA_INDEX T WHERE FT.TABLE='DATA_INDEX' AND T.HASH = FT.KEYS[0] AND T.OWNERID = '%s".format(tags, ownerId)
+    //    storage.search(tags, ")
+    //    storage.select(sql)
     null
   }
 
-  private def getChronResults(storage: IndexStorage, ownerId: Long, count: Int = PAGE_SIZE, offset: Int = 0) : JSONArray = {
-//    storage.select("select * from fmd where ownerId = '%s' order by filedate DESC limit %d OFFSET %d".format(ownerId.toLowerCase, count, offset))
+  protected def getChronResults(storage: IndexStorage, ownerId: Long, count: Int = PAGE_SIZE, offset: Int = 0) : JSONArray = {
+    //    storage.select("select * from fmd where ownerId = '%s' order by filedate DESC limit %d OFFSET %d".format(ownerId.toLowerCase, count, offset))
     val filter = JsonUtil.createJsonObject(
       "properties__ownerId", ownerId.asInstanceOf[AnyRef],  // TODO: use colon syntax for stored.io
       "count", count.asInstanceOf[AnyRef],
@@ -305,5 +245,30 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
         "desc", true.asInstanceOf[AnyRef]
       ))
     storage.find(filter)
+  }
+
+  protected def loadPage(session: TwitterSession, pageIdx: Int, countPerPage: Int) : RouteResponse = {
+    var tmp = MAIN_TEMPLATE.toString
+    tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
+    tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
+    tmp = tmp.replace("{{dyn-data}}", resultsToJsonArray(session, getChronResults(storage, session.twitter.getId, countPerPage, pageIdx)).toString())
+    //    tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
+    tmp = tmp.replace("{{dyn-profileimg}}", session.getProfileImageUrl(session.twitter.getId))
+    new HtmlResponse(tmp)
+  }
+
+  protected def resultsToJsonArray(session: TwitterSession, records: List[Record]) : JSONArray = {
+    val arr = new JSONArray()
+    records.foreach{r : Record => arr.put(ModelUtil.createResponseData(session, r.rawData, r.id)) }
+    arr
+  }
+
+  protected def resultsToJsonArray(session: TwitterSession, records: JSONArray) : JSONArray = {
+    val arr = new JSONArray()
+    (0 until records.length).map { idx =>
+      val obj = records.getJSONObject(idx)
+      arr.put(ModelUtil.createResponseData(session, obj.getJSONObject("data"), obj.getString("hash")))
+    }
+    arr
   }
 }

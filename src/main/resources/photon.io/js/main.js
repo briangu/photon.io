@@ -145,12 +145,14 @@ var snapclearApp = function (initdata) {
 
     $('#fileupload').bind('fileuploaddone', function (e, data) {
       var x = JSON.parse(data.jqXHR.responseText)[0]
-      var h = Mustache.to_html(template, x);
+      var newElements = Mustache.to_html(template, x);
       var $gallery = $('#gallery')
 //      $('.corner-stamp').append(h);
-      $gallery.prepend(h);
+      var $newElems = $( newElements ).css({ opacity: 0 });
+      $gallery.prepend($newElems);
       $gallery.imagesLoaded(function(){
         $gallery.masonry('reload')
+        $newElems.animate({ opacity: 1 });
         attachItemsActions();
         showTimeAgoDates();
       });
@@ -184,8 +186,9 @@ var snapclearApp = function (initdata) {
       var $gallery = $('#gallery');
 
       $.each(initdata, function(i,x){
-        var h = Mustache.to_html(template, x);
-        $gallery = $gallery.append(h);
+        var newElements = Mustache.to_html(template, x);
+        $gallery = $gallery.append(newElements);
+        $gallery.css({ opacity: 0 });
       });
 
       $gallery.imagesLoaded(function(){
@@ -194,6 +197,7 @@ var snapclearApp = function (initdata) {
           columnWidth: 230,
           cornerStampSelector: '.corner-stamp'
         });
+        $gallery.animate({ opacity: 1 });
       });
 
       $gallery.infinitescroll({
@@ -496,5 +500,9 @@ var snapclearApp = function (initdata) {
       placement: 'bottom',
       title: "Add files...",
       content: "Add files by drag-n-drop anywhere on the page or by using the file dialog."
+    })
+
+    $('.search-query').click(function(e) {
+      xxx
     })
 };
