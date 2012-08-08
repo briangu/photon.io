@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
   <meta charset="utf-8">
   <title>snapclear</title>
@@ -161,6 +161,7 @@
   <div class="row-fluid" style="margin-left: 20px;">
     <div class="span12">
       <div id="gallery" data-toggle="modal-gallery" data-target="#modal-gallery">
+        <!--
         <div class="item box corner-stamp">
           <div class="corner-stamp-text">
             <ul class="nav nav-list trends">
@@ -179,6 +180,7 @@
             </ul>
           </div>
         </div>
+        -->
       </div>
     </div>
   </div>
@@ -190,6 +192,20 @@
     <p>&copy; OPS5 2012</p>
   </footer>
 </div>
+
+<div id="modal-lightbox" class="modal hide fade">
+  <div class="modal-header">
+    <a class="close" data-dismiss="modal">&times;</a>
+    <h3 class="modal-title"></h3>
+  </div>
+  <div class="modal-body"><div class="modal-image"></div></div>
+  <div class="modal-footer">
+    <a class="btn modal-download" target="_blank">
+      <i class="icon-download"></i>
+      <span>Download</span>
+    </a>
+  </div>
+  </div>
 
 <div id="modal-gallery" class="modal modal-gallery hide fade" data-filter=":odd">
   <div class="modal-header">
@@ -336,7 +352,8 @@
       <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>
       {% } else { %}
       <td class="preview">{% if (file.thumbnail_url) { %}
-        <a href="{%=file.url%}" title="{%=file.name%}" rel="gallery" download="{%=file.name%}"><img src="{%=file.thumbnail_url%}" class="download_img"></a>
+        <!-- rel="gallery"  -->
+        <a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}"><img src="{%=file.thumbnail_url%}" class="download_img"></a>
         {% } %}</td>
       <td class="name">
         <a href="{%=file.url%}" title="{%=file.name%}" rel="{%=file.thumbnail_url&&'gallery'%}" download="{%=file.name%}">{%=file.name%}</a>
@@ -370,7 +387,8 @@
           </span>
       </div>
       <div class="ItemHolder center">
-        <a href="/d/{{id}}" class="ItemThumb ImgLink" title="{{name}}" rel="gallery" download="{{name}}">
+        <!-- rel="gallery" -->
+        <a href="/d/{{id}}" class="ItemThumb ImgLink" title="{{name}}" download="{{name}}">
           <img src="/t/{{id}}" alt="{{tags}}" class="ItemThumbImg" />
         </a>
         <div class="description tags">{{tags}}</div>

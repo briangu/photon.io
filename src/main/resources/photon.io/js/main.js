@@ -49,10 +49,16 @@ var snapclearApp = function (initdata) {
         addToShareList($(this).closest('.item'));
         $('#modal-share').modal({})
       })
+
+      enableItemLightbox(item);
     }
 
     function unattachItemsActions() {
-      $('.item').unbind('hover');
+      $('.item').each(function (idx, item) {
+        $(item).unbind('hover');
+        $(item).find('.item-share').unbind('click');
+        disableItemLightbox(item);
+      });
     }
 
     function initUI() {
@@ -221,6 +227,7 @@ var snapclearApp = function (initdata) {
         }
       );
 
+      enableGalleryClick();
       attachItemsActions();
       showTimeAgoDates();
     }
@@ -228,14 +235,55 @@ var snapclearApp = function (initdata) {
     initGallery(initdata);
 
     function disableGalleryClick() {
-      $('a[rel="gallery"]').unbind('click')
-      $('a[rel="gallery"]').click(function(e) { e.preventDefault(); });
-      $('a[rel="gallery"]').removeAttr('rel')
+//      $('a[rel="gallery"]').unbind('click')
+//      $('.ItemThumb').unbind('click')
+//      $('.ItemThumb').click(function(e) { e.preventDefault(); });
+//      $('.ItemThumb"]').removeAttr('rel')
+      $('.item').each(function (idx,item) { disableItemLightbox(item); });
     }
 
     function enableGalleryClick() {
-      $('.ItemThumb').unbind('click')
-      $('.ItemThumb').attr('rel', 'gallery');
+//      $('.ItemThumb').unbind('click')
+//      $('.ItemThumb').attr('rel', 'gallery');
+      $('.item').each(function (idx,item) { enableItemLightbox(item); });
+    }
+
+    function doDownload(url)
+    {
+        var iframe;
+        iframe = document.getElementById("hiddenDownloader");
+        if (iframe === null)
+        {
+            iframe = document.createElement('iframe');
+            iframe.id = "hiddenDownloader";
+            iframe.style.visibility = 'hidden';
+            document.body.appendChild(iframe);
+        }
+        iframe.src = url;
+    }
+
+    function disableItemLightbox(item) {
+      var thumb = $(item).find('.ItemThumb');
+      $(thumb).unbind('click');
+      $(thumb).click(function(e) { e.preventDefault(); })
+    }
+
+    function enableItemLightbox(item) {
+      var thumb = $(item).find('.ItemThumb')
+      $(thumb).unbind('click');
+      $(thumb).click(function(e) {
+        e.preventDefault();
+        var downloadUrl = $(this).attr('href')
+        $('#modal-lightbox').find('.modal-title').html($(thumb).attr('title'))
+        $('#modal-lightbox').find('.modal-image').html($('<img/>').attr('src', $(thumb).find("img").attr('src')))
+        $('#modal-lightbox').find('.modal-download').unbind('click')
+        $('#modal-lightbox').find('.modal-download').click(function(e) {
+            e.preventDefault();  //stop the browser from following
+            doDownload(downloadUrl)
+        })
+        $('#modal-lightbox').modal();
+        return false;
+      })
     }
 
     function enableSelectNav() {
@@ -388,9 +436,10 @@ var snapclearApp = function (initdata) {
     }
 
     function attachItemSelectActions(item) {
-      $(item).find('a[rel="gallery"]').unbind('click')
-      $(item).find('a[rel="gallery"]').click(function(e) { e.preventDefault(); });
-      $(item).find('a[rel="gallery"]').removeAttr('rel')
+//      $(item).find('a[rel="gallery"]').unbind('click')
+      $(item).find('.ItemThumb').unbind('click')
+      $(item).find('.ItemThumb').click(function(e) { e.preventDefault(); });
+//      $(item).find('.ItemThumb"]').removeAttr('rel')
       $(item).find(".icon-top-right").show();
       $(item).hover(function(e) {$(this).addClass('red');}, function(e) {$(this).removeClass('red');});
       $(item).click(function(e) {

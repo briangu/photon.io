@@ -133,8 +133,9 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
           if (ModelUtil.hasReadPriv(meta.getRawData, session.twitter.getScreenName)) {
-            val mimeType = if (meta.getType == null) "application/octet-stream" else meta.getType
-            buildDownloadResponse(cas, meta.createBlockContext(meta.getBlockHashes.getString(0)), mimeType)
+            //val mimeType = if (meta.getType == null) "application/octet-stream" else meta.getType
+            val mimeType = "application/octet-stream" // for downloading
+            buildDownloadResponse(cas, meta.createBlockContext(meta.getBlockHashes.getString(0)), mimeType, meta.getFilename)
           } else {
             new StatusResponse(HttpResponseStatus.FORBIDDEN)
           }
@@ -237,13 +238,16 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
     }
   }
 
-  private def buildDownloadResponse(cas: ContentAddressableStorage, ctx: BlockContext, contentType: String) : RouteResponse = {
+  private def buildDownloadResponse(cas: ContentAddressableStorage, ctx: BlockContext, contentType: String, fileName: String = null) : RouteResponse = {
     try {
       val (is, length) = cas.load(ctx)
       val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
       response.setHeader(HttpHeaders.Names.CONTENT_TYPE, contentType)
       response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, length)
       response.setHeader(HttpHeaders.Names.EXPIRES, "Expires: Thu, 29 Oct 2020 17:04:19 GMT")
+      if (fileName != null) {
+        response.setHeader("Content-disposition", "attachment; filename=%s".format(fileName))
+      }
       response.setContent(new FileChannelBuffer(is, length))
       new RouteResponse(response, new RouteResponseDispose {
         def dispose() { is.close }
