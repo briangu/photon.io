@@ -1,7 +1,7 @@
 package io.photon.app
 
 import io.viper.core.server.router.{RouteResponse, RouteUtil, RouteHandler, Route}
-import twitter4j.{ProfileImage, Twitter, TwitterException, TwitterFactory}
+import twitter4j._
 import java.io.{File, InputStreamReader, BufferedReader}
 import twitter4j.auth.{RequestToken, AccessToken}
 import org.jboss.netty.handler.codec.http._
@@ -91,17 +91,65 @@ class TwitterLogout(handler: TwitterRouteHandler, config: TwitterConfig) extends
 
 class TwitterSession(val id: String, val twitter: Twitter, var requestToken: RequestToken, var postLoginRoute: String) {
 
-  private val _urlCache = new mutable.HashMap[String, String] with mutable.SynchronizedMap[String, String];
+  private val _userIdCache = new mutable.HashMap[Long, User] with mutable.SynchronizedMap[Long, User];
+  private val _userNameCache = new mutable.HashMap[String, User] with mutable.SynchronizedMap[String, User];
 
-  def getProfileImageUrl(screenname: String) : String = {
-    if (!_urlCache.contains(screenname)) {
-      _urlCache.synchronized {
-        if (!_urlCache.contains(screenname)) {
-          _urlCache.put(screenname, twitter.getProfileImage(screenname, ProfileImage.MINI).getURL)
+  private def ensureId(id: Long) {
+    if (!_userIdCache.contains(id)) {
+      _userIdCache.synchronized {
+        if (!_userIdCache.contains(id)) {
+          try {
+            val user = twitter.showUser(id)
+            if (user != null) {
+              _userIdCache.put(id, user)
+            }
+          } catch {
+            case e: Exception => ;
+          }
         }
       }
     }
-    return _urlCache.get(screenname).get
+  }
+
+  private def ensureName(name: String) {
+    if (!_userNameCache.contains(name)) {
+      _userNameCache.synchronized {
+        if (!_userNameCache.contains(name)) {
+          try {
+            val user = twitter.showUser(name)
+            if (user != null) {
+              _userNameCache.put(name, user)
+            }
+          } catch {
+            case e: Exception => ;
+          }
+        }
+      }
+    }
+  }
+
+  def getIdFromScreenName(name: String): Long = {
+    ensureName(name)
+    if (_userNameCache.contains(name)) _userNameCache.get(name).get.getId else 0
+  }
+
+  def getScreenName(id: Long) : String = {
+    ensureId(id)
+    if (_userIdCache.contains(id)) {
+      _userIdCache.get(id).get.getScreenName
+    } else {
+      "anonymous"
+    }
+  }
+
+  def getProfileImageUrl(id: Long) : String = {
+    ensureId(id)
+
+    if (_userIdCache.contains(id)) {
+      _userIdCache.get(id).get.getProfileImageURL.toString
+    } else {
+      "https://twimg0-a.akamaihd.net/sticky/default_profile_images/default_profile_0_normal.png"
+    }
   }
 }
 

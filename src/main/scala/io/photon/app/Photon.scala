@@ -8,7 +8,6 @@ import io.viper.core.server.router.RouteResponse.RouteResponseDispose
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import org.json.{JSONArray, JSONObject}
-import com.thebuzzmedia.imgscalr.AsyncScalr
 import cloudcmd.common._
 import adapters.DataNotFoundException
 import engine.IndexStorage
@@ -28,8 +27,6 @@ object Photon {
     val ipAddress = getIpAddress
     val port = 8080
     println("booting at http://%s:%d".format(ipAddress, port))
-
-    AsyncScalr.setServiceThreadCount(2) // TODO: set via config
 
     var configRoot: String = FileUtil.findConfigDir(FileUtil.getCurrentWorkingDirectory, ".cld")
     if (configRoot == null) {
@@ -88,7 +85,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
         if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
-          if (ModelUtil.hasReadPriv(meta.getRawData, session.twitter.getScreenName)) {
+          if (ModelUtil.hasReadPriv(meta, session.twitter.getId)) {
             val obj = ModelUtil.createResponseData(session, meta, meta.getHash)
             val arr = new JSONArray()
             arr.put(obj)
@@ -106,7 +103,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
         if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
-          if (ModelUtil.hasReadPriv(meta.getRawData, session.twitter.getScreenName)) {
+          if (ModelUtil.hasReadPriv(meta, session.twitter.getId)) {
             var mimeType = meta.getType
             if (mimeType == null) mimeType = FileTypeUtil.instance.getTypeFromExtension(meta.getFileExt)
             val (thumbType, ctx) = if (meta.getRawData.has("thumbHash") && mimeType != null) {
@@ -132,7 +129,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
         if (meta == null) {
           new StatusResponse(HttpResponseStatus.NOT_FOUND)
         } else {
-          if (ModelUtil.hasReadPriv(meta.getRawData, session.twitter.getScreenName)) {
+          if (ModelUtil.hasReadPriv(meta, session.twitter.getId)) {
             //val mimeType = if (meta.getType == null) "application/octet-stream" else meta.getType
             val mimeType = "application/octet-stream" // for downloading
             buildDownloadResponse(cas, meta.createBlockContext(meta.getBlockHashes.getString(0)), mimeType, meta.getFilename)
@@ -153,10 +150,15 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
         val docIds = args.get("ids").split(',')
         var metas = getMetaListById(docIds.toList)
         if (metas.length != docIds.length) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
-        metas = metas.filter(m => ModelUtil.hasSharePriv(m.getRawData, session.twitter.getScreenName))
+        metas = metas.filter(m => ModelUtil.hasSharePriv(m, session.twitter.getId))
         if (metas.length != docIds.length) return new StatusResponse(HttpResponseStatus.FORBIDDEN)
 
-        val sharees = args.get("sharees").split(',')
+        val shareeNames = args.get("sharees").split(',')
+        val shareeIds = shareeNames.par.map{ name =>
+          val shareeId = session.getIdFromScreenName(name)
+          if (shareeId == 0) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
+          shareeId
+        }
         val shareMsg = args.get("sharemsg")
 
         val arr = new JSONArray()
@@ -165,7 +167,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
         // TODO: dm
 
         metas.foreach{ meta =>
-          sharees.foreach{ sharee =>
+          shareeIds.foreach{ sharee =>
             val reshareMeta = ModelUtil.reshareMeta(meta.getRawData, sharee)
             val fmd = FileMetaData.create(reshareMeta)
             storage.add(fmd)
@@ -178,7 +180,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
       }
     }))
 
-    addRoute(new PostHandler("/u/", sessions, storage, cas, 640, 480))
+    addRoute(new PostHandler("/u/", sessions, storage, cas, CloudServices.FileProcessor))
 
     addRoute(new TwitterLogin(
       new TwitterRouteHandler {
@@ -265,7 +267,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
     tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
     tmp = tmp.replace("{{dyn-data}}", resultsToJsonArray(session, getChronResults(storage, session.twitter.getScreenName, countPerPage, pageIdx)).toString())
 //    tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
-    tmp = tmp.replace("{{dyn-profileimg}}", session.getProfileImageUrl(session.twitter.getScreenName))
+    tmp = tmp.replace("{{dyn-profileimg}}", session.getProfileImageUrl(session.twitter.getId))
     new HtmlResponse(tmp)
   }
 
@@ -294,7 +296,7 @@ class Photon(hostname: String, port: Int, storage: IndexStorage, cas: ContentAdd
   private def getChronResults(storage: IndexStorage, ownerId: String, count: Int = PAGE_SIZE, offset: Int = 0) : JSONArray = {
 //    storage.select("select * from fmd where ownerId = '%s' order by filedate DESC limit %d OFFSET %d".format(ownerId.toLowerCase, count, offset))
     val filter = JsonUtil.createJsonObject(
-//      "ownerId", ownerId,
+      "properties__ownerId", ownerId,
       "count", count.asInstanceOf[AnyRef],
       "offset", offset.asInstanceOf[AnyRef],
       "orderBy", JsonUtil.createJsonObject(

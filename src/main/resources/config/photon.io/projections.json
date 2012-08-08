@@ -5,7 +5,7 @@
       "name": "fmd",
       "dimensions": 12,
       "fields": {
-        "ownerId": 12
+        "properties__ownerId": 12
       }
     }
   ]
