@@ -27,5 +27,8 @@ window.locale = {
         "destroy": "Delete",
         'boxeditor': "Add tags for your new files...",
         'sharemsg': "Compose a direct message to share your files..."
+    },
+    "search": {
+      "default": "Search tags..."
     }
 };

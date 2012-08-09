@@ -68,14 +68,13 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, twitterConfi
     addRoute(new TwitterGetRoute(twitterConfig, "/j/$page", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
-        new JsonResponse(
-          resultsToJsonArray(
-            session,
-            getChronResults(
-              storage,
-              session.twitter.getId,
-              PAGE_SIZE,
-              (math.max(args.get("page").toInt-1, 0)) * PAGE_SIZE)))
+        val offset = (math.max(args.get("page").toInt-1, 0)) * PAGE_SIZE
+        val feed = if (args.containsKey("q")) {
+          getSearchResults(storage, session.twitter.getId, args.get("q"), PAGE_SIZE, offset)
+        } else {
+          getChronResults(storage, session.twitter.getId, PAGE_SIZE, offset)
+        }
+        new JsonResponse(resultsToJsonArray(session, feed))
       }
     }))
     addRoute(new TwitterGetRoute(twitterConfig, "/t/$docId", new TwitterRouteHandler {
@@ -227,15 +226,23 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, twitterConfi
     }
   }
 
-  protected def getSearchResults(storage: Node, ownerId: String, tags: String, count: Int, offset: Int) : List[Record] = {
+  protected def getSearchResults(storage: IndexStorage, ownerId: Long, tags: String, count: Int, offset: Int) : JSONArray = {
     //    val sql = "SELECT T.HASH,T.RAWMETA FROM FT_SEARCH_DATA('%s', 0, 0) FT, DATA_INDEX T WHERE FT.TABLE='DATA_INDEX' AND T.HASH = FT.KEYS[0] AND T.OWNERID = '%s".format(tags, ownerId)
     //    storage.search(tags, ")
     //    storage.select(sql)
-    null
+    val filter = JsonUtil.createJsonObject(
+      "tags", tags,
+      "properties__ownerId", ownerId.asInstanceOf[AnyRef],  // TODO: use colon syntax for stored.io
+      "count", count.asInstanceOf[AnyRef],
+      "offset", offset.asInstanceOf[AnyRef],
+      "orderBy", JsonUtil.createJsonObject(
+        "name", "createdDate",
+        "desc", true.asInstanceOf[AnyRef]
+      ))
+    storage.find(filter)
   }
 
   protected def getChronResults(storage: IndexStorage, ownerId: Long, count: Int = PAGE_SIZE, offset: Int = 0) : JSONArray = {
-    //    storage.select("select * from fmd where ownerId = '%s' order by filedate DESC limit %d OFFSET %d".format(ownerId.toLowerCase, count, offset))
     val filter = JsonUtil.createJsonObject(
       "properties__ownerId", ownerId.asInstanceOf[AnyRef],  // TODO: use colon syntax for stored.io
       "count", count.asInstanceOf[AnyRef],

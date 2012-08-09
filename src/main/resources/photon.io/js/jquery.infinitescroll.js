@@ -60,7 +60,8 @@
         errorCallback: function () { },
         infid: 0, //Instance ID
         pixelsFromNavToBottom: undefined,
-        path: undefined
+        path: undefined,
+        destUrlCallback: undefined
     };
 
 
@@ -498,6 +499,10 @@
                 box = $(opts.contentSelector).is('table') ? $('<tbody/>') : $('<div/>');
 
                 desturl = path.join(opts.state.currPage);
+
+                if (!!opts.destUrlCallback) {
+                  desturl = opts.destUrlCallback(desturl);
+                }
 
                 method = (opts.dataType == 'html' || opts.dataType == 'json' ) ? opts.dataType : 'html+callback';
                 if (opts.appendCallback && opts.dataType == 'html') method += '+callback'

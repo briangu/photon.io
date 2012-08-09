@@ -205,6 +205,15 @@ var snapclearApp = function (initdata) {
         nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
         itemSelector : '.item',     // selector for all items you'll retrieve
         dataType     : 'json',
+        loading      : {img: '/img/transparent.png'},
+        destUrlCallback: function(destUrl) {
+          var query = $('.search-query').val()
+          if (query.length > 0) {
+            return destUrl + "?q=" + query
+          } else {
+            return destUrl
+          }
+        },
         template     : function(data) {
           var $div = $('<div/>')
             $.each(data, function(i,x){
@@ -502,7 +511,94 @@ var snapclearApp = function (initdata) {
       content: "Add files by drag-n-drop anywhere on the page or by using the file dialog."
     })
 
-    $('.search-query').click(function(e) {
-      xxx
-    })
+    function applyTemplateToResults(data) {
+      var $div = $('<div/>')
+        $.each(data, function(i,x){
+          $div.append(Mustache.to_html(template, x));
+        });
+      return $div.children();
+    }
+
+    var searchState = {
+      loading: false,
+      last: undefined
+    }
+
+    function appendNewelements(newElements) {
+      var $newElems = $( newElements ).css({ opacity: 0 });
+      $newElems.imagesLoaded(function(){
+
+        var sels = $($newElems.children()).filter(function(index) { return !!$(this).attr('data-sharable'); })
+
+        if (inSelectMode()) {
+          $(sels).each(function (idx, item) { attachItemSelectActions(item); });
+        } else {
+          $(sels).each(function (idx, item) { attachItemActions(item); });
+        }
+
+        $newElems.animate({ opacity: 1 });
+        $('#gallery').masonry('reload');
+        showTimeAgoDates();
+      });
+      $('#gallery').append($newElems)
+    }
+
+    function onSearch() {
+      if (searchState.loading) return
+
+      var tags = $('.search-query').val();
+      if (tags == undefined && tags.length == 0) return
+      if (tags === searchState.last) return
+
+      searchState.last = tags
+
+      $.ajax({
+          dataType: 'json',
+          type: 'GET',
+          url: '/j/0',
+          data: {'q': tags},
+          success: function(data, textStatus, jqXHR) {
+            if (data.length > 0) {
+              var $newElems = applyTemplateToResults(data);
+              $('#gallery').children().remove();
+              appendNewelements($newElems)
+              searchState.loading = false
+            }
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+            searchState.loading = false
+          }
+      });
+    }
+
+    function resetSearchBox() {
+      $('.search-query').val(window.locale.search.default);
+    }
+
+    function initSearch() {
+      resetSearchBox();
+
+      $('.search-query').change(function() {
+        onSearch();
+        return false;
+      });
+
+      $('.search-query').live('keyup', function() {
+        onSearch();
+        return false;
+      });
+
+      $('.search-query').focus(function() {
+        $('.search-query').val("");
+      });
+
+      $('.search-query').blur(function() {
+        var query = $('.search-query').val();
+        if (query != undefined && query.length == 0) {
+          resetSearchBox();
+        }
+      });
+    }
+
+    initSearch();
 };
