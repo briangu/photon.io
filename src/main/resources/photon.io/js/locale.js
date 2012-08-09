@@ -29,6 +29,6 @@ window.locale = {
         'sharemsg': "Compose a direct message to share your files..."
     },
     "search": {
-      "default": "Search tags..."
+      "default": "Search for tags and filenames..."
     }
 };

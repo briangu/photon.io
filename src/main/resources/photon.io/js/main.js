@@ -577,6 +577,11 @@ var snapclearApp = function (initdata) {
     function initSearch() {
       resetSearchBox();
 
+      $('.navbar-search').submit(function() {
+        onSearch();
+        return false;
+      })
+
       $('.search-query').change(function() {
         onSearch();
         return false;
