@@ -30,11 +30,11 @@ var snapclearApp = function (initdata) {
       $('.box-editor').val(window.locale.fileupload.boxeditor)
     }
 
-    function attachItemsActions() {
-      $('.item[data-sharable="true"]').each(function(idx, item) { attachItemActions(item); });
+    function attachItemsShareActions() {
+      $('.item[data-sharable="true"]').each(function(idx, item) { attachItemShareActions(item); });
     }
 
-    function attachItemActions(item) {
+    function attachItemShareActions(item) {
       $(item).hover(
         function(e) {
           $(this).find('.item-actions').filter(function(index) { return !$(this).find("input[name='share[]']").is(':checked'); }).show();
@@ -49,15 +49,12 @@ var snapclearApp = function (initdata) {
         addToShareList($(this).closest('.item'));
         $('#modal-share').modal({})
       })
-
-      enableItemLightbox(item);
     }
 
-    function unattachItemsActions() {
+    function unattachItemsShareActions() {
       $('.item').each(function (idx, item) {
         $(item).unbind('hover');
         $(item).find('.item-share').unbind('click');
-        disableItemLightbox(item);
       });
     }
 
@@ -153,7 +150,10 @@ var snapclearApp = function (initdata) {
       $gallery.imagesLoaded(function(){
         $gallery.masonry('reload')
         $newElems.animate({ opacity: 1 });
-        attachItemsActions();
+        $($newElems).each(function (idx, item) {
+          attachItemShareActions(item);
+          enableItemLightbox(item);
+        })
         showTimeAgoDates();
       });
     });
@@ -219,7 +219,7 @@ var snapclearApp = function (initdata) {
             $.each(data, function(i,x){
               $div.append(Mustache.to_html(template, x));
             });
-            return $div
+            return $div.children();
           },
         },
         function( newElements ) {
@@ -229,17 +229,19 @@ var snapclearApp = function (initdata) {
             $('#gallery').masonry('appended', $newElems, true );
             showTimeAgoDates();
           });
+
           var sels = $($newElems).filter(function(index) { return !!$(this).attr('data-sharable'); })
           if (inSelectMode()) {
             $(sels).each(function (idx, item) { attachItemSelectActions(item); });
           } else {
-            $(sels).each(function (idx, item) { attachItemActions(item); });
+            $(sels).each(function (idx, item) { attachItemShareActions(item); });
           }
+          $($newElems).each(function (idx, item) { enableItemLightbox(item); })
         }
       );
 
       enableGalleryClick();
-      attachItemsActions();
+      attachItemsShareActions();
       showTimeAgoDates();
     }
 
@@ -337,8 +339,8 @@ var snapclearApp = function (initdata) {
       $('.item').unbind('click');
       $('.item').removeClass('red');
       resetItemCheckboxes();
-      attachItemsActions();
       enableGalleryClick();
+      attachItemsShareActions();
       disableSelectNav();
     }
 
@@ -435,14 +437,15 @@ var snapclearApp = function (initdata) {
 
     $('.multi-select').click(function() {
       enableSelectNav();
-      unattachItemsActions();
+
+      unattachItemsShareActions();
+      disableGalleryClick();
 
       resetItemCheckboxes();
       attachSelectActions();
     });
 
     function attachSelectActions() {
-      disableGalleryClick();
       $('.item[data-sharable="true"]').each(function (idx,item) { attachItemSelectActions(item); });
     }
 
@@ -534,8 +537,9 @@ var snapclearApp = function (initdata) {
       if (inSelectMode()) {
         $(sels).each(function (idx, item) { attachItemSelectActions(item); });
       } else {
-        $(sels).each(function (idx, item) { attachItemActions(item); });
+        $(sels).each(function (idx, item) { attachItemShareActions(item); });
       }
+      $($newElems).each(function (idx, item) { enableItemLightbox(item); })
     }
 
     function onSearch() {
