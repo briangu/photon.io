@@ -1,7 +1,6 @@
 package io.photon.app
 
 import io.stored.server.common.Record
-import io.stored.server.Node
 import io.viper.common.{ViperServer, NestServer}
 import io.viper.core.server.router._
 import io.viper.core.server.router.RouteResponse.RouteResponseDispose
@@ -13,7 +12,7 @@ import adapters.DataNotFoundException
 import engine.IndexStorage
 import java.io.File
 import java.net.InetAddress
-import srv.{CloudAdapter, SimpleAuthSessionService, HmacRouteConfig}
+import srv.{SimpleOAuthSessionService, CloudAdapter, OAuthRouteConfig}
 import util.{FileTypeUtil, JsonUtil}
 
 
@@ -27,7 +26,8 @@ object Photon {
   def main(args: Array[String]) {
     val ipAddress = getIpAddress
     val port = 8080
-    println("booting at http://%s:%d".format(ipAddress, port))
+    val baseHostPort = "http://%s:%d".format(ipAddress, port)
+    println("booting at " + baseHostPort)
 
     var configRoot: String = FileUtil.findConfigDir(FileUtil.getCurrentWorkingDirectory, ".cld")
     if (configRoot == null) {
@@ -41,7 +41,7 @@ object Photon {
      // val storage = Node.createSingleNode("db/photon.io", projectionConfig)
       val sessions = SimpleTwitterSessionService.instance
       val twitterConfig = new TwitterConfig("/login", "/logout", "callback", "http://%s:%d/callback".format(ipAddress, port), sessions)
-      val apiConfig = new HmacRouteConfig(SimpleAuthSessionService.instance)
+      val apiConfig = new OAuthRouteConfig(baseHostPort, SimpleOAuthSessionService.instance)
 
       NestServer.run(port, new Photon(CloudServices.IndexStorage, CloudServices.CloudEngine, twitterConfig, apiConfig))
     } finally {
@@ -50,7 +50,7 @@ object Photon {
   }
 }
 
-class Photon(storage: IndexStorage, cas: ContentAddressableStorage, twitterConfig: TwitterConfig, apiConfig: HmacRouteConfig) extends ViperServer("res:///photon.io") {
+class Photon(storage: IndexStorage, cas: ContentAddressableStorage, twitterConfig: TwitterConfig, apiConfig: OAuthRouteConfig) extends ViperServer("res:///photon.io") {
 
   final protected val PAGE_SIZE = 25
   final protected val MAIN_TEMPLATE = FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
