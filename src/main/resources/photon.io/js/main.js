@@ -208,7 +208,7 @@ var snapclearApp = function (initdata) {
         loading      : {img: '/img/transparent.png'},
         destUrlCallback: function(destUrl) {
           var query = $('.search-query').val()
-          if (query.length > 0) {
+          if (query.length > 0 && query != window.locale.search.default) {
             return destUrl + "?q=" + query
           } else {
             return destUrl
