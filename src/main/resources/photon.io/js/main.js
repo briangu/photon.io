@@ -225,19 +225,16 @@ var snapclearApp = function (initdata) {
         function( newElements ) {
           var $newElems = $( newElements ).css({ opacity: 0 });
           $newElems.imagesLoaded(function(){
-
-            var sels = $($newElems.children()).filter(function(index) { return !!$(this).attr('data-sharable'); })
-
-            if (inSelectMode()) {
-              $(sels).each(function (idx, item) { attachItemSelectActions(item); });
-            } else {
-              $(sels).each(function (idx, item) { attachItemActions(item); });
-            }
-
             $newElems.animate({ opacity: 1 });
             $('#gallery').masonry('appended', $newElems, true );
             showTimeAgoDates();
           });
+          var sels = $($newElems).filter(function(index) { return !!$(this).attr('data-sharable'); })
+          if (inSelectMode()) {
+            $(sels).each(function (idx, item) { attachItemSelectActions(item); });
+          } else {
+            $(sels).each(function (idx, item) { attachItemActions(item); });
+          }
         }
       );
 
@@ -527,20 +524,18 @@ var snapclearApp = function (initdata) {
     function appendNewelements(newElements) {
       var $newElems = $( newElements ).css({ opacity: 0 });
       $newElems.imagesLoaded(function(){
-
-        var sels = $($newElems.children()).filter(function(index) { return !!$(this).attr('data-sharable'); })
-
-        if (inSelectMode()) {
-          $(sels).each(function (idx, item) { attachItemSelectActions(item); });
-        } else {
-          $(sels).each(function (idx, item) { attachItemActions(item); });
-        }
-
         $newElems.animate({ opacity: 1 });
         $('#gallery').masonry('reload');
         showTimeAgoDates();
       });
       $('#gallery').append($newElems)
+
+      var sels = $($newElems).filter(function(index) { return !!$(this).attr('data-sharable'); })
+      if (inSelectMode()) {
+        $(sels).each(function (idx, item) { attachItemSelectActions(item); });
+      } else {
+        $(sels).each(function (idx, item) { attachItemActions(item); });
+      }
     }
 
     function onSearch() {
