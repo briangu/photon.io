@@ -55,7 +55,7 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, twitterConfi
   final protected val PAGE_SIZE = 25
   final protected val MAIN_TEMPLATE = FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
 
-  val _apiHandler = new CloudAdapter(cas, apiConfig)
+  val _apiHandler = new CloudAdapter(cas, storage, apiConfig)
 
   override def addRoutes {
 
