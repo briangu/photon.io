@@ -205,7 +205,7 @@ var snapclearApp = function (initdata) {
         nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
         itemSelector : '.item',     // selector for all items you'll retrieve
         dataType     : 'json',
-        loading      : {img: '/img/transparent.png'},
+        loading      : {img: '/img/loading.gif'},
         destUrlCallback: function(destUrl) {
           var query = $('.search-query').val()
           if (query.length > 0 && query != window.locale.search.default) {
