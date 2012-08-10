@@ -9,7 +9,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion._
 import org.json.{JSONArray, JSONObject}
 import cloudcmd.common._
 import adapters.DataNotFoundException
-import engine.IndexStorage
+import engine.{FileProcessor, IndexStorage}
 import java.io.File
 import java.net.InetAddress
 import srv.{SimpleOAuthSessionService, CloudAdapter, OAuthRouteConfig}
@@ -43,14 +43,14 @@ object Photon {
       val twitterConfig = new TwitterConfig("/login", "/logout", "callback", "http://%s:%d/callback".format(ipAddress, port), sessions)
       val apiConfig = new OAuthRouteConfig(baseHostPort, SimpleOAuthSessionService.instance)
 
-      NestServer.run(port, new Photon(CloudServices.IndexStorage, CloudServices.CloudEngine, twitterConfig, apiConfig))
+      NestServer.run(port, new Photon(CloudServices.IndexStorage, CloudServices.CloudEngine, CloudServices.FileProcessor, twitterConfig, apiConfig))
     } finally {
       CloudServices.shutdown
     }
   }
 }
 
-class Photon(storage: IndexStorage, cas: ContentAddressableStorage, twitterConfig: TwitterConfig, apiConfig: OAuthRouteConfig) extends ViperServer("res:///photon.io") {
+class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcessor: FileProcessor, twitterConfig: TwitterConfig, apiConfig: OAuthRouteConfig) extends ViperServer("res:///photon.io") {
 
   final protected val PAGE_SIZE = 25
   final protected val MAIN_TEMPLATE = FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
@@ -160,7 +160,7 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, twitterConfi
         new JsonResponse(arr)
       }
     }))
-    addRoute(new PostHandler("/u/", twitterConfig.sessions, storage, cas, CloudServices.FileProcessor))
+    addRoute(new PostHandler("/u/", twitterConfig.sessions, storage, cas, fileProcessor))
     addRoute(new TwitterLogin(
       new TwitterRouteHandler {
         override

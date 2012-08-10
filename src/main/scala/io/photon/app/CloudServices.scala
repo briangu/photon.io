@@ -15,6 +15,17 @@ object CloudServices {
     CloudServices.CloudEngine.init
     CloudServices.IndexStorage.init(configRoot)
 //    AsyncScalr.setServiceThreadCount(2) // TODO: set via config
+
+    println("refreshing adapter caches")
+    CloudEngine.refreshCache()
+
+    println("initializing adapters with describe()")
+    CloudEngine.describe()
+
+    println("reindexing index storage")
+    IndexStorage.reindex()
+
+    println("ready!")
   }
 
   def shutdown() {
