@@ -235,8 +235,8 @@ var snapclearApp = function (initdata) {
             $(sels).each(function (idx, item) { attachItemSelectActions(item); });
           } else {
             $(sels).each(function (idx, item) { attachItemShareActions(item); });
+            $($newElems).each(function (idx, item) { enableItemLightbox(item); })
           }
-          $($newElems).each(function (idx, item) { enableItemLightbox(item); })
         }
       );
 
@@ -538,8 +538,8 @@ var snapclearApp = function (initdata) {
         $(sels).each(function (idx, item) { attachItemSelectActions(item); });
       } else {
         $(sels).each(function (idx, item) { attachItemShareActions(item); });
+        $($newElems).each(function (idx, item) { enableItemLightbox(item); })
       }
-      $($newElems).each(function (idx, item) { enableItemLightbox(item); })
     }
 
     function onSearch() {
