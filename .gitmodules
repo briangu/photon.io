@@ -1,0 +1,9 @@
+[submodule "viper.io"]
+	path = viper.io
+	url = https://github.com/briangu/viper.io.git
+[submodule "cloudcmd"]
+	path = cloudcmd
+	url = https://github.com/briangu/cloudcmd.git
+[submodule "stored.io"]
+	path = stored.io
+	url = https://github.com/briangu/stored.io.git
