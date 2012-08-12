@@ -35,8 +35,6 @@
       <groupId>NettyExtension</groupId>
       <artifactId>NettyExtension</artifactId>
       <version>1.1.9</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/NettyExtension-1.1.9.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>io.stored</groupId>
