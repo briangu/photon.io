@@ -67,11 +67,11 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
         val offset = (math.max(args.get("page").toInt-1, 0)) * PAGE_SIZE
         val feed = if (args.containsKey("q")) {
-          getSearchResults(storage, session.twitter.getId, args.get("q"), PAGE_SIZE, offset)
+          resultsToJsonArray(session, getSearchResults(storage, session.twitter.getId, args.get("q"), PAGE_SIZE, offset))
         } else {
-          getChronResults(storage, session.twitter.getId, PAGE_SIZE, offset)
+          loadFeedData(session, storage, session.twitter.getId, PAGE_SIZE, offset)
         }
-        new JsonResponse(resultsToJsonArray(session, feed))
+        new JsonResponse(feed)
       }
     }))
     addRoute(new TwitterGetRoute(twitterConfig, "/t/$docId", new TwitterRouteHandler {
