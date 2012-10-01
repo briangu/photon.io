@@ -1,0 +1,24 @@
+Quickstart
+----------
+
+	cd workspace
+	git clone git://github.com/briangu/cloudcmd.git
+	cd cloudcmd
+	mvn clean install
+	cd ../photon.io
+        cd viper.io
+	./bin/mvn-install.sh
+        mvn clean install
+	cd ..
+	mvn clean install
+	
+
+    	export CLOUDCMD_HOME=~/workspace/cloudcmd
+    	export PATH=$CLOUDCMD_HOME/cld/bin:$PATH
+
+	cd ~
+	cld init
+	mkdir photondata
+ 	cld adapter -a -u file://`pwd`/photondata	
+
+
