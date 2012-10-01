@@ -20,7 +20,7 @@ object Photon {
   val projectionConfig = new JSONObject(FileUtils.readResourceFile(this.getClass, "/config/photon.io/projections.json"))
 
   def getIpAddress: String = {
-    InetAddress.getLocalHost.getHostAddress
+    InetAddress.getLocalHost.getHostName
   }
 
   def main(args: Array[String]) {
@@ -61,10 +61,6 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
 
     _apiHandler.addRoutes(this)
 
-    addRoute(new TwitterGetRoute(twitterConfig, "/v", new TwitterRouteHandler {
-      override
-      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, 0, PAGE_SIZE)
-    }))
     addRoute(new TwitterGetRoute(twitterConfig, "/j/$page", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
@@ -161,6 +157,7 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
       }
     }))
     addRoute(new PostHandler("/u/", twitterConfig.sessions, storage, cas, fileProcessor))
+
     addRoute(new TwitterLogin(
       new TwitterRouteHandler {
         override
@@ -183,6 +180,11 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
         }
       },
       twitterConfig))
+
+    addRoute(new TwitterGetRoute(twitterConfig, "/", new TwitterRouteHandler {
+      override
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, 0, PAGE_SIZE)
+    }))
   }
 
   protected def getMetaById(id: String) : FileMetaData = {

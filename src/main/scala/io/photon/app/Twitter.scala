@@ -227,7 +227,7 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
         response.setHeader("Location", requestToken.getAuthenticationURL)
         response
       } catch {
-        case e: TwitterException => throw new RuntimeException("failed to login")
+        case e: TwitterException => throw new RuntimeException("failed to login", e)
       }
     } else {
       val session = config.sessions.getSession(sessionId)
@@ -297,7 +297,8 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
   }
 
   def userInWhiteList(screenname: String) : Boolean = {
-    WhiteListService.inWhiteList(screenname)
+    //WhiteListService.inWhiteList(screenname)
+    true
   }
 
   def getSessionId(cookieString: String): (String, List[Cookie]) = {
