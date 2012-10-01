@@ -13,7 +13,7 @@ import java.io.File
 import java.net.InetAddress
 import srv.{SimpleOAuthSessionService, CloudAdapter, OAuthRouteConfig}
 import util.{FileTypeUtil, JsonUtil}
-import twitter4j.{Status, Paging, TwitterFactory}
+import twitter4j.{Query, Status, Paging, TwitterFactory}
 import twitter4j.json.DataObjectFactory
 
 
@@ -218,7 +218,7 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
       response.setHeader(HttpHeaders.Names.CONTENT_LENGTH, length)
       response.setHeader(HttpHeaders.Names.EXPIRES, "Expires: Thu, 29 Oct 2020 17:04:19 GMT")
       if (fileName != null) {
-        response.setHeader("Content-disposition", "attachment; filename=%s".format(fileName))
+        response.setHeader("Content-disposition", "attachment filename=%s".format(fileName))
       }
       response.setContent(new FileChannelBuffer(is, length))
       new RouteResponse(response, new RouteResponseDispose {
@@ -261,14 +261,16 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
 
   protected def loadLatestTweets(session: TwitterSession) : List[Status] = {
     import scala.collection.JavaConversions._
-    // TODO: use Since
-    val paging = new Paging(1, 50)
-    session.twitter.getHomeTimeline(paging).toList
+    session.twitter.getHomeTimeline(new Paging(1, 500)).toList
   }
 
   protected def loadMediaTweets(session: TwitterSession) : JSONArray = {
+    filterMediaTweets(loadLatestTweets(session))
+  }
+
+  protected def filterMediaTweets(tweets: List[Status]) : JSONArray = {
     val results = new JSONArray()
-    loadLatestTweets(session).foreach{ status =>
+    tweets.foreach{ status =>
       if (status.getMediaEntities != null) {
         status.getMediaEntities.foreach{ entity =>
           println(entity.getType)
