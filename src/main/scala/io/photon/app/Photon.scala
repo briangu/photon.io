@@ -13,6 +13,8 @@ import java.io.File
 import java.net.InetAddress
 import srv.{SimpleOAuthSessionService, CloudAdapter, OAuthRouteConfig}
 import util.{FileTypeUtil, JsonUtil}
+import twitter4j.{Status, Paging, TwitterFactory}
+import twitter4j.json.DataObjectFactory
 
 
 object Photon {
@@ -257,15 +259,57 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
     storage.find(filter)
   }
 
+  protected def loadLatestTweets(session: TwitterSession) : List[Status] = {
+    import scala.collection.JavaConversions._
+    // TODO: use Since
+    val paging = new Paging(1, 50)
+    session.twitter.getHomeTimeline(paging).toList
+  }
+
+  protected def loadMediaTweets(session: TwitterSession) : JSONArray = {
+    val results = new JSONArray()
+    loadLatestTweets(session).foreach{ status =>
+      if (status.getMediaEntities != null) {
+        status.getMediaEntities.foreach{ entity =>
+          println(entity.getType)
+          if (entity.getType.equals("photo")) {
+            System.out.println(status.getUser().getScreenName() + ":" + status.getText())
+            results.put(new JSONObject(DataObjectFactory.getRawJSON(status)))
+          }
+        }
+      }
+    }
+    results
+  }
+
+  protected def loadFeedData(session: TwitterSession, storage: IndexStorage, ownerId: Long, count: Int = PAGE_SIZE, offset: Int = 0) : JSONArray = {
+    val mediaTweets = twitterResultsToJsonArray(session, loadMediaTweets(session))
+    val backFeed = resultsToJsonArray(session, getChronResults(storage, ownerId, count, offset))
+    val results = new JSONArray
+    (0 until mediaTweets.length()).foreach(idx => results.put(mediaTweets.get(idx)))
+    (0 until backFeed.length()).foreach(idx => results.put(backFeed.get(idx)))
+    results
+  }
+
   protected def loadPage(session: TwitterSession, pageIdx: Int, countPerPage: Int) : RouteResponse = {
+    val data = loadFeedData(session, storage, session.twitter.getId, countPerPage, pageIdx)
+
     var tmp = MAIN_TEMPLATE.toString
     // TODO: make this more efficient.
     tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
     tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
-    tmp = tmp.replace("{{dyn-data}}", resultsToJsonArray(session, getChronResults(storage, session.twitter.getId, countPerPage, pageIdx)).toString())
+    tmp = tmp.replace("{{dyn-data}}", data.toString())
     //    tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
     tmp = tmp.replace("{{dyn-profileimg}}", session.getProfileImageUrl(session.twitter.getId))
     new HtmlResponse(tmp)
+  }
+
+  protected def twitterResultsToJsonArray(session: TwitterSession, records: JSONArray) : JSONArray = {
+    val arr = new JSONArray()
+    (0 until records.length).map { idx =>
+      arr.put(ModelUtil.createResponseDataFromTweet(session, records.getJSONObject(idx)))
+    }
+    arr
   }
 
   protected def resultsToJsonArray(session: TwitterSession, records: JSONArray) : JSONArray = {
