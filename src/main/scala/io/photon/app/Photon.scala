@@ -1,6 +1,5 @@
 package io.photon.app
 
-import io.stored.server.common.Record
 import io.viper.common.{ViperServer, NestServer}
 import io.viper.core.server.router._
 import io.viper.core.server.router.RouteResponse.RouteResponseDispose
@@ -183,7 +182,9 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
 
     addRoute(new TwitterGetRoute(twitterConfig, "/", new TwitterRouteHandler {
       override
-      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = loadPage(session, 0, PAGE_SIZE)
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
+        loadPage(session, 0, PAGE_SIZE)
+      }
     }))
   }
 
@@ -258,18 +259,13 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
 
   protected def loadPage(session: TwitterSession, pageIdx: Int, countPerPage: Int) : RouteResponse = {
     var tmp = MAIN_TEMPLATE.toString
+    // TODO: make this more efficient.
     tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
     tmp = tmp.replace("{{dyn-id}}", session.twitter.getId.toString)
     tmp = tmp.replace("{{dyn-data}}", resultsToJsonArray(session, getChronResults(storage, session.twitter.getId, countPerPage, pageIdx)).toString())
     //    tmp = tmp.replace("{{dyn-title}}", "Hello, %s!".format(session.twitter.getScreenName))
     tmp = tmp.replace("{{dyn-profileimg}}", session.getProfileImageUrl(session.twitter.getId))
     new HtmlResponse(tmp)
-  }
-
-  protected def resultsToJsonArray(session: TwitterSession, records: List[Record]) : JSONArray = {
-    val arr = new JSONArray()
-    records.foreach{r : Record => arr.put(ModelUtil.createResponseData(session, r.rawData, r.id)) }
-    arr
   }
 
   protected def resultsToJsonArray(session: TwitterSession, records: JSONArray) : JSONArray = {
