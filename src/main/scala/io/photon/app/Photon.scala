@@ -11,6 +11,7 @@ import java.io.File
 import java.net.InetAddress
 import srv.{SimpleOAuthSessionService, CloudAdapter, OAuthRouteConfig}
 import com.ning.http.client.AsyncHttpClient
+import scala.util.Random
 
 
 object Photon {
@@ -329,12 +330,12 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
   //    val url = "https://api.twitter.com/search.json?result_type=%s&include_entities=1&q=filter:images%20filter:twimg+%s&rpp=%d".format(workflow, query, rpp)
   // https://api.twitter.com/search.json?q=(from:mcuban+OR+from:eismcc+OR+from:sm+OR+from:jayz)+(filter%3Aimages+OR+filter%3Atwimg)&include_entities=1&result_type=parallel_realtime
   protected def getInitialSearchResults(query: String, friends: List[String], rpp: Int = PAGE_SIZE, workflow: String = "parallel_realtime") : JSONObject = {
-    val scope = "" // friends.map("from:%s".format(_)).reduceLeft(_ + "+OR+" + _)
+    val scope = Random.shuffle(friends).slice(0,math.min(25, friends.size)).map("from:%s".format(_)).reduceLeft(_ + "+OR+" + _)
     val response = asyncHttpClient
       .prepareGet("https://api.twitter.com/search.json")
       .addQueryParameter("result_type", workflow)
       .addQueryParameter("include_entities", "1")
-      .addQueryParameter("q", "(filter:images+OR+filter:twimg)+(%s)+(%s)".format(scope, query))
+      .addQueryParameter("q", "(filter:images+OR+filter:twimg)+(%s)+(%s) -flickr".format(scope, query))
       .addQueryParameter("rpp", rpp.toString)
       .execute
       .get

@@ -192,8 +192,10 @@ DISABLED
 
       $.each(data, function(i,x){
         var newElements = processItem(template, x);
-        $gallery = $gallery.append(newElements);
-        $gallery.css({ opacity: 0 });
+        if (newElements != null) {
+          $gallery = $gallery.append(newElements);
+          $gallery.css({ opacity: 0 });
+        }
       });
 
       $gallery.imagesLoaded(function(){
@@ -222,7 +224,10 @@ DISABLED
         template     : function(data) {
           var $div = $('<div/>')
             $.each(data, function(i,x){
-              $div.append(processItem(template, x));
+              var newElements = processItem(template, x)
+              if (newElements != null) {
+                $div.append(newElements);
+              }
             });
             return $div.children();
           },
@@ -407,7 +412,10 @@ DISABLED
       data['id'] = $(item).attr('data-id');
       data['name'] = $(item).find('.ItemThumb').attr('title');
       data['thumb'] = $(item).find('.ItemThumbImg').attr('src')
-      $('.share-item-list').append(processItem(st, data));
+      var newElements = processItem(template, x)
+      if (newElements != null) {
+        $('.share-item-list').append(newElements);
+      }
     }
 
     $('.share-dialog-button').click(function() {
@@ -519,7 +527,10 @@ DISABLED
     function applyTemplateToResults(data) {
       var $div = $('<div/>')
         $.each(data, function(i,x){
-          $div.append(processItem(template, x));
+          var newElements = processItem(template, x)
+          if (newElements != null) {
+            $div.append(newElements);
+          }
         });
       return $div.children();
     }
@@ -617,7 +628,7 @@ DISABLED
       item.isSharable = true
       if (typeof item.entities.media != 'undefined' && item.entities.media != null) {
         var media = item.entities.media[0]
-        item.mediaUrl = media.media_url
+        item.mediaUrl = media.media_url_https
         item.expandedUrl = media.url
         item.displayUrl = media.display_url
       } else {
@@ -639,11 +650,17 @@ DISABLED
             item.displayUrl = x.display_url
             return false
           } else {
+/*
             item.mediaUrl = x.expanded_url
             item.expandedUrl = x.url
             item.displayUrl = x.display_url
+*/
           }
         });
+      }
+
+      if (typeof item.mediaUrl == 'undefined') {
+        return null
       }
 
       return Mustache.to_html(template, item)
