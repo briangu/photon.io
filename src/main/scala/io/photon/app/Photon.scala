@@ -262,6 +262,7 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
   protected def loadLatestTweets(session: TwitterSession) : List[Status] = {
     import scala.collection.JavaConversions._
     session.twitter.getHomeTimeline(new Paging(1, 500)).toList
+//    session.twitter.search(new Query("filter:images")).getTweets.toList
   }
 
   protected def loadMediaTweets(session: TwitterSession) : JSONArray = {

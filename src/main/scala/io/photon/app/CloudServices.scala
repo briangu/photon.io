@@ -9,11 +9,14 @@ object CloudServices {
   val CloudEngine = new ParallelCloudEngine(ConfigService)
   val IndexStorage = new H2IndexStorage(CloudEngine)
   val FileProcessor = new DefaultFileProcessor(ConfigService, CloudEngine, IndexStorage, 640, 480)
+  val TwitterStream = new TwitterLinkStreamClient()
 
   def init(configRoot: String) {
-    CloudServices.ConfigService.init(configRoot)
-    CloudServices.CloudEngine.init
-    CloudServices.IndexStorage.init(configRoot)
+    ConfigService.init(configRoot)
+    CloudEngine.init
+    IndexStorage.init(configRoot)
+    TwitterStream.init()
+
 //    AsyncScalr.setServiceThreadCount(2) // TODO: set via config
 
     println("refreshing adapter caches")
@@ -32,6 +35,7 @@ object CloudServices {
     IndexStorage.shutdown
     CloudEngine.shutdown
     ConfigService.shutdown
+    TwitterStream.shutdown()
 
     if (AsyncScalr.getService != null) {
       AsyncScalr.getService.shutdownNow
