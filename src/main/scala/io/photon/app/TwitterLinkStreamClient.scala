@@ -81,10 +81,8 @@ class TwitterLinkStreamClient {
     val employees = getTwitterTeamMembers
 
     val map = new collection.mutable.HashMap[Long, List[Long]]
-    val jsonEmployees = new JSONObject()
 
     employees.foreach{ userId : Long => {
-      val jsonFollowing = new JSONArray()
       try {
         println("getFollowing: " + userId.toString)
 
@@ -92,19 +90,24 @@ class TwitterLinkStreamClient {
         following.foreach { followingId =>
           if (!map.contains(followingId)) {
             map.put(followingId, List())
-            jsonFollowing.put(followingId)
           }
+          map.put(followingId, map.get(followingId).get ++ List(userId))
         }
       } catch {
         case e: Exception => {
           println("failed to query user: " + userId)
         }
       }
-      jsonFollowing.put(userId)
-      jsonEmployees.put(userId.toString, jsonFollowing)
     }}
 
-    println(jsonEmployees.toString())
+    val obj = new JSONObject()
+    map.keySet.foreach{ key => {
+      val followers = new JSONArray()
+      map.get(key).get.foreach(followers.put)
+      obj.put(key.toString, followers)
+    }}
+
+    println(obj.toString())
 
     map.toMap
   }
