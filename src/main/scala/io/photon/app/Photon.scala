@@ -329,26 +329,27 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
   //    val url = "https://api.twitter.com/search.json?result_type=%s&include_entities=1&q=filter:images%20filter:twimg+%s&rpp=%d".format(workflow, query, rpp)
   // https://api.twitter.com/search.json?q=(from:mcuban+OR+from:eismcc+OR+from:sm+OR+from:jayz)+(filter%3Aimages+OR+filter%3Atwimg)&include_entities=1&result_type=parallel_realtime
   protected def getInitialSearchResults(query: String, friends: List[String], rpp: Int = PAGE_SIZE, workflow: String = "parallel_realtime") : JSONObject = {
-    val scope = friends.map("from:%s".format(_)).reduceLeft(_ + "+OR+" + _)
+    val scope = "" // friends.map("from:%s".format(_)).reduceLeft(_ + "+OR+" + _)
     val response = asyncHttpClient
       .prepareGet("https://api.twitter.com/search.json")
-      .addParameter("result_type", workflow)
-      .addParameter("include_entities", "1")
-      .addParameter("q", "(filter:images+OR+filter:twimg)+(%s)+(%s)".format(scope, query))
-      .addParameter("rpp", rpp.toString)
+      .addQueryParameter("result_type", workflow)
+      .addQueryParameter("include_entities", "1")
+      .addQueryParameter("q", "(filter:images+OR+filter:twimg)+(%s)+(%s)".format(scope, query))
+      .addQueryParameter("rpp", rpp.toString)
       .execute
       .get
-    new JSONObject(response.getResponseBody)
+    val responseBody = response.getResponseBody
+    new JSONObject(responseBody)
   }
 
   protected def getPaginatedSearchResults(page: String, maxId: String, query: String, workflow: String) : JSONObject = {
     val response = asyncHttpClient
       .prepareGet("https://api.twitter.com/search.json")
-      .addParameter("result_type", workflow)
-      .addParameter("include_entities", "1")
-      .addParameter("q", query)
-      .addParameter("page", page)
-      .addParameter("max_id", maxId)
+      .addQueryParameter("result_type", workflow)
+      .addQueryParameter("include_entities", "1")
+      .addQueryParameter("q", query)
+      .addQueryParameter("page", page)
+      .addQueryParameter("max_id", maxId)
       .execute
       .get
     new JSONObject(response.getResponseBody)

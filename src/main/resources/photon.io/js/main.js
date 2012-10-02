@@ -90,6 +90,8 @@ var snapclearApp = function (initdata) {
       })
     }
 
+    var template = $('#template-mason-brick').html();
+
 /*
     $('#fileupload').fileupload();
     $('#fileupload').fileupload('option', {
@@ -131,11 +133,9 @@ var snapclearApp = function (initdata) {
       toggleUploadPanelClosable();
     });
 
-    var template = $('#template-mason-brick').html();
-
     $('#fileupload').bind('fileuploaddone', function (e, data) {
       var x = JSON.parse(data.jqXHR.responseText)[0]
-      var newElements = Mustache.to_html(template, x);
+      var newElements = processItem(template, x);
       var $gallery = $('#gallery')
 //      $('.corner-stamp').append(h);
       var $newElems = $( newElements ).css({ opacity: 0 });
@@ -182,7 +182,8 @@ DISABLED
 
     function showTimeAgoDates() {
       $(".easydate").each(function() {
-        $(this).html($.easydate.format_date(new Date(parseInt($(this).attr("data-filedate"), 10))));
+//        $(this).html($.easydate.format_date(new Date(parseInt($(this).attr("data-filedate"), 10))));
+        $(this).html($.easydate.format_date(new Date($(this).attr("data-filedate"))));
       });
     }
 
@@ -190,7 +191,7 @@ DISABLED
       var $gallery = $('#gallery');
 
       $.each(initdata, function(i,x){
-        var newElements = Mustache.to_html(template, x);
+        var newElements = processItem(template, x);
         $gallery = $gallery.append(newElements);
         $gallery.css({ opacity: 0 });
       });
@@ -221,7 +222,7 @@ DISABLED
         template     : function(data) {
           var $div = $('<div/>')
             $.each(data, function(i,x){
-              $div.append(Mustache.to_html(template, x));
+              $div.append(processItem(template, x));
             });
             return $div.children();
           },
@@ -406,7 +407,7 @@ DISABLED
       data['id'] = $(item).attr('data-id');
       data['name'] = $(item).find('.ItemThumb').attr('title');
       data['thumb'] = $(item).find('.ItemThumbImg').attr('src')
-      $('.share-item-list').append(Mustache.to_html(st, data));
+      $('.share-item-list').append(processItem(st, data));
     }
 
     $('.share-dialog-button').click(function() {
@@ -518,7 +519,7 @@ DISABLED
     function applyTemplateToResults(data) {
       var $div = $('<div/>')
         $.each(data, function(i,x){
-          $div.append(Mustache.to_html(template, x));
+          $div.append(processItem(template, x));
         });
       return $div.children();
     }
@@ -609,4 +610,10 @@ DISABLED
     }
 
     initSearch();
+
+    function processItem(item) {
+      // convert instagram and twitpic media links
+      // resolve media url conflicts (when multiple)
+      return Mustache.to_html(template, item)
+    }
 };

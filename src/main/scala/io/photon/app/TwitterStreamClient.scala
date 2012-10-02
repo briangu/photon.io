@@ -17,7 +17,7 @@ class TwitterStreamClient(tweetProcessor: MediaTweetProcessor) {
 
   def init() {
 
-    followingGraph = buildFollowGraph()
+    followingGraph = loadFollowingGraph()
     followingFunnel = loadCachedFunnel()
 
     val listener = new StatusListener() {
@@ -50,7 +50,7 @@ class TwitterStreamClient(tweetProcessor: MediaTweetProcessor) {
       }
       def onScrubGeo(p1: Long, p2: Long) {}
     }
-
+/*
     val cb = new ConfigurationBuilder
     cb.setDebugEnabled(true)
     cb.setOAuthConsumerKey(System.getProperty("twitter4j.oauth.consumerKey"))
@@ -60,17 +60,35 @@ class TwitterStreamClient(tweetProcessor: MediaTweetProcessor) {
     twitterStream = new TwitterStreamFactory(cb.build()).getInstance()
     twitterStream.addListener(listener)
     twitterStream.sample()
+*/
   }
 
   def loadFollowingGraph() : Map[Long, List[String]] = {
     val map = new collection.mutable.HashMap[Long, List[String]]
+
+    val cachedFollowing = FileUtils.readResourceFile(this.getClass, "/config/photon.io/followgraph.json")
+    if (cachedFollowing != null) {
+      val json = new JSONObject(cachedFollowing)
+      val keys = json.keys()
+      while (keys.hasNext) {
+        val key = keys.next().toString
+        val lkey = key.toLong
+        val jsonMembers = json.getJSONArray(key)
+        val members = new ListBuffer[String]
+        (0 until jsonMembers.length()).foreach{ idx =>
+          members.append(jsonMembers.getString(idx))
+        }
+        map.put(lkey, members.toList)
+      }
+    }
+
     map.toMap
   }
 
   def loadCachedFunnel() : Map[Long, List[Long]] = {
     val map = new collection.mutable.HashMap[Long, List[Long]]
 
-    val cachedFunnel = FileUtils.readResourceFile(this.getClass, "/config/photon.io/twitter_team.json")
+    val cachedFunnel = FileUtils.readResourceFile(this.getClass, "/config/photon.io/followfunnel.json")
     if (cachedFunnel != null) {
       val json = new JSONObject(cachedFunnel)
       val keys = json.keys()
