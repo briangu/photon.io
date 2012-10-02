@@ -19,6 +19,7 @@ object CloudServices {
 
 //    AsyncScalr.setServiceThreadCount(2) // TODO: set via config
 
+/*
     println("refreshing adapter caches")
     CloudEngine.refreshCache()
 
@@ -27,6 +28,7 @@ object CloudServices {
 
     println("reindexing index storage")
     IndexStorage.reindex()
+*/
 
     println("ready!")
   }

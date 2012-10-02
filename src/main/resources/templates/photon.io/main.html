@@ -306,10 +306,10 @@
 
 <script type="text/javascript">
   var params = {}
-  var data = {{dyn-data}}
+  var dyndata = {{dyn-data}}
 
   $(document).ready(function() {
-    snapclearApp(data);
+    snapclearApp(dyndata);
   });
 </script>
 
@@ -390,21 +390,21 @@
       </div>
       <div class="ItemHolder center">
         <!-- rel="gallery" -->
-        <a href="/d/{{id}}" class="ItemThumb ImgLink" title="{{name}}" download="{{name}}">
-          <img src="{{thumbnail_url}}" alt="{{tags}}" class="ItemThumbImg" />
+        <a href="{{expandedUrl}}" class="ItemThumb ImgLink" title="{{id}}" download="{{id}}">
+          <img src="{{mediaUrl}}" alt="{{text}}" class="ItemThumbImg" />
         </a>
-        <div class="description tags">{{tags}}</div>
+        <div class="description tags">{{text}}</div>
       </div>
       <div class="iteminfo creatorInfo">
         <span>
-          <a href="https://twitter.com/{{creatorName}}/" title="{{creatorName}}" class="ImgLink">
-            <img src="{{creatorProfileImg}}" alt="Profile picture of @{{creatorName}}">
+          <a href="https://twitter.com/{{from_user}}/" title="{{from_user}}" class="ImgLink">
+            <img src="{{profile_image_url}}" alt="Profile picture of @{{from_user}}">
           </a>
           <div class="item-info">
             <div>
-              <div class="easydate pull-right" data-filedate="{{filedate}}"></div>
-              <div><a href="https://twitter.com/{{creatorName}}">@{{creatorName}}</a></div>
-              <div class="description"><a href="/d/{{id}}">{{name}}</a></div>
+              <div class="easydate pull-right" data-filedate="{{created_at}}"></div>
+              <div><a href="https://twitter.com/{{from_user}}">@{{from_user}}</a></div>
+              <div class="description"><a href="/d/{{id}}">{{from_user_name}}</a></div>
             </div>
           </div>
         </span>

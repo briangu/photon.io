@@ -190,7 +190,7 @@ DISABLED
     function initGallery(data) {
       var $gallery = $('#gallery');
 
-      $.each(initdata, function(i,x){
+      $.each(data, function(i,x){
         var newElements = processItem(template, x);
         $gallery = $gallery.append(newElements);
         $gallery.css({ opacity: 0 });
@@ -250,7 +250,7 @@ DISABLED
       showTimeAgoDates();
     }
 
-    initGallery(initdata);
+    initGallery(initdata.results);
 
     function disableGalleryClick() {
 //      $('a[rel="gallery"]').unbind('click')
@@ -611,9 +611,41 @@ DISABLED
 
     initSearch();
 
-    function processItem(item) {
+    function processItem(template, item) {
       // convert instagram and twitpic media links
       // resolve media url conflicts (when multiple)
+      item.isSharable = true
+      if (typeof item.entities.media != 'undefined' && item.entities.media != null) {
+        var media = item.entities.media[0]
+        item.mediaUrl = media.media_url
+        item.expandedUrl = media.url
+        item.displayUrl = media.display_url
+      } else {
+        $.each(item.entities.urls, function(i,x){
+          if (x.expanded_url.indexOf("instagr.am") >= 0) {
+            // extract code and create direct media url
+            // http://instagram.com/p/QSRtwvO2_T/media
+            var code = x.expanded_url.split("/")[4]
+            item.mediaUrl = "http://instagram.com/p/" + code + "/media"
+            item.expandedUrl = x.url
+            item.displayUrl = x.display_url
+            return false
+          } else if (x.expanded_url.indexOf("twitpic") >= 0) {
+            // extract code and create direct media url
+            // http://twitpic.com/show/full/b007dk
+            var code = x.expanded_url.split("/")[3]
+            item.mediaUrl = "http://twitpic.com/show/full/" + code
+            item.expandedUrl = x.url
+            item.displayUrl = x.display_url
+            return false
+          } else {
+            item.mediaUrl = x.expanded_url
+            item.expandedUrl = x.url
+            item.displayUrl = x.display_url
+          }
+        });
+      }
+
       return Mustache.to_html(template, item)
     }
 };
