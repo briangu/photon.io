@@ -90,6 +90,7 @@ var snapclearApp = function (initdata) {
       })
     }
 
+/*
     $('#fileupload').fileupload();
     $('#fileupload').fileupload('option', {
         url: '/u/',
@@ -121,14 +122,6 @@ var snapclearApp = function (initdata) {
     $('#fileupload').bind('fileuploadadd', function (e, data) {
       enableUpload(true);
     });
-
-/*
-    $('#fileupload').bind('fileuploadfail', function (e, data) {
-      if ($('.upload-file-queue tr').size() == 1) {
-        enableUpload(false);
-      }
-    });
-*/
 
     $('#fileupload').bind('fileuploadstop', function (e, data) {
       if ($('.upload-file-queue tr').size() == 1) {
@@ -173,6 +166,17 @@ var snapclearApp = function (initdata) {
       .bind('fileuploadpaste', function (e, data) {console.log("fileuploadpaste")})
       .bind('fileuploaddrop', function (e, data) {console.log("fileuploaddrop")})
       .bind('fileuploaddragover', function (e) {console.log("fileuploaddragover")});
+*/
+
+
+/*
+DISABLED
+    $('#fileupload').bind('fileuploadfail', function (e, data) {
+      if ($('.upload-file-queue tr').size() == 1) {
+        enableUpload(false);
+      }
+    });
+*/
 
     initUI();
 

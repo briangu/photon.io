@@ -60,7 +60,6 @@ object ModelUtil {
     obj
   }
 
-
   def createResponseData(session: TwitterSession, rawFmd: JSONObject, docId: String) : JSONObject = {
     createResponseData(session, FileMetaData.create(rawFmd), docId)
   }

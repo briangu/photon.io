@@ -2,19 +2,15 @@ package io.photon.app
 
 import io.viper.common.{ViperServer, NestServer}
 import io.viper.core.server.router._
-import io.viper.core.server.router.RouteResponse.RouteResponseDispose
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import org.json.{JSONArray, JSONObject}
 import cloudcmd.common._
-import adapters.DataNotFoundException
 import engine.{FileProcessor, IndexStorage}
 import java.io.File
 import java.net.InetAddress
 import srv.{SimpleOAuthSessionService, CloudAdapter, OAuthRouteConfig}
-import util.{FileTypeUtil, JsonUtil}
-import twitter4j.{Query, Status, Paging, TwitterFactory}
-import twitter4j.json.DataObjectFactory
+import com.ning.http.client.AsyncHttpClient
 
 
 object Photon {
@@ -56,24 +52,31 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
   final protected val PAGE_SIZE = 25
   final protected val MAIN_TEMPLATE = FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
 
+  val asyncHttpClient = new AsyncHttpClient()
+
   val _apiHandler = new CloudAdapter(cas, storage, apiConfig)
 
   override def addRoutes {
 
     _apiHandler.addRoutes(this)
 
+    // TODO: use nextPage URI provided by api.twitter.com
     addRoute(new TwitterGetRoute(twitterConfig, "/j/$page", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
-        val offset = (math.max(args.get("page").toInt-1, 0)) * PAGE_SIZE
         val feed = if (args.containsKey("q")) {
-          resultsToJsonArray(session, getSearchResults(storage, session.twitter.getId, args.get("q"), PAGE_SIZE, offset))
+          loadFeedData(session.twitter.getId)
         } else {
-          loadFeedData(session, storage, session.twitter.getId, PAGE_SIZE, offset)
+          val query = args.get("q")
+          val page = args.get("page")
+          val maxId = args.get("max_id")
+          val workflow = args.get("result_type")
+          getPaginatedSearchResults(page, maxId, query, workflow)
         }
         new JsonResponse(feed)
       }
     }))
+/*
     addRoute(new TwitterGetRoute(twitterConfig, "/t/$docId", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
@@ -117,6 +120,7 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
         }
       }
     }))
+
     addRoute(new TwitterPostRoute(twitterConfig, "/shares", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
@@ -157,7 +161,30 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
         new JsonResponse(arr)
       }
     }))
-    addRoute(new PostHandler("/u/", twitterConfig.sessions, storage, cas, fileProcessor))
+
+*/
+
+    addRoute(new TwitterPostRoute(twitterConfig, "/shares", new TwitterRouteHandler {
+      override
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
+        if (!args.containsKey("sharees")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
+        if (!args.containsKey("ids")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
+        if (!args.containsKey("sharemsg")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
+
+        val shareeNames = args.get("sharees").split(',')
+        val shareeIds = shareeNames.par.map{ name =>
+          val shareeId = session.getIdFromScreenName(name)
+          if (shareeId == 0) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
+          shareeId
+        }
+
+        val docIds = args.get("ids").split(',')
+
+        new JsonResponse(new JSONArray())
+      }
+    }))
+
+//    addRoute(new PostHandler("/u/", twitterConfig.sessions, storage, cas, fileProcessor))
 
     addRoute(new TwitterLogin(
       new TwitterRouteHandler {
@@ -185,11 +212,13 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
     addRoute(new TwitterGetRoute(twitterConfig, "/", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
-        loadPage(session, 0, PAGE_SIZE)
+        val query = if (args.containsKey("q")) { args.get("q") } else { "" }
+        loadPage(session, query, 0, PAGE_SIZE)
       }
     }))
   }
 
+/*
   protected def getMetaById(id: String) : FileMetaData = {
     val result = storage.find(JsonUtil.createJsonObject("hash", id + ".meta"))
     if (result == null || result.length == 0) {
@@ -231,7 +260,7 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
     }
   }
 
-  protected def getSearchResults(storage: IndexStorage, ownerId: Long, tags: String, count: Int, offset: Int) : JSONArray = {
+  protected def getInitialSearchResults(storage: IndexStorage, ownerId: Long, tags: String, count: Int, offset: Int) : JSONArray = {
     //    val sql = "SELECT T.HASH,T.RAWMETA FROM FT_SEARCH_DATA('%s', 0, 0) FT, DATA_INDEX T WHERE FT.TABLE='DATA_INDEX' AND T.HASH = FT.KEYS[0] AND T.OWNERID = '%s".format(tags, ownerId)
     //    storage.search(tags, ")
     //    storage.select(sql)
@@ -293,9 +322,45 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
     (0 until backFeed.length()).foreach(idx => results.put(backFeed.get(idx)))
     results
   }
+*/
 
-  protected def loadPage(session: TwitterSession, pageIdx: Int, countPerPage: Int) : RouteResponse = {
-    val data = loadFeedData(session, storage, session.twitter.getId, countPerPage, pageIdx)
+  // https://api.twitter.com/search.json?result_type=parallel_realtime&include_entities=1&q=filter:images%20filter:twimg%20OR%20filter:videos&rpp=100
+  //    val url = "https://api.twitter.com/search.json?result_type=%s&include_entities=1&q=filter:images%20filter:twimg%20OR%20filter:videos+%s&rpp=%d".format(workflow, query, rpp)
+  //    val url = "https://api.twitter.com/search.json?result_type=%s&include_entities=1&q=filter:images%20filter:twimg+%s&rpp=%d".format(workflow, query, rpp)
+  // https://api.twitter.com/search.json?q=(from:mcuban+OR+from:eismcc+OR+from:sm+OR+from:jayz)+(filter%3Aimages+OR+filter%3Atwimg)&include_entities=1&result_type=parallel_realtime
+  protected def getInitialSearchResults(query: String, friends: List[String], rpp: Int = PAGE_SIZE, workflow: String = "parallel_realtime") : JSONObject = {
+    val scope = friends.map("from:%s".format(_)).reduceLeft(_ + "+OR+" + _)
+    val response = asyncHttpClient
+      .prepareGet("https://api.twitter.com/search.json")
+      .addParameter("result_type", workflow)
+      .addParameter("include_entities", "1")
+      .addParameter("q", "(filter:images+OR+filter:twimg)+(%s)+(%s)".format(scope, query))
+      .addParameter("rpp", rpp.toString)
+      .execute
+      .get
+    new JSONObject(response.getResponseBody)
+  }
+
+  protected def getPaginatedSearchResults(page: String, maxId: String, query: String, workflow: String) : JSONObject = {
+    val response = asyncHttpClient
+      .prepareGet("https://api.twitter.com/search.json")
+      .addParameter("result_type", workflow)
+      .addParameter("include_entities", "1")
+      .addParameter("q", query)
+      .addParameter("page", page)
+      .addParameter("max_id", maxId)
+      .execute
+      .get
+    new JSONObject(response.getResponseBody)
+  }
+
+  protected def loadFeedData(ownerId: Long, query: String = "", count: Int = PAGE_SIZE) : JSONObject = {
+    val friends = CloudServices.TwitterStream.followingGraph.getOrElse(ownerId, List())
+    getInitialSearchResults(query, friends, count)
+  }
+
+  protected def loadPage(session: TwitterSession, query: String, pageIdx: Int, countPerPage: Int) : RouteResponse = {
+    val data = loadFeedData(session.twitter.getId, query, countPerPage)
 
     var tmp = MAIN_TEMPLATE.toString
     // TODO: make this more efficient.
