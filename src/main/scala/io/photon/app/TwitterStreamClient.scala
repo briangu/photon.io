@@ -5,27 +5,38 @@ import twitter4j._
 import conf.ConfigurationBuilder
 import collection.mutable.ListBuffer
 import scala.collection
+import collection.mutable
 import org.json.{JSONObject, JSONArray}
 
-class TwitterLinkStreamClient {
-  private val log = Logger.getLogger(classOf[TwitterLinkStreamClient])
+class TwitterStreamClient(tweetProcessor: MediaTweetProcessor) {
+  private val log = Logger.getLogger(classOf[TwitterStreamClient])
 
   var twitterStream : TwitterStream = null
   var followingFunnel: Map[Long, List[Long]] = null
+  var followingGraph: Map[Long, List[String]] = null
 
   def init() {
 
+    followingGraph = buildFollowGraph()
     followingFunnel = loadCachedFunnel()
 
     val listener = new StatusListener() {
       def onStatus(status: Status) {
-        if (status.getMediaEntities != null) {
-          val media = status.getMediaEntities
-          media.foreach{ entity =>
-            entity.getType match {
-              case "photo" => {
-                if (followingFunnel.contains(status.getUser.getId)) {
-                  println(status.getUser().getName() + " : " + status.getText())
+        //if (followingFunnel.contains(status.getUser.getId)) {
+        if (true) {
+          if (status.getMediaEntities != null) {
+            val media = status.getMediaEntities
+            media.foreach{ entity =>
+              entity.getType match {
+                case "photo" => {
+                  // TODO: fanout one copy of the meta data for each recipient
+                  println(status.getUser().getName() + " : " + entity.getMediaURL())
+                  tweetProcessor.add(status, 1234)
+                  /*
+                  followingFunnel.get(status.getUser.getId).get.foreach{ userId =>
+                    tweetProcessor.add(status, userId)
+                  }
+                  */
                 }
               }
             }
@@ -51,6 +62,11 @@ class TwitterLinkStreamClient {
     twitterStream.sample()
   }
 
+  def loadFollowingGraph() : Map[Long, List[String]] = {
+    val map = new collection.mutable.HashMap[Long, List[String]]
+    map.toMap
+  }
+
   def loadCachedFunnel() : Map[Long, List[Long]] = {
     val map = new collection.mutable.HashMap[Long, List[Long]]
 
@@ -69,6 +85,56 @@ class TwitterLinkStreamClient {
         map.put(lkey, members.toList)
       }
     }
+
+    map.toMap
+  }
+
+  def buildFollowGraph() : Map[Long, List[String]] = {
+    val employees = getTwitterTeamMembers
+
+    val map = new collection.mutable.HashMap[Long, List[String]]
+
+    employees.foreach{ userId : Long => {
+      try {
+        println("getFollowing: " + userId.toString)
+        val userCache = new mutable.HashMap[Long, User]()
+
+        val following = getFollowing(userId) ++ List(userId)
+        val followingNames = List() ++ following.flatMap { followingId =>
+          if (!userCache.contains(followingId)) {
+            try {
+              val twitter = TwitterFactory.getSingleton
+              val followingUser = twitter.showUser(followingId)
+              userCache.put(followingId, followingUser)
+            } catch {
+              case e:Exception => {
+                println("failed to resolve userId: " + followingId)
+              }
+            }
+          }
+          if (userCache.contains(followingId)) {
+            List(userCache.get(followingId).get.getScreenName)
+          } else {
+            Nil
+          }
+        }
+
+        map.put(userId, followingNames)
+      } catch {
+        case e: Exception => {
+          println("failed to query user: " + userId)
+        }
+      }
+    }}
+
+    val obj = new JSONObject()
+    map.keySet.foreach{ key => {
+      val following = new JSONArray()
+      map.get(key).get.foreach(following.put)
+      obj.put(key.toString, following)
+    }}
+
+    println(obj.toString())
 
     map.toMap
   }

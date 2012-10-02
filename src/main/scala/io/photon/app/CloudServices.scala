@@ -9,7 +9,7 @@ object CloudServices {
   val CloudEngine = new ParallelCloudEngine(ConfigService)
   val IndexStorage = new H2IndexStorage(CloudEngine)
   val FileProcessor = new DefaultFileProcessor(ConfigService, CloudEngine, IndexStorage, 640, 480)
-  val TwitterStream = new TwitterLinkStreamClient()
+  val TwitterStream = new TwitterStreamClient(new MediaTweetProcessor(CloudEngine, IndexStorage))
 
   def init(configRoot: String) {
     ConfigService.init(configRoot)
