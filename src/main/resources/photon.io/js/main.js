@@ -735,10 +735,10 @@ DISABLED
     // center main
     function alignMain() {
       var width;
-      if (document.width == 1280) {
-        width = 64;
-      } else if (document.width <= 1200) {
+      if (document.width == 1200) {
         width = 27;
+      } else {
+        width = 64;
       }
       $('.main-content-row').attr('style', 'margin-left: ' + document.width * width / 1280  +'px');
     }
