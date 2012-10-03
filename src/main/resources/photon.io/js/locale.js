@@ -29,6 +29,6 @@ window.locale = {
         'sharemsg': "Compose a direct message to share your files..."
     },
     "search": {
-      "default": "See what’s happening right now..."
+      "default": "See what’s happening right now with..."
     }
 };
