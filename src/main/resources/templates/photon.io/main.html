@@ -38,7 +38,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </a>
-      <a class="brand" href="#">twinterest</a>
+      <a class="brand" href="/">twinterest</a>
       <div class="btn-group pull-right">
         <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
           <img src="{{dyn-profileimg}}" style="width: 24px;"/> {{dyn-screenname}}
@@ -468,8 +468,13 @@
           <div class="item-info">
             <div>
               <div class="easydate pull-right" data-filedate="{{created_at}}"></div>
-              <div><a href="https://twitter.com/{{from_user}}">@{{from_user}}</a></div>
-              <div class="description"><a href="https://twitter.com/{{from_user}}">{{from_user_name}}</a></div>
+              <div><a href="/?user={{from_user}}">@{{from_user}}</a></div>
+              {{#tags}}
+                <div class="item-collection">
+                  <i class="collect-icon-tag icon-tag"></i>
+                  <a href="/?user={{from_user}}&tags={{tags}}">{{tags}}</a>
+                </div>
+              {{/tags}}
             </div>
           </div>
         </span>

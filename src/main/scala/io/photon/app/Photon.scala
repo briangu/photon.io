@@ -212,8 +212,20 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
     addRoute(new TwitterGetRoute(twitterConfig, "/", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
-        val query = if (args.containsKey("q")) { args.get("q") } else { "" }
-        loadPage(session, query, 0, PAGE_SIZE)
+        val (query, mynetwork) = if (args.containsKey("user")) {
+          if (args.containsKey("tags")) {
+            ("", false) // TODO: extract ids from collection and hydrate
+          } else {
+            ("from:"+args.get("user"), false)
+          }
+        } else {
+          if (args.containsKey("q")) {
+            (args.get("q"), true)
+          } else {
+            ("", true) // VANILLA page load
+          }
+        }
+        loadPage(session, query, 0, PAGE_SIZE, mynetwork)
       }
     }))
   }
@@ -383,8 +395,8 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
     getInitialSearchResults(query, friends, count)
   }
 
-  protected def loadPage(session: TwitterSession, query: String, pageIdx: Int, countPerPage: Int) : RouteResponse = {
-    val data = loadFeedData(session.twitter.getId, query, true, countPerPage)
+  protected def loadPage(session: TwitterSession, query: String, pageIdx: Int, countPerPage: Int, network: Boolean = true) : RouteResponse = {
+    val data = loadFeedData(session.twitter.getId, query, network, countPerPage)
 
     var tmp = MAIN_TEMPLATE.toString
     // TODO: make this more efficient.
