@@ -571,9 +571,10 @@ DISABLED
 
       var tags = $('.search-query').val();
       if (tags == undefined && tags.length == 0) return
-      if (tags === searchState.last) return
+//      if (tags === searchState.last) return
 
       searchState.last = tags
+      var network = $('.network-selector .active').attr('id') == "network-my";
 
       $.ajax({
           dataType: 'json',
@@ -581,7 +582,7 @@ DISABLED
           url: '/j/0',
           data: {
             'q': tags,
-            'network': false
+            'network': network
           },
           success: function(data, textStatus, jqXHR) {
             dyndata = data
