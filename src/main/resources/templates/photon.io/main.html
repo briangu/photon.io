@@ -407,24 +407,24 @@
   <script type="text/html" id="template-share-item">
     <tr>
       <td><img class="download_img" src="{{thumb}}"></td>
-      <td data-id='{{id}}'>{{name}}</td>
+      <td data-id='{{id_str}}'>{{name}}</td>
     </tr>
   </script>
 
   <script type="text/html" id="template-mason-brick">
-    <div class="item box" data-id="{{id}}" data-sharable={{isSharable}}>
+    <div class="item box" data-id="{{id_str}}" data-sharable={{isSharable}}>
       <div class="pull-right icon-top-right" style="display: none;">
         <img class="checkbox-img" src="/img/transparent.png" role="checkbox">
         <input type="checkbox" name="share[]" style="display: none;"/>
       </div>
       <div class="item-actions" style="display: none;">
-          <span class="item-collect" data-id="{{id}}" style="cursor: pointer;">
+          <span class="item-collect" data-id="{{id_str}}" style="cursor: pointer;">
             <a class="btn inline-collect-button">
               <i class="collect-icon-tag icon-tag"></i>
               <span>Tag</span>
             </a>
 <!--
-            <span class="dropdown item-collect" data-id="{{id}}" style="cursor: pointer;">
+            <span class="dropdown item-collect" data-id="{{id_str}}" style="cursor: pointer;">
               <a class="btn inline-collect-button dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">Collect <b class="caret"></b></a>
               <i class="collect-icon-tag icon-tag"></i>
               <ul id="menu1" class="dropdown-menu collect-menu" role="menu" aria-labelledby="drop4">
@@ -445,7 +445,7 @@
 -->
           </span>
 <!--
-          <span class="item-share" data-id="{{id}}" style="cursor: pointer;">
+          <span class="item-share" data-id="{{id_str}}" style="cursor: pointer;">
             <a class="btn inline-share-button">
               <i class="retweet-icon-share icon-share"></i>
               <span>Retweet</span>

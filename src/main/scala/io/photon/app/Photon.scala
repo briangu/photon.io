@@ -383,6 +383,11 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
     json
   }
 
+  protected def getTweetsByIds(ids: List[Long]) : JSONArray = {
+    //http://api.twitter.com/1/statuses/show/253507835592327168.json?include_entities=1
+    null
+  }
+
   protected def loadFeedData(ownerId: Long, query: String = "", network: Boolean = true, count: Int = PAGE_SIZE) : JSONObject = {
     val friends = if (network) CloudServices.TwitterStream.followingGraph.getOrElse(ownerId, List()) else List()
     getInitialSearchResults(query, friends, count)

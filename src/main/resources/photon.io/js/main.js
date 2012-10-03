@@ -461,6 +461,30 @@ DISABLED
       $('.tag-item-list').append(Mustache.to_html(st, data));
     }
 
+    $('.tag-dialog-button').click(function() {
+      if ($('.collect-tags').val().length == 0) {
+        alert("You didn't specifiy any tags.")
+        return false;
+      }
+
+      var tags = $('.collect-tags').val();
+      var ids = $.makeArray($('.tag-item-list').find('td[data-id]').map(function(idx,item) { return $(item).attr('data-id'); })).join(',')
+
+      $('#modal-share input[id="collect-ids"]').val(ids)
+      $('#modal-share input[id="collect-tags"]').val(sharees)
+
+      $.ajax({
+        type: 'POST',
+        url: '/tags',
+        async: false,
+        data: $("#form-tag-modal").serialize(),
+        error: function() { alert('failed to tag!'); },
+        dataType: 'json'
+      });
+
+      $('#modal-tag').modal('hide');
+    });
+
     $('.share-dialog-button').click(function() {
       if ($('.sharee-list').html().length == 0) {
         alert("You didn't specifiy any recipients.  Use @ notation to specify a Twitter user.")
