@@ -58,6 +58,25 @@ var snapclearApp = function (initdata) {
       });
     }
 
+    function attachItemsTagActions() {
+      $('.item').each(function(idx, item) { attachItemTagActions(item); });
+    }
+
+    function attachItemTagActions(item) {
+      $(item).find('.item-collect').click(function(e) {
+        resetTagModal();
+        addToTagList($(this).closest('.item'));
+        $('#modal-tag').modal({})
+      })
+    }
+
+    function unattachItemsShareActions() {
+      $('.item').each(function (idx, item) {
+        $(item).unbind('hover');
+        $(item).find('.item-share').unbind('click');
+      });
+    }
+
     function initUI() {
       resetBoxEditor();
 
@@ -260,6 +279,7 @@ DISABLED
 
       enableGalleryClick();
       attachItemsShareActions();
+      attachItemsTagActions();
       showTimeAgoDates();
     }
 
@@ -359,6 +379,7 @@ DISABLED
       resetItemCheckboxes();
       enableGalleryClick();
       attachItemsShareActions();
+      attachItemsTagActions();
       disableSelectNav();
     }
 
@@ -388,7 +409,13 @@ DISABLED
       $('.sharee-list').html('');
     }
 
+    function resetTagModal() {
+      $('.collect-tags').val("");
+      $('.tag-item-list tr').remove();
+    }
+
     resetShareModal(); // TODO: cluster all init code
+    resetTagModal(); // TODO: cluster all init code
 
     function updateSharees() {
       var txt = $('.sharemsg').val();
@@ -420,10 +447,18 @@ DISABLED
       data['id'] = $(item).attr('data-id');
       data['name'] = $(item).find('.ItemThumb').attr('title');
       data['thumb'] = $(item).find('.ItemThumbImg').attr('src')
-      var newElements = processItem(template, x)
-      if (newElements != null) {
-        $('.share-item-list').append(newElements);
+      $('.share-item-list').append(Mustache.to_html(st, data));
+    }
+
+    function addToTagList(item, st) {
+      if (st == undefined) {
+        st = $('#template-share-item').html();
       }
+      var data = {};
+      data['id'] = $(item).attr('data-id');
+      data['name'] = $(item).find('.ItemThumb').attr('title');
+      data['thumb'] = $(item).find('.ItemThumbImg').attr('src')
+      $('.tag-item-list').append(Mustache.to_html(st, data));
     }
 
     $('.share-dialog-button').click(function() {
@@ -460,6 +495,7 @@ DISABLED
       enableSelectNav();
 
       unattachItemsShareActions();
+      unattachItemsTagActions();
       disableGalleryClick();
 
       resetItemCheckboxes();
@@ -561,7 +597,10 @@ DISABLED
       if (inSelectMode()) {
         $(sels).each(function (idx, item) { attachItemSelectActions(item); });
       } else {
-        $(sels).each(function (idx, item) { attachItemShareActions(item); });
+        $(sels).each(function (idx, item) {
+          attachItemShareActions(item);
+          attachItemTagActions(item);
+        });
         $($newElems).each(function (idx, item) { enableItemLightbox(item); })
       }
     }
@@ -640,7 +679,15 @@ DISABLED
     initSearch();
 
     // center main
-    $('.main-content-row').attr('style', 'margin-left: ' + document.width * 27 / 1280  +'px');
+    function alignMain() {
+      var width = 64;
+      if (window.screen.width < 1280) {
+        width = 27;
+      }
+      $('.main-content-row').attr('style', 'margin-left: ' + window.screen.width * width / 1280  +'px');
+    }
+
+    alignMain();
 
     function processItem(template, item) {
       // convert instagram and twitpic media links
