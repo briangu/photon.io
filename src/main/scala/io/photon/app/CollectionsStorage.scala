@@ -113,7 +113,7 @@ class CollectionsStorage() {
   }
 
   private val fields = List("USERNAME", "TAGS", "ID")
-  private val addMetaSql = "INSERTd INTO FILE_INDEX (%s) VALUES (%s)".format(fields.mkString(","), StringUtil.joinRepeat(fields.size, "?", ","))
+  private val addMetaSql = "INSERT INTO FILE_INDEX (%s) VALUES (%s)".format(fields.mkString(","), StringUtil.joinRepeat(fields.size, "?", ","))
 
   def addTags(userName: String, tags: String, ids: List[Long]) {
     var db: Connection = null
