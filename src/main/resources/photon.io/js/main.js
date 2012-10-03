@@ -579,10 +579,15 @@ DISABLED
           dataType: 'json',
           type: 'GET',
           url: '/j/0',
-          data: {'q': tags},
+          data: {
+            'q': tags,
+            'network': false
+          },
           success: function(data, textStatus, jqXHR) {
-            if (data.length > 0) {
-              var $newElems = applyTemplateToResults(data);
+            dyndata = data
+            var results = dyndata.results
+            if (results.length > 0) {
+              var $newElems = applyTemplateToResults(results);
               $('#gallery').children().remove();
               appendNewelements($newElems)
               searchState.loading = false
@@ -607,12 +612,12 @@ DISABLED
       })
 
       $('.search-query').change(function() {
-        onSearch();
+//        onSearch();
         return false;
       });
 
       $('.search-query').live('keyup', function() {
-        onSearch();
+//        onSearch();
         return false;
       });
 

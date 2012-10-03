@@ -70,9 +70,18 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
         } else {
           val query = args.get("q")
           val page = args.get("page")
-          val maxId = args.get("max_id")
-          val workflow = args.get("result_type")
-          getPaginatedSearchResults(page, maxId, query, workflow)
+          if (page.equals("0")) {
+            val network = if (args.containsKey("network")) {
+              args.get("network").toBoolean
+            } else {
+              true
+            }
+            loadFeedData(session.twitter.getId, query, network)
+          } else {
+            val maxId = args.get("max_id")
+            val workflow = args.get("result_type")
+            getPaginatedSearchResults(page, maxId, query, workflow)
+          }
         }
         new JsonResponse(feed)
       }
@@ -348,6 +357,9 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
       .get
     val responseBody = response.getResponseBody
     val json = new JSONObject(responseBody)
+    if (json.has("errors")) {
+      println("error for " + query)
+    }
     json.put("result_type", workflow)
     json
   }
@@ -363,21 +375,21 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
       .execute
       .get
     val responseBody = response.getResponseBody
-    if (responseBody.length == 0) {
-      println("received no results for " + query)
-    }
     val json = new JSONObject(responseBody)
+    if (json.has("errors")) {
+      println("error for " + query)
+    }
     json.put("result_type", workflow)
     json
   }
 
-  protected def loadFeedData(ownerId: Long, query: String = "", count: Int = PAGE_SIZE) : JSONObject = {
-    val friends = CloudServices.TwitterStream.followingGraph.getOrElse(ownerId, List())
+  protected def loadFeedData(ownerId: Long, query: String = "", network: Boolean = true, count: Int = PAGE_SIZE) : JSONObject = {
+    val friends = if (network) CloudServices.TwitterStream.followingGraph.getOrElse(ownerId, List()) else List()
     getInitialSearchResults(query, friends, count)
   }
 
   protected def loadPage(session: TwitterSession, query: String, pageIdx: Int, countPerPage: Int) : RouteResponse = {
-    val data = loadFeedData(session.twitter.getId, query, countPerPage)
+    val data = loadFeedData(session.twitter.getId, query, true, countPerPage)
 
     var tmp = MAIN_TEMPLATE.toString
     // TODO: make this more efficient.
