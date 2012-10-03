@@ -83,6 +83,10 @@ position: absolute;
 z-index: 30;
 }
 
+.big-query-box {
+  width: 220px;
+}
+
 .inline-share-button {
 background-color: f2f0f0;
 width: 65px;
