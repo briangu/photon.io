@@ -113,7 +113,7 @@ class CollectionsStorage() {
   }
 
   private val fields = List("USERNAME", "TAGS", "ID")
-  private val addMetaSql = "MERGE INTO FILE_INDEX (%s) VALUES (%s)".format(fields.mkString(","), StringUtil.joinRepeat(fields.size, "?", ","))
+  private val addMetaSql = "INSERTd INTO FILE_INDEX (%s) VALUES (%s)".format(fields.mkString(","), StringUtil.joinRepeat(fields.size, "?", ","))
 
   def addTags(userName: String, tags: String, ids: List[Long]) {
     var db: Connection = null
@@ -202,7 +202,7 @@ class CollectionsStorage() {
   }
 
   def find(filter: JSONObject): JSONArray = {
-    val results: JSONArray = new JSONArray
+    val results = new JSONArray
 
     var db: Connection = null
     var statement: PreparedStatement = null
@@ -230,7 +230,7 @@ class CollectionsStorage() {
       val iter = filter.keys
       while (iter.hasNext) {
         iter.next.asInstanceOf[String] match {
-          case "orderBy" | "count" | "offset" | "tags" => ;
+          case "orderBy" | "count" | "offset" => ;
           case rawKey => {
             val key = prefix + rawKey
 
@@ -250,7 +250,11 @@ class CollectionsStorage() {
                 list.append(String.format("%s LIKE ?", key))
               }
               else {
-                list.append(String.format("%s IN (?)", key))
+                if (key.equals("tags")) {
+                  list.append(String.format("%s = ?", key))
+                } else {
+                  list.append(String.format("%s IN (?)", key))
+                }
               }
               bind.append(obj)
             }
@@ -281,7 +285,7 @@ class CollectionsStorage() {
       val rs = statement.executeQuery
       while (rs.next) {
         results.put(JsonUtil.createJsonObject(
-          "userName", rs.getString("HASH"),
+          "userName", rs.getString("USERNAME"),
           "tags", rs.getString("TAGS"),
           "id", rs.getLong("ID").asInstanceOf[AnyRef]))
       }

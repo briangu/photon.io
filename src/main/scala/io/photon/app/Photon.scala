@@ -212,8 +212,21 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
     addRoute(new TwitterGetRoute(twitterConfig, "/", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
+        if (args.containsKey("user") && args.containsKey("tags")) {
+          val filter = new JSONObject()
+          filter.put("tags", args.get("tags"))
+          filter.put("userName", session.twitter.getScreenName)
+          val results = tagsStorage.find(filter)
+          // val ids = (0 until results.length()).map(results.getJSONObject(_).getLong("id")).toList
+          val tweets = getTweetsByTags(results)
+          val obj = new JSONObject()
+          obj.put("next_page", "") // TODO: fix pagination
+          obj.put("results", tweets)
+          return loadPage(session, obj)
+        }
         val (query, mynetwork) = if (args.containsKey("user")) {
           if (args.containsKey("tags")) {
+
             ("", false) // TODO: extract ids from collection and hydrate
           } else {
             ("from:"+args.get("user"), false)
@@ -385,9 +398,30 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
     json
   }
 
-  protected def getTweetsByIds(ids: List[Long]) : JSONArray = {
-    //http://api.twitter.com/1/statuses/show/253507835592327168.json?include_entities=1
-    null
+  //http://api.twitter.com/1/statuses/show/253507835592327168.json?include_entities=1
+  protected def getTweetById(id: Long) : JSONObject = {
+    val response = asyncHttpClient
+      .prepareGet("http://api.twitter.com/1/statuses/show/%s.json".format(id.toString))
+      .addQueryParameter("include_entities", "1")
+      .execute
+      .get
+    val responseBody = response.getResponseBody
+    val json = new JSONObject(responseBody)
+    json
+  }
+
+  protected def getTweetsByTags(searchResults: JSONArray) : JSONArray = {
+    val tweets = new JSONArray()
+    (0 until searchResults.length()).foreach{ idx => {
+      val searchResult = searchResults.getJSONObject(idx)
+      val tweet = getTweetById(searchResult.getLong("id"))
+      val user = tweet.getJSONObject("user")
+      tweet.put("profile_image_url", user.getString("profile_image_url"))
+      tweet.put("from_user", user.getString("screen_name"))
+      tweet.put("tags", searchResult.getString("tags"))
+      tweets.put(tweet)
+    }}
+    tweets
   }
 
   protected def loadFeedData(ownerId: Long, query: String = "", network: Boolean = true, count: Int = PAGE_SIZE) : JSONObject = {
@@ -397,7 +431,10 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
 
   protected def loadPage(session: TwitterSession, query: String, pageIdx: Int, countPerPage: Int, network: Boolean = true) : RouteResponse = {
     val data = loadFeedData(session.twitter.getId, query, network, countPerPage)
+    loadPage(session, data)
+  }
 
+  protected def loadPage(session: TwitterSession, data: JSONObject) : RouteResponse = {
     var tmp = MAIN_TEMPLATE.toString
     // TODO: make this more efficient.
     tmp = tmp.replace("{{dyn-screenname}}", session.twitter.getScreenName)
