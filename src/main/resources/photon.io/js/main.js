@@ -78,6 +78,10 @@ var snapclearApp = function (initdata) {
       $('.item').each(function(idx, item) { attachItemTagActions(item); });
     }
 
+    $('#modal-tag').on('shown', function () {
+      $('#modal-tag .collect-tags')[0].focus();
+    })
+
     function attachItemTagActions(item) {
       $(item).find('.item-collect').click(function(e) {
         resetTagModal();
@@ -287,7 +291,10 @@ DISABLED
           if (inSelectMode()) {
             $(sels).each(function (idx, item) { attachItemSelectActions(item); });
           } else {
-            $(sels).each(function (idx, item) { attachItemShareActions(item); });
+            $(sels).each(function (idx, item) {
+              attachItemShareActions(item);
+              attachItemTagActions(item);
+            });
             $($newElems).each(function (idx, item) { enableItemLightbox(item); })
           }
         }
