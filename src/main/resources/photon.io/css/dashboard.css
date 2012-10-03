@@ -96,17 +96,23 @@ margin-left: -2px;
 }
 
 .item-share {
-margin-top: -27px;
+margin-top: -46px;
 float: right;
+}
+
+.collect-menu {
+margin-top: -18px;
 }
 
 .inline-collect-button {
 background-color: f2f0f0;
 width: 65px;
+text-align: right;
 }
 
 .collect-icon-tag {
-  float: left;
+  margin-top: -24px;
+  margin-left: 6px;
 }
 
 .inline-share-button {
