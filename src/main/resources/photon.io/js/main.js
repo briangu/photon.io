@@ -470,8 +470,8 @@ DISABLED
       var tags = $('.collect-tags').val();
       var ids = $.makeArray($('.tag-item-list').find('td[data-id]').map(function(idx,item) { return $(item).attr('data-id'); })).join(',')
 
-      $('#modal-share input[id="collect-ids"]').val(ids)
-      $('#modal-share input[id="collect-tags"]').val(sharees)
+      $('#modal-tag input[id="collect-ids"]').val(ids)
+      $('#modal-tag input[id="collect-tags"]').val(tags)
 
       $.ajax({
         type: 'POST',

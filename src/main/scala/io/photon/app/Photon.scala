@@ -6,10 +6,9 @@ import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpVersion._
 import org.json.{JSONArray, JSONObject}
 import cloudcmd.common._
-import engine.{FileProcessor, IndexStorage}
 import java.io.File
 import java.net.InetAddress
-import srv.{SimpleOAuthSessionService, CloudAdapter, OAuthRouteConfig}
+import srv.{SimpleOAuthSessionService, OAuthRouteConfig}
 import com.ning.http.client.AsyncHttpClient
 import scala.util.Random
 
@@ -41,25 +40,21 @@ object Photon {
       val twitterConfig = new TwitterConfig("/login", "/logout", "callback", "http://%s:%d/callback".format(ipAddress, port), sessions)
       val apiConfig = new OAuthRouteConfig(baseHostPort, SimpleOAuthSessionService.instance)
 
-      NestServer.run(port, new Photon(CloudServices.IndexStorage, CloudServices.CloudEngine, CloudServices.FileProcessor, twitterConfig, apiConfig))
+      NestServer.run(port, new Photon(twitterConfig, CloudServices.CollectionsStorage, apiConfig))
     } finally {
       CloudServices.shutdown
     }
   }
 }
 
-class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcessor: FileProcessor, twitterConfig: TwitterConfig, apiConfig: OAuthRouteConfig) extends ViperServer("res:///photon.io") {
+class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiConfig: OAuthRouteConfig) extends ViperServer("res:///photon.io") {
 
   final protected val PAGE_SIZE = 25
   final protected val MAIN_TEMPLATE = FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
 
   val asyncHttpClient = new AsyncHttpClient()
 
-  val _apiHandler = new CloudAdapter(cas, storage, apiConfig)
-
   override def addRoutes {
-
-    _apiHandler.addRoutes(this)
 
     // TODO: use nextPage URI provided by api.twitter.com
     addRoute(new TwitterGetRoute(twitterConfig, "/j/$page", new TwitterRouteHandler {
@@ -174,21 +169,16 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
 
 */
 
-    addRoute(new TwitterPostRoute(twitterConfig, "/shares", new TwitterRouteHandler {
+    addRoute(new TwitterPostRoute(twitterConfig, "/tags", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
-        if (!args.containsKey("sharees")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
+        if (!args.containsKey("tags")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
         if (!args.containsKey("ids")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
-        if (!args.containsKey("sharemsg")) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
 
-        val shareeNames = args.get("sharees").split(',')
-        val shareeIds = shareeNames.par.map{ name =>
-          val shareeId = session.getIdFromScreenName(name)
-          if (shareeId == 0) return new StatusResponse(HttpResponseStatus.BAD_REQUEST)
-          shareeId
-        }
+        val tags = args.get("tags")
+        val docIds = args.get("ids").split(',').toList.map(_.toLong)
 
-        val docIds = args.get("ids").split(',')
+        tagsStorage.addTags(session.twitter.getScreenName, tags, docIds)
 
         new JsonResponse(new JSONArray())
       }

@@ -2,13 +2,12 @@ package io.photon.app
 
 import org.apache.log4j.Logger
 import twitter4j._
-import conf.ConfigurationBuilder
 import collection.mutable.ListBuffer
 import scala.collection
 import collection.mutable
 import org.json.{JSONObject, JSONArray}
 
-class TwitterStreamClient(tweetProcessor: MediaTweetProcessor) {
+class TwitterStreamClient() {
   private val log = Logger.getLogger(classOf[TwitterStreamClient])
 
   var twitterStream : TwitterStream = null
@@ -31,7 +30,7 @@ class TwitterStreamClient(tweetProcessor: MediaTweetProcessor) {
                 case "photo" => {
                   // TODO: fanout one copy of the meta data for each recipient
                   println(status.getUser().getName() + " : " + entity.getMediaURL())
-                  tweetProcessor.add(status, 1234)
+//                  tweetProcessor.add(status, 1234)
                   /*
                   followingFunnel.get(status.getUser.getId).get.foreach{ userId =>
                     tweetProcessor.add(status, userId)
