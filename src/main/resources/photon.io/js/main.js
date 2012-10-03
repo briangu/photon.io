@@ -1,6 +1,22 @@
 var snapclearApp = function (initdata) {
     'use strict';
 
+    function updateTrends(trends) {
+      $('.trends li').remove();
+      // <li><a class="toptag" href="?tags=rocket">#rocket</a></li>
+      $.each(trends, function(i,tag){
+        var displayTag
+        if (tag.substr(0,1) != "#") {
+          displayTag = "#" + tag
+        } else {
+          displayTag = tag
+        }
+        $('.trends').append('<li><a class="toptag" href="?tags='+tag+'">' + displayTag +'</a></li>')
+      });
+    }
+
+    updateTrends(initdata.trends);
+
     function enableUpload(enable) {
       if (enable) {
         if ($('.download-panel').is(':hidden')) {

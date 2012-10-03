@@ -224,6 +224,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
           val obj = new JSONObject()
           obj.put("next_page", "") // TODO: fix pagination
           obj.put("results", tweets)
+          obj.put("trends", tagsStorage.getTopTrends())
           return loadPage(session, obj)
         }
         val (query, mynetwork) = if (args.containsKey("user")) {
@@ -424,7 +425,10 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
 
   protected def loadFeedData(ownerId: Long, query: String = "", network: Boolean = true, count: Int = PAGE_SIZE) : JSONObject = {
     val friends = if (network) CloudServices.TwitterStream.followingGraph.getOrElse(ownerId, List()) else List()
-    getInitialSearchResults(query, friends, count)
+    val searchResults = getInitialSearchResults(query, friends, count)
+    val trends = tagsStorage.getTopTrends()
+    searchResults.put("trends", trends)
+    searchResults
   }
 
   protected def loadPage(session: TwitterSession, query: String, pageIdx: Int, countPerPage: Int, network: Boolean = true) : RouteResponse = {
