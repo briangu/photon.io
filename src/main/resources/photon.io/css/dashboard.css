@@ -76,7 +76,7 @@ color: #221919;
 
 .item-actions {
 margin-top: -10px;
-margin-left: 125px;
+margin-left: 110px;
 color: white;
 height: 20px;
 position: absolute;
@@ -85,6 +85,11 @@ z-index: 30;
 
 .inline-share-button {
 background-color: f2f0f0;
+width: 65px;
+}
+
+.retweet-icon-share {
+  float: left;
 }
 
 #modal-share {
