@@ -214,16 +214,24 @@ DISABLED
         dataType     : 'json',
         loading      : {img: '/img/loading.gif'},
         destUrlCallback: function(destUrl) {
+/*
           var query = $('.search-query').val()
           if (query.length > 0 && query != window.locale.search.default) {
             return destUrl + "?q=" + query
           } else {
             return destUrl
           }
+*/
+          if (typeof dyndata.next_page != 'undefined') {
+            return destUrl + dyndata.next_page
+          } else {
+            return destUrl + "?q=" + dyndata.query + "&max_id=" + dyndata.max_id + "&result_type=" + dyndata.result_type
+          }
         },
         template     : function(data) {
+          dyndata = data
           var $div = $('<div/>')
-            $.each(data, function(i,x){
+            $.each(data.results, function(i,x){
               var newElements = processItem(template, x)
               if (newElements != null) {
                 $div.append(newElements);

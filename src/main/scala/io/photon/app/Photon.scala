@@ -65,7 +65,7 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
     addRoute(new TwitterGetRoute(twitterConfig, "/j/$page", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
-        val feed = if (args.containsKey("q")) {
+        val feed = if (!args.containsKey("q")) {
           loadFeedData(session.twitter.getId)
         } else {
           val query = args.get("q")
@@ -330,17 +330,26 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
   //    val url = "https://api.twitter.com/search.json?result_type=%s&include_entities=1&q=filter:images%20filter:twimg+%s&rpp=%d".format(workflow, query, rpp)
   // https://api.twitter.com/search.json?q=(from:mcuban+OR+from:eismcc+OR+from:sm+OR+from:jayz)+(filter%3Aimages+OR+filter%3Atwimg)&include_entities=1&result_type=parallel_realtime
   protected def getInitialSearchResults(query: String, friends: List[String], rpp: Int = PAGE_SIZE, workflow: String = "parallel_realtime") : JSONObject = {
-    val scope = Random.shuffle(friends).slice(0,math.min(25, friends.size)).map("from:%s".format(_)).reduceLeft(_ + "+OR+" + _)
+    var expandedQuery = "(filter:images+OR+filter:twimg) -flickr"
+    if (friends.size > 0) {
+      val scope = Random.shuffle(friends).slice(0,math.min(20, friends.size)).map("from:%s".format(_)).reduceLeft(_ + "+OR+" + _)
+      expandedQuery = expandedQuery + "(%s)".format(scope)
+    }
+    if (query.length > 0) {
+      expandedQuery = expandedQuery + "(%s)".format(query)
+    }
     val response = asyncHttpClient
       .prepareGet("https://api.twitter.com/search.json")
       .addQueryParameter("result_type", workflow)
       .addQueryParameter("include_entities", "1")
-      .addQueryParameter("q", "(filter:images+OR+filter:twimg)+(%s)+(%s) -flickr".format(scope, query))
+      .addQueryParameter("q", expandedQuery)
       .addQueryParameter("rpp", rpp.toString)
       .execute
       .get
     val responseBody = response.getResponseBody
-    new JSONObject(responseBody)
+    val json = new JSONObject(responseBody)
+    json.put("result_type", workflow)
+    json
   }
 
   protected def getPaginatedSearchResults(page: String, maxId: String, query: String, workflow: String) : JSONObject = {
@@ -353,7 +362,13 @@ class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcesso
       .addQueryParameter("max_id", maxId)
       .execute
       .get
-    new JSONObject(response.getResponseBody)
+    val responseBody = response.getResponseBody
+    if (responseBody.length == 0) {
+      println("received no results for " + query)
+    }
+    val json = new JSONObject(responseBody)
+    json.put("result_type", workflow)
+    json
   }
 
   protected def loadFeedData(ownerId: Long, query: String = "", count: Int = PAGE_SIZE) : JSONObject = {
