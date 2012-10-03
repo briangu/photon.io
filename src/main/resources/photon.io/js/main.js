@@ -704,11 +704,13 @@ DISABLED
 
     // center main
     function alignMain() {
-      var width = 64;
-      if (window.screen.width < 1280) {
+      var width;
+      if (document.width == 1280) {
+        width = 64;
+      } else if (document.width <= 1200) {
         width = 27;
       }
-      $('.main-content-row').attr('style', 'margin-left: ' + window.screen.width * width / 1280  +'px');
+      $('.main-content-row').attr('style', 'margin-left: ' + document.width * width / 1280  +'px');
     }
 
     alignMain();
