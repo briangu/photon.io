@@ -76,15 +76,37 @@ color: #221919;
 
 .item-actions {
 margin-top: -10px;
-margin-left: 110px;
+margin-left: 0px;
 color: white;
 height: 20px;
 position: absolute;
 z-index: 30;
+width:196px;
 }
 
 .big-query-box {
   width: 220px;
+}
+
+.item-collect {
+float: left;
+padding-right: 50px;
+margin-top: 4px;
+margin-left: -2px;
+}
+
+.item-share {
+margin-top: -27px;
+float: right;
+}
+
+.inline-collect-button {
+background-color: f2f0f0;
+width: 65px;
+}
+
+.collect-icon-tag {
+  float: left;
 }
 
 .inline-share-button {

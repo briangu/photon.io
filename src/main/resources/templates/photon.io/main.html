@@ -193,7 +193,7 @@
     <a href="/j/2"></a>
   </nav>
   <footer>
-    <p>&copy; OPS5 2012</p>
+    <p>&copy; Brian Guarraci 2012</p>
   </footer>
 </div>
 
@@ -206,7 +206,7 @@
   <div class="modal-footer">
     <a class="btn modal-download" target="_blank">
       <i class="icon-download"></i>
-      <span>Download</span>
+      <span>Collect</span>
     </a>
   </div>
   </div>
@@ -383,6 +383,12 @@
         <input type="checkbox" name="share[]" style="display: none;"/>
       </div>
       <div class="item-actions" style="display: none;">
+          <span class="item-collect" data-id="{{id}}" style="cursor: pointer;">
+            <a class="btn inline-collect-button">
+              <i class="collect-icon-tag icon-tag"></i>
+              <span>Collect</span>
+            </a>
+          </span>
           <span class="item-share" data-id="{{id}}" style="cursor: pointer;">
             <a class="btn inline-share-button">
               <i class="retweet-icon-share icon-share"></i>
@@ -392,7 +398,7 @@
       </div>
       <div class="ItemHolder center">
         <!-- rel="gallery" -->
-        <a href="{{expandedUrl}}" class="ItemThumb ImgLink" title="{{id}}" download="{{id}}">
+        <a href="{{mediaUrl}}" class="ItemThumb ImgLink" title="{{text}}" download="{{mediaUrl}}">
           <img src="{{mediaUrl}}" alt="{{text}}" class="ItemThumbImg" />
         </a>
         <div class="description tags">{{text}}</div>
@@ -406,7 +412,7 @@
             <div>
               <div class="easydate pull-right" data-filedate="{{created_at}}"></div>
               <div><a href="https://twitter.com/{{from_user}}">@{{from_user}}</a></div>
-              <div class="description"><a href="/d/{{id}}">{{from_user_name}}</a></div>
+              <div class="description"><a href="https://twitter.com/{{from_user}}">{{from_user_name}}</a></div>
             </div>
           </div>
         </span>
