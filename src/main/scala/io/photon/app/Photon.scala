@@ -212,10 +212,12 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
     addRoute(new TwitterGetRoute(twitterConfig, "/", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
-        if (args.containsKey("user") && args.containsKey("tags")) {
+        if (args.containsKey("tags")) {
           val filter = new JSONObject()
           filter.put("tags", args.get("tags"))
-          filter.put("userName", session.twitter.getScreenName)
+          if (args.containsKey("user")) {
+            filter.put("userName", session.twitter.getScreenName)
+          }
           val results = tagsStorage.find(filter)
           // val ids = (0 until results.length()).map(results.getJSONObject(_).getLong("id")).toList
           val tweets = getTweetsByTags(results)
@@ -225,12 +227,8 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
           return loadPage(session, obj)
         }
         val (query, mynetwork) = if (args.containsKey("user")) {
-          if (args.containsKey("tags")) {
-
-            ("", false) // TODO: extract ids from collection and hydrate
-          } else {
-            ("from:"+args.get("user"), false)
-          }
+          // TODO: filter on tagged items for this user w/ "tagged" flag
+          ("from:"+args.get("user"), false)
         } else {
           if (args.containsKey("q")) {
             (args.get("q"), true)
