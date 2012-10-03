@@ -461,7 +461,7 @@ DISABLED
       $('.tag-item-list').append(Mustache.to_html(st, data));
     }
 
-    $('.tag-dialog-button').click(function() {
+    function tagSubmit() {
       if ($('.collect-tags').val().length == 0) {
         alert("You didn't specifiy any tags.")
         return false;
@@ -483,7 +483,14 @@ DISABLED
       });
 
       $('#modal-tag').modal('hide');
+    }
+
+    $("#form-tag-modal").submit(function() {
+      tagSubmit();
+      return false;
     });
+
+    $('.tag-dialog-button').click(tagSubmit);
 
     $('.share-dialog-button').click(function() {
       if ($('.sharee-list').html().length == 0) {
