@@ -639,6 +639,9 @@ DISABLED
 
     initSearch();
 
+    // center main
+    $('.main-content-row').attr('style', 'margin-left: ' + document.width * 27 / 1280  +'px');
+
     function processItem(template, item) {
       // convert instagram and twitpic media links
       // resolve media url conflicts (when multiple)
