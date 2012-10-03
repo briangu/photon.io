@@ -248,7 +248,12 @@ class CollectionsStorage() {
         "SELECT T.USERNAME,T.TAGS,T.ID FROM FTL_SEARCH_DATA(?, %d, %d) FTL, FILE_INDEX T WHERE FTL.TABLE='FILE_INDEX' AND T.UID = FTL.UID[0]".format(limit, offset)
       }
       else {
-        "SELECT USERNAME,TAGS,ID FROM FILE_INDEX"
+        val select = if (filter.has("distinct")) {
+          "SELECT DISTINCT"
+        } else {
+          "SELECT"
+        }
+        select + " USERNAME,TAGS,ID FROM FILE_INDEX"
       }
 
       val list = new ListBuffer[String]
@@ -256,7 +261,7 @@ class CollectionsStorage() {
       val iter = filter.keys
       while (iter.hasNext) {
         iter.next.asInstanceOf[String] match {
-          case "orderBy" | "count" | "offset" => ;
+          case "orderBy" | "count" | "offset" | "distinct" => ;
           case rawKey => {
             val key = prefix + rawKey
 

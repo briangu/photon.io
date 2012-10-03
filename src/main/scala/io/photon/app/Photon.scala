@@ -218,6 +218,9 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
           if (args.containsKey("user")) {
             filter.put("userName", session.twitter.getScreenName)
           }
+          val distinct = new JSONObject()
+          distinct.put("name", "ID")
+          filter.put("distinct", distinct)
           val results = tagsStorage.find(filter)
           // val ids = (0 until results.length()).map(results.getJSONObject(_).getLong("id")).toList
           val tweets = getTweetsByTags(results)
