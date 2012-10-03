@@ -622,7 +622,10 @@ DISABLED
       });
 
       $('.search-query').focus(function() {
-        $('.search-query').val("");
+        var query = $('.search-query').val();
+        if (query != undefined && query == window.locale.search.default) {
+          $('.search-query').val("");
+        }
       });
 
       $('.search-query').blur(function() {
