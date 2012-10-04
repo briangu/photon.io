@@ -82,6 +82,14 @@ var snapclearApp = function (initdata) {
       $('#modal-tag .collect-tags')[0].focus();
     })
 
+    $('#modal-lightbox').on('shown', function () {
+      $('html').css({overflow:'hidden'})
+    })
+
+    $('#modal-lightbox').on('hidden', function () {
+      $('html').css({overflow:'auto'})
+    })
+
     function attachItemTagActions(item) {
       $(item).find('.item-collect').click(function(e) {
         resetTagModal();
