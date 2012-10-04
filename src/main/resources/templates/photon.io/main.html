@@ -441,12 +441,12 @@
         <div class="row-fluid item-info">
           {{#tagCountMsg}}
             <div class="item-collection-count">
-              <a href="#" class="item-collection-history">{{tagCountMsg}}</a>
+              <a href="{{mediaUrl}}" class="ItemThumb item-collection-history" title="{{text}}" download="{{mediaUrl}}">{{tagCountMsg}}</a>
             </div>
           {{/tagCountMsg}}
           {{#tags}}
             <div class="item-collection">
-              <a href="/?user={{from_user}}&tags={{tags}}">{{tags}}</a>
+              <a href="/?user={{dyn-screenname}}&tags={{tags}}">{{tags}}</a>
               <i class="collect-icon-tag icon-tag"></i>
             </div>
           {{/tags}}

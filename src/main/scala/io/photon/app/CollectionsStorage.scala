@@ -171,6 +171,10 @@ class CollectionsStorage() {
   def getTagCounts(ids: Set[Long]) : Map[Long, Int] = {
     val results = new mutable.HashMap[Long, Int]()
 
+    if (ids.size == 0) {
+      return results.toMap
+    }
+
     var db: Connection = null
     var statement: PreparedStatement = null
     try {
@@ -197,6 +201,10 @@ class CollectionsStorage() {
 
   def getUserTagInfo(ids: Set[Long], userName: String) : Map[Long, JSONObject] = {
     val results = new mutable.HashMap[Long, JSONObject]()
+
+    if (ids.size == 0) {
+      return results.toMap
+    }
 
     var db: Connection = null
     var statement: PreparedStatement = null
