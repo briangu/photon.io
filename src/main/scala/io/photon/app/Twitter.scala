@@ -13,6 +13,7 @@ import org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer
 import org.jboss.netty.handler.codec.http.HttpHeaders.setContentLength
 import java.net.URI
 import org.jboss.netty.handler.codec.http
+import java.util.UUID
 
 
 object TwitterCLI {
@@ -197,6 +198,7 @@ object WhiteListService {
 
 object TwitterRestRoute {
   val SESSION_NAME = "photon-session"
+  val SESSION_PREFIX = UUID.randomUUID().toString
 }
 
 class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod, protected val config: TwitterConfig) extends Route(route) {
@@ -214,11 +216,13 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
     val request = e.asInstanceOf[MessageEvent].getMessage.asInstanceOf[HttpRequest]
     val (sessionId, cookies) = getSessionId(request.getHeader(HttpHeaders.Names.COOKIE))
 
-    val response = if (sessionId == null || config.sessions.getSession(sessionId) == null) {
+    val response = if (sessionId == null
+        || config.sessions.getSession(sessionId) == null
+        || !sessionId.startsWith(TwitterRestRoute.SESSION_PREFIX)) {
       try {
         val twitter = new TwitterFactory().getInstance()
         val requestToken = twitter.getOAuthRequestToken(config.callbackUrl)
-        val sessionId = java.util.UUID.randomUUID().toString
+        val sessionId = TwitterRestRoute.SESSION_PREFIX + java.util.UUID.randomUUID().toString
         val session = new TwitterSession(sessionId, twitter, requestToken, request.getUri)
         config.sessions.setSession(sessionId, session)
 
