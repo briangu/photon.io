@@ -61,7 +61,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
         val feed = if (!args.containsKey("q")) {
-          loadFeedData(session.twitter.getId)
+          loadFeedData(session)
         } else {
           val query = args.get("q")
           val page = args.get("page")
@@ -71,7 +71,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
             } else {
               true
             }
-            loadFeedData(session.twitter.getId, query, network)
+            loadFeedData(session, query, network)
           } else {
             val maxId = args.get("max_id")
             val workflow = args.get("result_type")
@@ -216,7 +216,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
           val filter = new JSONObject()
           filter.put("tags", args.get("tags"))
           if (args.containsKey("user")) {
-            filter.put("userName", session.twitter.getScreenName)
+            filter.put("userName", args.get("user"))
           }
           val distinct = new JSONObject()
           distinct.put("name", "ID")
@@ -426,16 +426,33 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
     tweets
   }
 
-  protected def loadFeedData(ownerId: Long, query: String = "", network: Boolean = true, count: Int = PAGE_SIZE) : JSONObject = {
+  protected def loadFeedData(session: TwitterSession, query: String = "", network: Boolean = true, count: Int = PAGE_SIZE) : JSONObject = {
+    val ownerId = session.twitter.getId
     val friends = if (network) CloudServices.TwitterStream.followingGraph.getOrElse(ownerId, List()) else List()
     val searchResults = getInitialSearchResults(query, friends, count)
+    val feed = searchResults.getJSONArray("results")
+    val idMap = Map() ++ (0 until feed.length()).flatMap{idx => {
+      val item = feed.getJSONObject(idx)
+      Map(item.getString("id_str").toLong -> item)
+    }}
+    val tagInfo = tagsStorage.getTagInfo(idMap.keySet)
+    val screenName = session.twitter.getScreenName
+    tagInfo.keys.foreach{key =>
+      val info = tagInfo.get(key).get
+      val resObj = idMap.get(key).get
+      val taggedBy = info.getString("userName")
+      if (resObj.getString("from_user").equals(taggedBy)
+        || screenName.equals(taggedBy)) {
+        resObj.put("tags", info.getString("tags"))
+      }
+    }
     val trends = tagsStorage.getTopTrends()
     searchResults.put("trends", trends)
     searchResults
   }
 
   protected def loadPage(session: TwitterSession, query: String, pageIdx: Int, countPerPage: Int, network: Boolean = true) : RouteResponse = {
-    val data = loadFeedData(session.twitter.getId, query, network, countPerPage)
+    val data = loadFeedData(session, query, network, countPerPage)
     loadPage(session, data)
   }
 

@@ -222,30 +222,28 @@ DISABLED
     function showTimeAgoDates() {
       $(".easydate").each(function() {
 //        $(this).html($.easydate.format_date(new Date(parseInt($(this).attr("data-filedate"), 10))));
-        $(this).html($.easydate.format_date(new Date($(this).attr("data-filedate"))));
+        $(this).html(
+          $.easydate.format_date(
+            new Date($(this).attr("data-filedate"))),
+            {
+              units: [
+                          { name: "now", limit: 5 },
+                          { name: "second", limit: 60, in_seconds: 1 },
+                          { name: "minute", limit: 3600, in_seconds: 60 },
+                          { name: "hour", limit: 86400, in_seconds: 3600  },
+                          { name: "yesterday", limit: 172800, past_only: true },
+                          { name: "tomorrow", limit: 172800, future_only: true },
+                          { name: "day", limit: 604800, in_seconds: 86400 },
+                          { name: "week", limit: 2629743, in_seconds: 604800  },
+                          { name: "month", limit: 31556926, in_seconds: 2629743 },
+                          { name: "year", limit: Infinity, in_seconds: 31556926 }
+                      ]
+            });
       });
     }
 
-    function initGallery(data) {
+    function initInfiniteScrolling() {
       var $gallery = $('#gallery');
-
-      $.each(data, function(i,x){
-        var newElements = processItem(template, x);
-        if (newElements != null) {
-          $gallery = $gallery.append(newElements);
-          $gallery.css({ opacity: 0 });
-        }
-      });
-
-      $gallery.imagesLoaded(function(){
-        $gallery.masonry({
-          itemSelector : '.box',
-          columnWidth: 230,
-          cornerStampSelector: '.corner-stamp'
-        });
-        $gallery.animate({ opacity: 1 });
-      });
-
       $gallery.infinitescroll({
         navSelector  : '#page-nav',    // selector for the paged navigation
         nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
@@ -299,6 +297,29 @@ DISABLED
           }
         }
       );
+
+    }
+
+    function initGallery(data) {
+      var $gallery = $('#gallery');
+
+      $.each(data, function(i,x){
+        var newElements = processItem(template, x);
+        if (newElements != null) {
+          $gallery = $gallery.append(newElements);
+          $gallery.css({ opacity: 0 });
+        }
+      });
+
+      $gallery.imagesLoaded(function(){
+        $gallery.masonry({
+          itemSelector : '.box',
+          columnWidth: 230,
+          cornerStampSelector: '.corner-stamp'
+        });
+        $gallery.animate({ opacity: 1 });
+        initInfiniteScrolling();
+       });
 
       enableGalleryClick();
       attachItemsShareActions();
@@ -683,7 +704,8 @@ DISABLED
             if (results.length > 0) {
               var $newElems = applyTemplateToResults(results);
               $('#gallery').children().remove();
-              appendNewelements($newElems)
+              appendNewelements($newElems);
+              initInfiniteScrolling();
               searchState.loading = false
             }
           },
@@ -735,7 +757,7 @@ DISABLED
     // center main
     function alignMain() {
       var width;
-      if (document.width == 1200) {
+      if (document.width <= 1200) {
         width = 27;
       } else {
         width = 64;

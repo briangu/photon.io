@@ -174,7 +174,7 @@
         <div class="item box corner-stamp">
           <div class="corner-stamp-text">
             <ul class="nav nav-list trends">
-              <h2>Top Collection Tags</h2>
+              <h2>Top Collections</h2>
               <li><a class="toptag" href="?tags=rocket">#rocket</a></li>
               <li><a class="toptag" href="?tags=jack">#jack</a></li>
               <li><a class="toptag" href="?tags=fun">#fun</a></li>
@@ -327,7 +327,7 @@
 <script src="/js/jquery.fileupload-fp.js"></script>
 <script src="/js/jquery.fileupload-ui.js"></script>
 <script src="/js/locale.js"></script>
-<script src="/js/easydate.js"></script>
+<script src="/js/jquery.easydate-0.2.4.js"></script>
 <script src="/js/main.js"></script>
 <!--[if gte IE 8]><script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
 
@@ -411,7 +411,7 @@
           <span class="item-collect" data-id="{{id_str}}" style="cursor: pointer;">
             <a class="btn inline-collect-button">
               <i class="collect-icon-tag icon-tag"></i>
-              <span>Tag</span>
+              <span>Collect</span>
             </a>
           </span>
 <!--
@@ -430,24 +430,27 @@
         </a>
         <div class="description tags">{{text}}</div>
       </div>
-      <div class="iteminfo creatorInfo">
-        <span>
+      <div class="iteminfo creatorInfo container-fluid">
+        <div class="row-fluid">
+          <div class="easydate pull-right" data-filedate="{{created_at}}"></div>
           <a href="https://twitter.com/{{from_user}}/" title="{{from_user}}" class="ImgLink">
             <img src="{{profile_image_url}}" alt="Profile picture of @{{from_user}}">
           </a>
-          <div class="item-info">
-            <div>
-              <div class="easydate pull-right" data-filedate="{{created_at}}"></div>
-              <div><a href="/?user={{from_user}}">@{{from_user}}</a></div>
-              {{#tags}}
-                <div class="item-collection">
-                  <i class="collect-icon-tag icon-tag"></i>
-                  <a href="/?user={{from_user}}&tags={{tags}}">{{tags}}</a>
-                </div>
-              {{/tags}}
+          <div><a href="/?user={{from_user}}">@{{from_user}}</a></div>
+        </div>
+        <div class="row-fluid item-info">
+          {{#tagCount}}
+            <div class="item-collection-count">
+              <a href="#" class="item-collection-history">tagged {{#tagCount}} times</a>
             </div>
-          </div>
-        </span>
+          {{/tagCount}}
+          {{#tags}}
+            <div class="item-collection">
+              <a href="/?user={{from_user}}&tags={{tags}}">{{tags}}</a>
+              <i class="collect-icon-tag icon-tag"></i>
+            </div>
+          {{/tags}}
+        </div>
       </div>
     </div>
   </script>

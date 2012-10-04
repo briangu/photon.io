@@ -11,6 +11,7 @@ import java.sql.{PreparedStatement, SQLException, Statement, Connection}
 import collection.mutable.ListBuffer
 import cloudcmd.common.{StringUtil, FileUtil, SqlUtil}
 import cloudcmd.common.util.JsonUtil
+import collection.mutable
 
 class CollectionsStorage() {
   private val log = Logger.getLogger(classOf[CollectionsStorage])
@@ -165,6 +166,39 @@ class CollectionsStorage() {
     else {
       throw new IllegalArgumentException("unknown obj type: " + obj.toString)
     }
+  }
+
+  def getTagInfo(ids: Set[Long]) : Map[Long, JSONObject] = {
+    val results = new mutable.HashMap[Long, JSONObject]()
+
+    var db: Connection = null
+    var statement: PreparedStatement = null
+    try {
+      db = getDbConnection
+      val idList = ids.map(_.toString).reduceLeft(_  + "," + _)
+      statement = db.prepareStatement("SELECT USERNAME,TAGS,ID FROM FILE_INDEX WHERE ID IN (%s)".format(idList))
+
+      val rs = statement.executeQuery
+      while (rs.next) {
+        val info = JsonUtil.createJsonObject(
+          "id", rs.getLong("ID").asInstanceOf[AnyRef],
+          "tags", rs.getString("TAGS"),
+          "userName", rs.getString("USERNAME")
+        )
+
+        results.put(rs.getLong("ID"), info)
+      }
+    }
+    catch {
+      case e: JSONException => log.error(e)
+      case e: SQLException => log.error(e)
+    }
+    finally {
+      SqlUtil.SafeClose(statement)
+      SqlUtil.SafeClose(db)
+    }
+
+    results.toMap
   }
 
   def getTopTrends() : JSONArray = {

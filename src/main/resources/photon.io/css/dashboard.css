@@ -74,6 +74,14 @@ color: #221919;
 
 .download_img { width: 80px; }
 
+.item-collection-count {
+  float: left;
+}
+
+.item-collection {
+float: right;
+}
+
 .item-actions {
 margin-top: -10px;
 margin-left: 0px;
