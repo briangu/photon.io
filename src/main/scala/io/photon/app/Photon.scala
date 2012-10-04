@@ -448,28 +448,32 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
 
     val sliceResults = new ArrayBuffer[JSONObject] with mutable.SynchronizedBuffer[JSONObject]
     slices.par.foreach( slice => {
-      val scope = slice.map("from:%s".format(_)).reduceLeft(_ + "+OR+" + _)
-      var expandedQuery = "(filter:images+OR+filter:twimg) -flickr "
-      expandedQuery = expandedQuery + "(%s)".format(scope)
+      try {
+        val scope = slice.map("from:%s".format(_)).reduceLeft(_ + "+OR+" + _)
+        var expandedQuery = "(filter:images+OR+filter:twimg) -flickr "
+        expandedQuery = expandedQuery + "(%s)".format(scope)
 
-      if (query.length > 0) {
-        expandedQuery = expandedQuery + "(%s)".format(query)
-      }
-      val response = asyncHttpClient
-        .prepareGet("https://api.twitter.com/search.json")
-        .addQueryParameter("result_type", workflow)
-        .addQueryParameter("include_entities", "1")
-        .addQueryParameter("q", expandedQuery)
-        .addQueryParameter("rpp", rpp.toString)
-        .execute
-        .get
-      val responseBody = response.getResponseBody
-      val json = new JSONObject(responseBody)
-      if (json.has("errors")) {
-        println("error for " + query)
-      } else {
-        val jarr = json.getJSONArray("results")
-        (0 until jarr.length()).foreach( idx=> { sliceResults.append(jarr.getJSONObject(idx))})
+        if (query.length > 0) {
+          expandedQuery = expandedQuery + "(%s)".format(query)
+        }
+        val response = asyncHttpClient
+          .prepareGet("https://api.twitter.com/search.json")
+          .addQueryParameter("result_type", workflow)
+          .addQueryParameter("include_entities", "1")
+          .addQueryParameter("q", expandedQuery)
+          .addQueryParameter("rpp", rpp.toString)
+          .execute
+          .get
+        val responseBody = response.getResponseBody
+        val json = new JSONObject(responseBody)
+        if (json.has("errors")) {
+          println("error for " + query)
+        } else {
+          val jarr = json.getJSONArray("results")
+          (0 until jarr.length()).foreach( idx=> { sliceResults.append(jarr.getJSONObject(idx))})
+        }
+      } catch {
+        case e: Exception => ;
       }
     })
 
