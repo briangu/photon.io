@@ -759,6 +759,11 @@ DISABLED
     function initSearch() {
       resetSearchBox();
 
+      $('.search-icon').click(function() {
+        onSearch();
+        return false;
+      })
+
       $('.navbar-search').submit(function() {
         onSearch();
         return false;

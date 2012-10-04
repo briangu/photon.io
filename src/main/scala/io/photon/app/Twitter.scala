@@ -268,29 +268,45 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
             args
           }
 
-          val routeResponse = handler.asInstanceOf[TwitterRouteHandler].exec(session, args)
-          if (routeResponse.HttpResponse == null) {
-            val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK)
-            response.setContent(wrappedBuffer("{\"status\": true}".getBytes()))
-            response
-          } else {
-            val response = routeResponse.HttpResponse
-            if (response.getHeader(HttpHeaders.Names.CONTENT_LENGTH) == null) {
-              setContentLength(response, response.getContent().readableBytes())
-            }
-            if (isKeepAlive(request)) {
-              response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+          try {
+            val routeResponse = handler.asInstanceOf[TwitterRouteHandler].exec(session, args)
+            if (routeResponse.HttpResponse == null) {
+              val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK)
+              response.setContent(wrappedBuffer("{\"status\": true}".getBytes()))
+              response
             } else {
-              response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.CLOSE)
-            }
+              val response = routeResponse.HttpResponse
+              if (response.getHeader(HttpHeaders.Names.CONTENT_LENGTH) == null) {
+                setContentLength(response, response.getContent().readableBytes())
+              }
+              if (isKeepAlive(request)) {
+                response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+              } else {
+                response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.CLOSE)
+              }
 
-            if (config.sessions.getSession(sessionId) == null) {
-              response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(null, cookies))
-            } else {
-              //response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
-            }
+              if (config.sessions.getSession(sessionId) == null) {
+                response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(null, cookies))
+              } else {
+                //response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
+              }
 
-            response
+              response
+            }
+          } catch {
+            case e: IllegalStateException => {
+              // treat as invalid login and force relogin
+              val twitter = new TwitterFactory().getInstance()
+              val requestToken = twitter.getOAuthRequestToken(config.callbackUrl)
+              val sessionId = TwitterRestRoute.SESSION_PREFIX + java.util.UUID.randomUUID().toString
+              val session = new TwitterSession(sessionId, twitter, requestToken, request.getUri)
+              config.sessions.setSession(sessionId, session)
+
+              val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND)
+              response.setHeader(HttpHeaders.Names.SET_COOKIE, setSessionId(sessionId, cookies))
+              response.setHeader("Location", requestToken.getAuthenticationURL)
+              response
+            }
           }
         } catch {
           case e: TwitterException => new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST)

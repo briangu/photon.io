@@ -378,7 +378,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
   //    val url = "https://api.twitter.com/search.json?result_type=%s&include_entities=1&q=filter:images%20filter:twimg+%s&rpp=%d".format(workflow, query, rpp)
   // https://api.twitter.com/search.json?q=(from:mcuban+OR+from:eismcc+OR+from:sm+OR+from:jayz)+(filter%3Aimages+OR+filter%3Atwimg)&include_entities=1&result_type=parallel_realtime
   protected def getInitialSearchResults(query: String, friends: List[String], rpp: Int = PAGE_SIZE, workflow: String = "parallel_realtime") : JSONObject = {
-    var expandedQuery = "(filter:images+OR+filter:twimg) -flickr"
+    var expandedQuery = "(filter:images+OR+filter:twimg) -flickr "
     if (friends.size > 0) {
       val scope = Random.shuffle(friends).slice(0,math.min(20, friends.size)).map("from:%s".format(_)).reduceLeft(_ + "+OR+" + _)
       expandedQuery = expandedQuery + "(%s)".format(scope)
@@ -450,7 +450,11 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
 
   protected def loadFeedData(session: TwitterSession, query: String = "", network: Boolean = true, count: Int = PAGE_SIZE) : JSONObject = {
     val ownerId = session.twitter.getId
-    val friends = if (network) CloudServices.TwitterStream.followingGraph.getOrElse(ownerId, List()) else List()
+    val friends = if (network) {
+      CloudServices.TwitterStream.followingGraph.getOrElse(ownerId, List(session.twitter.getScreenName))
+    } else {
+      List()
+    }
     decorateSearchResults(session, getInitialSearchResults(query, friends, count))
   }
 
