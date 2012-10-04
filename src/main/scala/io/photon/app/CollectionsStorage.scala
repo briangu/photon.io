@@ -237,8 +237,12 @@ class CollectionsStorage() {
     results.toMap
   }
 
-  def getTagInfo(ids: Set[Long]) : Map[Long, JSONObject] = {
-    val results = new mutable.HashMap[Long, JSONObject]()
+  def getTagInfo(ids: Set[Long]) : Map[Long, JSONArray] = {
+    val results = new mutable.HashMap[Long, JSONArray]()
+
+    if (ids.size == 0) {
+      return results.toMap
+    }
 
     var db: Connection = null
     var statement: PreparedStatement = null
@@ -255,7 +259,11 @@ class CollectionsStorage() {
           "userName", rs.getString("USERNAME")
         )
 
-        results.put(rs.getLong("ID"), info)
+        val id = rs.getLong("ID")
+        if (!results.contains(id)) {
+          results.put(id, new JSONArray())
+        }
+        results.get(id).get.put(info)
       }
     }
     catch {

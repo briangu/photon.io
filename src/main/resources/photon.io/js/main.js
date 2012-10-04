@@ -386,6 +386,33 @@ DISABLED
             e.preventDefault();  //stop the browser from following
             doDownload(downloadUrl)
         })
+        // fetch taggers
+        // .modal-lightbox-taggers
+        $.ajax({
+            dataType: 'json',
+            type: 'GET',
+            url: '/taggers/'+$(item).attr("data-id"),
+            success: function(data, textStatus, jqXHR) {
+              if (data.length == 0) {
+                $('.taggers-title').hide();
+                return;
+              }
+
+              $('.taggers-title').show();
+              $('.modal-lightbox-taggers').hide();
+              $('.tagger-item-list tr').remove();
+              var st = $('#template-tagger-item').html();
+              $.each(data, function(i,tagger) {
+                $('.tagger-item-list').append(Mustache.to_html(st, tagger));
+              });
+              $('.modal-lightbox-taggers').show();
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+              searchState.loading = false
+            }
+        });
+
+
         $('#modal-lightbox').modal({dynamic: true});
         return false;
       })

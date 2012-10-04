@@ -209,6 +209,29 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
       },
       twitterConfig))
 
+    addRoute(new TwitterGetRoute(twitterConfig, "/taggers/$id", new TwitterRouteHandler {
+      override
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
+        val id = args.get("id").toLong
+        val tagInfo = tagsStorage.getTagInfo(Set(id))
+        val result = if (tagInfo.contains(id)) {
+          val taggers = tagInfo.get(id).get
+          (0 until taggers.length).par.foreach{
+            idx => {
+              val info = taggers.getJSONObject(idx)
+              info.put("profile_image_url",
+                session.getProfileImageUrl(
+                  session.getIdFromScreenName(info.getString("userName"))))
+            }
+          }
+          taggers
+        } else {
+          new JSONArray()
+        }
+        new JsonResponse(result)
+      }
+    }))
+
     addRoute(new TwitterGetRoute(twitterConfig, "/", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {

@@ -199,7 +199,22 @@
     <a class="close" data-dismiss="modal">&times;</a>
     <h3 class="modal-title"></h3>
   </div>
-  <div class="modal-body"><div class="modal-image"></div></div>
+  <div class="modal-body">
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="modal-image"></div>
+      </div>
+      <hr/>
+      <div class="row-fluid">
+        <h3 class="taggers-title">Collected by...</h3>
+      </div>
+      <div class="row-fluid">
+        <div class="modal-lightbox-taggers">
+          <table role="presentation" class="tagger-table table table-striped"><tbody class="tagger-item-list"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="modal-footer">
 <!--
     <a class="btn modal-download" target="_blank">
@@ -405,7 +420,25 @@
     </tr>
   </script>
 
-  <script type="text/html" id="template-mason-brick">
+<script type="text/html" id="template-tagger-item">
+  <tr>
+    <td>
+      <div>
+        <a href="https://twitter.com/{{userName}}/" title="{{userName}}" class="ImgLink">
+          <img src="{{profile_image_url}}" alt="Profile picture of @{{userName}}">
+        </a>
+        <a class="tagger-page" href="/?user={{userName}}">@{{userName}}</a>
+      </div>
+    </td>
+    <td>
+    </td>
+    <td data-id='{{id}}'>
+      <a href="/?user={{userName}}&tags={{tags}}">{{tags}}</a>
+    </td>
+  </tr>
+</script>
+
+<script type="text/html" id="template-mason-brick">
     <div class="item box" data-id="{{id_str}}" data-sharable={{isSharable}}>
       <div class="pull-right icon-top-right" style="display: none;">
         <img class="checkbox-img" src="/img/transparent.png" role="checkbox">
