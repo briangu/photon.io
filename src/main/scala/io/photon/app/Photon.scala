@@ -11,6 +11,10 @@ import java.net.InetAddress
 import srv.{SimpleOAuthSessionService, OAuthRouteConfig}
 import com.ning.http.client.AsyncHttpClient
 import scala.util.Random
+import collection.mutable.{ArrayBuffer, ListBuffer}
+import collection.mutable
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 
 object Photon {
@@ -52,6 +56,8 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
   final protected val PAGE_SIZE = 25
   final protected val MAIN_TEMPLATE = FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
 
+  val userCache = new mutable.HashMap[Long, ArrayBuffer[JSONObject]] with mutable.SynchronizedMap[Long, ArrayBuffer[JSONObject]]
+
   val asyncHttpClient = new AsyncHttpClient()
 
   override def addRoutes {
@@ -61,7 +67,12 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
         val feed = if (!args.containsKey("q")) {
-          loadFeedData(session)
+          if (args.containsKey("batch")) {
+            val page = args.get("page").toInt
+            decorateSearchResults(session, getBatchPaginatedSearchResults(session.twitter.getId, page))
+          } else {
+            loadFeedData(session)
+          }
         } else {
           val query = args.get("q")
           val page = args.get("page")
@@ -422,6 +433,75 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
     json
   }
 
+  protected def getBatchInitialSearchResults(userId: Long, query: String, friends: List[String], rpp: Int = PAGE_SIZE, workflow: String = "parallel_realtime") : JSONObject = {
+    if (friends.size == 0) {
+      return getInitialSearchResults(query, friends, rpp, workflow)
+    }
+
+    var arr = friends
+    val slices = new ListBuffer[List[String]]
+    while (arr.size > 0) {
+      val (a,b) = arr.splitAt(math.min(20, arr.size))
+      slices.append(a)
+      arr = b
+    }
+
+    val sliceResults = new ArrayBuffer[JSONObject] with mutable.SynchronizedBuffer[JSONObject]
+    slices.par.foreach( slice => {
+      val scope = slice.map("from:%s".format(_)).reduceLeft(_ + "+OR+" + _)
+      var expandedQuery = "(filter:images+OR+filter:twimg) -flickr "
+      expandedQuery = expandedQuery + "(%s)".format(scope)
+
+      if (query.length > 0) {
+        expandedQuery = expandedQuery + "(%s)".format(query)
+      }
+      val response = asyncHttpClient
+        .prepareGet("https://api.twitter.com/search.json")
+        .addQueryParameter("result_type", workflow)
+        .addQueryParameter("include_entities", "1")
+        .addQueryParameter("q", expandedQuery)
+        .addQueryParameter("rpp", rpp.toString)
+        .execute
+        .get
+      val responseBody = response.getResponseBody
+      val json = new JSONObject(responseBody)
+      if (json.has("errors")) {
+        println("error for " + query)
+      } else {
+        val jarr = json.getJSONArray("results")
+        (0 until jarr.length()).foreach( idx=> { sliceResults.append(jarr.getJSONObject(idx))})
+      }
+    })
+
+    // Thu, 04 Oct 2012 18:05:00 +0000
+    val dateFmt =  new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH)
+    val sortedResults = sliceResults.sortBy(obj => -dateFmt.parse(obj.getString("created_at")).getTime)
+
+    userCache.put(userId, sortedResults)
+
+    val results = new JSONArray()
+    sortedResults.slice(0, math.min(PAGE_SIZE, sortedResults.size)).foreach(results.put)
+
+    val json = new JSONObject()
+    json.put("results", results)
+    json.put("next_page", "?batch=true&page=1")
+    json
+  }
+
+  protected def getBatchPaginatedSearchResults(userId: Long, page: Int) : JSONObject = {
+    val sortedResults = userCache.getOrElse(userId, ArrayBuffer())
+    val startIdx = math.min(page * PAGE_SIZE, sortedResults.size)
+    val stopIdx = math.min((page + 1) * PAGE_SIZE, sortedResults.size)
+
+    val results = new JSONArray()
+    val slice = sortedResults.slice(startIdx, stopIdx)
+    slice.foreach(results.put)
+    val json = new JSONObject()
+    json.put("results", results)
+    json.put("next_page", "?batch=true&page=%d".format(page+1))
+    json
+  }
+
   //http://api.twitter.com/1/statuses/show/253507835592327168.json?include_entities=1
   protected def getTweetById(id: Long) : JSONObject = {
     val response = asyncHttpClient
@@ -455,7 +535,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
     } else {
       List()
     }
-    decorateSearchResults(session, getInitialSearchResults(query, friends, count))
+    decorateSearchResults(session, getBatchInitialSearchResults(session.twitter.getId, query, friends, count))
   }
 
   protected def decorateSearchResults(session: TwitterSession, searchResults: JSONObject) : JSONObject = {
