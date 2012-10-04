@@ -168,6 +168,67 @@ class CollectionsStorage() {
     }
   }
 
+  def getTagCounts(ids: Set[Long]) : Map[Long, Int] = {
+    val results = new mutable.HashMap[Long, Int]()
+
+    var db: Connection = null
+    var statement: PreparedStatement = null
+    try {
+      db = getDbConnection
+      val idList = ids.map(_.toString).reduceLeft(_  + "," + _)
+      statement = db.prepareStatement("SELECT ID,COUNT(ID) AS TAGCOUNT FROM FILE_INDEX WHERE ID IN (%s) GROUP BY ID".format(idList))
+
+      val rs = statement.executeQuery
+      while (rs.next) {
+        results.put(rs.getLong("ID"), rs.getInt("TAGCOUNT"))
+      }
+    }
+    catch {
+      case e: JSONException => log.error(e)
+      case e: SQLException => log.error(e)
+    }
+    finally {
+      SqlUtil.SafeClose(statement)
+      SqlUtil.SafeClose(db)
+    }
+
+    results.toMap
+  }
+
+  def getUserTagInfo(ids: Set[Long], userName: String) : Map[Long, JSONObject] = {
+    val results = new mutable.HashMap[Long, JSONObject]()
+
+    var db: Connection = null
+    var statement: PreparedStatement = null
+    try {
+      db = getDbConnection
+      val idList = ids.map(_.toString).reduceLeft(_  + "," + _)
+      statement = db.prepareStatement("SELECT USERNAME,TAGS,ID FROM FILE_INDEX WHERE ID IN (%s) and USERNAME=?".format(idList))
+      statement.setString(1, userName)
+
+      val rs = statement.executeQuery
+      while (rs.next) {
+        val info = JsonUtil.createJsonObject(
+          "id", rs.getLong("ID").asInstanceOf[AnyRef],
+          "tags", rs.getString("TAGS"),
+          "userName", rs.getString("USERNAME")
+        )
+
+        results.put(rs.getLong("ID"), info)
+      }
+    }
+    catch {
+      case e: JSONException => log.error(e)
+      case e: SQLException => log.error(e)
+    }
+    finally {
+      SqlUtil.SafeClose(statement)
+      SqlUtil.SafeClose(db)
+    }
+
+    results.toMap
+  }
+
   def getTagInfo(ids: Set[Long]) : Map[Long, JSONObject] = {
     val results = new mutable.HashMap[Long, JSONObject]()
 

@@ -756,13 +756,17 @@ DISABLED
 
     // center main
     function alignMain() {
-      var width;
-      if (document.width <= 1200) {
-        width = 27;
-      } else {
-        width = 64;
+      var k;
+      var width = document.width
+      if (typeof width == 'undefined') {
+        width = window.screen.width
       }
-      $('.main-content-row').attr('style', 'margin-left: ' + document.width * width / 1280  +'px');
+      if (document.width <= 1200) {
+        k = 27;
+      } else {
+        k = 64;
+      }
+      $('.main-content-row').attr('style', 'margin-left: ' + width * k / 1280  +'px');
     }
 
     alignMain();

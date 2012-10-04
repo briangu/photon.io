@@ -439,11 +439,11 @@
           <div><a href="/?user={{from_user}}">@{{from_user}}</a></div>
         </div>
         <div class="row-fluid item-info">
-          {{#tagCount}}
+          {{#tagCountMsg}}
             <div class="item-collection-count">
-              <a href="#" class="item-collection-history">tagged {{#tagCount}} times</a>
+              <a href="#" class="item-collection-history">{{tagCountMsg}}</a>
             </div>
-          {{/tagCount}}
+          {{/tagCountMsg}}
           {{#tags}}
             <div class="item-collection">
               <a href="/?user={{from_user}}&tags={{tags}}">{{tags}}</a>

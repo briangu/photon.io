@@ -75,7 +75,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
           } else {
             val maxId = args.get("max_id")
             val workflow = args.get("result_type")
-            getPaginatedSearchResults(page, maxId, query, workflow)
+            decorateSearchResults(session, getPaginatedSearchResults(page, maxId, query, workflow))
           }
         }
         new JsonResponse(feed)
@@ -227,8 +227,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
           val obj = new JSONObject()
           obj.put("next_page", "") // TODO: fix pagination
           obj.put("results", tweets)
-          obj.put("trends", tagsStorage.getTopTrends())
-          return loadPage(session, obj)
+          return loadPage(session, decorateSearchResults(session, obj))
         }
         val (query, mynetwork) = if (args.containsKey("user")) {
           // TODO: filter on tagged items for this user w/ "tagged" flag
@@ -429,23 +428,35 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
   protected def loadFeedData(session: TwitterSession, query: String = "", network: Boolean = true, count: Int = PAGE_SIZE) : JSONObject = {
     val ownerId = session.twitter.getId
     val friends = if (network) CloudServices.TwitterStream.followingGraph.getOrElse(ownerId, List()) else List()
-    val searchResults = getInitialSearchResults(query, friends, count)
+    decorateSearchResults(session, getInitialSearchResults(query, friends, count))
+  }
+
+  protected def decorateSearchResults(session: TwitterSession, searchResults: JSONObject) : JSONObject = {
     val feed = searchResults.getJSONArray("results")
     val idMap = Map() ++ (0 until feed.length()).flatMap{idx => {
       val item = feed.getJSONObject(idx)
       Map(item.getString("id_str").toLong -> item)
     }}
-    val tagInfo = tagsStorage.getTagInfo(idMap.keySet)
+
     val screenName = session.twitter.getScreenName
-    tagInfo.keys.foreach{key =>
-      val info = tagInfo.get(key).get
+    val userTagInfo = tagsStorage.getUserTagInfo(idMap.keySet, screenName)
+
+    userTagInfo.keys.foreach{key =>
+      val info = userTagInfo.get(key).get
       val resObj = idMap.get(key).get
-      val taggedBy = info.getString("userName")
-      if (resObj.getString("from_user").equals(taggedBy)
-        || screenName.equals(taggedBy)) {
-        resObj.put("tags", info.getString("tags"))
+      resObj.put("tags", info.getString("tags"))
+    }
+
+    val tagCounts = tagsStorage.getTagCounts(idMap.keySet)
+    tagCounts.keys.foreach{key =>
+      val cnt = tagCounts.get(key).get - (if (userTagInfo.contains(key)) 1 else 0)
+      cnt match {
+        case 1 => idMap.get(key).get.put("tagCountMsg", "tagged by 1 other")
+        case x if x > 1 => idMap.get(key).get.put("tagCountMsg", "tagged by %d others".format(x))
+        case _ => ;
       }
     }
+
     val trends = tagsStorage.getTopTrends()
     searchResults.put("trends", trends)
     searchResults

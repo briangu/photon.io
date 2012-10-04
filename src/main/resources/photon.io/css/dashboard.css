@@ -74,6 +74,10 @@ color: #221919;
 
 .download_img { width: 80px; }
 
+.row-fluid.item-info {
+  padding-top: 5px;
+}
+
 .item-collection-count {
   float: left;
 }
