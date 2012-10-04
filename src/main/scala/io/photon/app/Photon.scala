@@ -66,6 +66,13 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
     addRoute(new TwitterGetRoute(twitterConfig, "/j/$page", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
+        if (args.containsKey("nop")) {
+          val json = new JSONObject()
+          json.put("results", new JSONArray())
+          json.put("next_page", "?nop=true")
+          json
+          return new JsonResponse(decorateSearchResults(session, json))
+        }
         val feed = if (!args.containsKey("q")) {
           if (args.containsKey("batch")) {
             val page = args.get("page").toInt
@@ -259,7 +266,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
           // val ids = (0 until results.length()).map(results.getJSONObject(_).getLong("id")).toList
           val tweets = getTweetsByTags(results)
           val obj = new JSONObject()
-          obj.put("next_page", "") // TODO: fix pagination
+          obj.put("next_page", "?nop=true") // TODO: fix pagination
           obj.put("results", tweets)
           return loadPage(session, decorateSearchResults(session, obj))
         }

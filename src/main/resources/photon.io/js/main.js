@@ -278,7 +278,7 @@ DISABLED
         template     : function(data) {
           dyndata = data
           var $div = $('<div/>')
-            $.each(data.results, function(i,x){
+            $.each(dyndata.results, function(i,x){
               var newElements = processItem(template, x)
               if (newElements != null) {
                 $div.append(newElements);
