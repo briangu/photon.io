@@ -251,6 +251,19 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
       }
     }))
 
+    addRoute(new TwitterGetRoute(twitterConfig, "/itemTagInfo/$id", new TwitterRouteHandler {
+      override
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
+        val id = args.get("id").toLong
+        val info = getTweetById(id)
+        val idMap = Map(id -> info)
+        applyTagCountInfo(session.twitter.getScreenName, idMap)
+        var res = new JSONArray()
+        res.put(info)
+        new JsonResponse(res)
+      }
+    }))
+
     addRoute(new TwitterGetRoute(twitterConfig, "/taggedBy/$user", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
@@ -261,10 +274,6 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
           val distinct = new JSONObject()
           distinct.put("name", "ID")
           filter.put("distinct", distinct)
-          val orderBy = new JSONObject()
-          orderBy.put("name", "UID")
-          orderBy.put("desc", true)
-          filter.put("orderBy", orderBy)
           tagsStorage.find(filter)
         }
 
@@ -560,16 +569,23 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
   }
 
   protected def getTweetsByTags(searchResults: JSONArray) : JSONArray = {
-    val tweets = new JSONArray()
-    (0 until searchResults.length()).foreach{ idx => {
+    val res = new ArrayBuffer[JSONObject] with mutable.SynchronizedBuffer[JSONObject]
+    (0 until searchResults.length()).par.foreach{ idx => {
       val searchResult = searchResults.getJSONObject(idx)
       val tweet = getTweetById(searchResult.getLong("id"))
-      val user = tweet.getJSONObject("user")
-      tweet.put("profile_image_url", user.getString("profile_image_url"))
-      tweet.put("from_user", user.getString("screen_name"))
-      tweet.put("tags", searchResult.getString("tags"))
-      tweets.put(tweet)
+      if (tweet.has("user")) {
+        val user = tweet.getJSONObject("user")
+        tweet.put("profile_image_url", user.getString("profile_image_url"))
+        tweet.put("from_user", user.getString("screen_name"))
+        tweet.put("tags", searchResult.getString("tags"))
+        res.append(tweet)
+      }
     }}
+    val tweets = new JSONArray()
+    // not the same date format - missing comma: Fri Oct 05 15:04:03 +0000 2012
+    val dateFmt =  new SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy", Locale.ENGLISH)
+    val sortedResults = res.sortBy(obj => -dateFmt.parse(obj.getString("created_at")).getTime)
+    sortedResults.foreach(tweets.put)
     tweets
   }
 
@@ -590,8 +606,18 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
       Map(item.getString("id_str").toLong -> item)
     }}
 
-    val screenName = session.twitter.getScreenName
-    val userTagInfo = tagsStorage.getUserTagInfo(idMap.keySet, screenName)
+    applyTagCountInfo(session.twitter.getScreenName, idMap)
+
+    searchResults.put(
+      "trends",
+      JsonUtil.createJsonObject(
+        "title", "Top Collections",
+        "results", tagsStorage.getTopTrends()))
+    searchResults
+  }
+
+  protected def applyTagCountInfo(userName: String, idMap: Map[Long, JSONObject]) {
+    val userTagInfo = tagsStorage.getUserTagInfo(idMap.keySet, userName)
 
     userTagInfo.keys.foreach{key =>
       val info = userTagInfo.get(key).get
@@ -608,13 +634,6 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
         case _ => ;
       }
     }
-
-    searchResults.put(
-      "trends",
-      JsonUtil.createJsonObject(
-        "title", "Top Collections",
-        "results", tagsStorage.getTopTrends()))
-    searchResults
   }
 
   protected def loadPage(session: TwitterSession, query: String, pageIdx: Int, countPerPage: Int, network: Boolean = true) : RouteResponse = {

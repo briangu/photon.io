@@ -563,6 +563,19 @@ DISABLED
         dataType: 'json'
       });
 
+      $.ajax({
+          dataType: 'json',
+          type: 'GET',
+          url: '/itemTagInfo/'+ids,
+          success: function(data, textStatus, jqXHR) {
+            var results = data
+            if (results.length > 0) {
+              var newElements = processItem(template, results[0])
+              $('[data-id="'+ids+'"] .item-info').html($(newElements).find('.item-info').html())
+            }
+          }
+      });
+
       $('#modal-tag').modal('hide');
     }
 

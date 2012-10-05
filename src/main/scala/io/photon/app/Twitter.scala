@@ -198,7 +198,6 @@ object WhiteListService {
 
 object TwitterRestRoute {
   val SESSION_NAME = "photon-session"
-  val SESSION_PREFIX = UUID.randomUUID().toString
 }
 
 class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod, protected val config: TwitterConfig) extends Route(route) {
@@ -216,13 +215,11 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
     val request = e.asInstanceOf[MessageEvent].getMessage.asInstanceOf[HttpRequest]
     val (sessionId, cookies) = getSessionId(request.getHeader(HttpHeaders.Names.COOKIE))
 
-    val response = if (sessionId == null
-        || config.sessions.getSession(sessionId) == null
-        || !sessionId.startsWith(TwitterRestRoute.SESSION_PREFIX)) {
+    val response = if (sessionId == null || config.sessions.getSession(sessionId) == null) {
       try {
         val twitter = new TwitterFactory().getInstance()
         val requestToken = twitter.getOAuthRequestToken(config.callbackUrl)
-        val sessionId = TwitterRestRoute.SESSION_PREFIX + java.util.UUID.randomUUID().toString
+        val sessionId = java.util.UUID.randomUUID().toString
         val session = new TwitterSession(sessionId, twitter, requestToken, request.getUri)
         config.sessions.setSession(sessionId, session)
 
@@ -298,7 +295,7 @@ class TwitterRestRoute(route: String, handler: RouteHandler, method: HttpMethod,
               // treat as invalid login and force relogin
               val twitter = new TwitterFactory().getInstance()
               val requestToken = twitter.getOAuthRequestToken(config.callbackUrl)
-              val sessionId = TwitterRestRoute.SESSION_PREFIX + java.util.UUID.randomUUID().toString
+              val sessionId = java.util.UUID.randomUUID().toString
               val session = new TwitterSession(sessionId, twitter, requestToken, request.getUri)
               config.sessions.setSession(sessionId, session)
 
