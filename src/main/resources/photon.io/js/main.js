@@ -572,6 +572,7 @@ DISABLED
             if (results.length > 0) {
               var newElements = processItem(template, results[0])
               $('[data-id="'+ids+'"] .item-info').html($(newElements).find('.item-info').html())
+              $('#gallery').masonry('reload')
             }
           }
       });
