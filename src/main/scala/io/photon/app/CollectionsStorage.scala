@@ -364,7 +364,7 @@ class CollectionsStorage() {
         } else {
           "SELECT"
         }
-        select + " USERNAME,TAGS,ID FROM FILE_INDEX"
+        select + " UID,USERNAME,TAGS,ID FROM FILE_INDEX"
       }
 
       val list = new ListBuffer[String]

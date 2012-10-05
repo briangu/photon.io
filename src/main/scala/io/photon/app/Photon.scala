@@ -250,6 +250,28 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
       }
     }))
 
+    addRoute(new TwitterGetRoute(twitterConfig, "/taggedBy/$user", new TwitterRouteHandler {
+      override
+      def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
+        val filter = new JSONObject()
+        filter.put("userName", args.get("user"))
+        val distinct = new JSONObject()
+        distinct.put("name", "ID")
+        filter.put("distinct", distinct)
+        val orderBy = new JSONObject()
+        orderBy.put("name", "UID")
+        orderBy.put("desc", true)
+        filter.put("orderBy", orderBy)
+        val results = tagsStorage.find(filter)
+        // val ids = (0 until results.length()).map(results.getJSONObject(_).getLong("id")).toList
+        val tweets = getTweetsByTags(results)
+        val obj = new JSONObject()
+        obj.put("next_page", "?nop=true") // TODO: fix pagination
+        obj.put("results", tweets)
+        return loadPage(session, decorateSearchResults(session, obj))
+      }
+    }))
+
     addRoute(new TwitterGetRoute(twitterConfig, "/", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
@@ -569,8 +591,8 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
     tagCounts.keys.foreach{key =>
       val cnt = tagCounts.get(key).get - (if (userTagInfo.contains(key)) 1 else 0)
       cnt match {
-        case 1 => idMap.get(key).get.put("tagCountMsg", "tagged by 1 other")
-        case x if x > 1 => idMap.get(key).get.put("tagCountMsg", "tagged by %d others".format(x))
+        case 1 => idMap.get(key).get.put("tagCountMsg", "1 other tag")
+        case x if x > 1 => idMap.get(key).get.put("tagCountMsg", "%d other tags".format(x))
         case _ => ;
       }
     }
