@@ -11,7 +11,7 @@ var snapclearApp = function (initdata) {
         } else {
           displayTag = tag
         }
-        $('.trends').append('<li><a class="toptag" href="?tags='+tag+'">' + displayTag +'</a></li>')
+        $('.trends').append('<li><a class="toptag" href="/?tags='+tag+'">' + displayTag +'</a></li>')
       });
     }
 
