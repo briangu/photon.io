@@ -39,6 +39,10 @@ h2 {
 
 li + h2, h2 + li {padding-top: 10px;}
 
+.promoted-icon {
+margin-top: -5px;
+}
+
 .trends {
 margin-bottom: 20px;
 }

@@ -11,6 +11,9 @@ var snapclearApp = function (initdata) {
         } else {
           displayTag = tag
         }
+        if (i == 0) {
+          displayTag = displayTag + " <img class='promoted-icon' src='/img/promoted.png'/> Promoted"
+        }
         $('.trends').append('<li><a class="toptag" href="/?tags='+tag+'">' + displayTag +'</a></li>')
       });
     }
