@@ -3,8 +3,8 @@ var snapclearApp = function (initdata) {
 
     function updateTrends(trends) {
       $('.trends li').remove();
-      // <li><a class="toptag" href="?tags=rocket">#rocket</a></li>
-      $.each(trends, function(i,tag){
+      $('.trends-title').html(trends.title);
+      $.each(trends.results, function(i,tag){
         var displayTag
         if (tag.substr(0,1) != "#") {
           displayTag = "#" + tag

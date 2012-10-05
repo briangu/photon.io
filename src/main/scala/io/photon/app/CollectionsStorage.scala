@@ -278,6 +278,33 @@ class CollectionsStorage() {
     results.toMap
   }
 
+  def getUserCollections(userName: String) : JSONArray = {
+    val results = new JSONArray
+
+    var db: Connection = null
+    var statement: PreparedStatement = null
+    try {
+      db = getDbConnection
+      statement = db.prepareStatement("SELECT TAGS,COUNT(TAGS) AS TREND FROM FILE_INDEX WHERE USERNAME = ? GROUP BY TAGS ORDER BY TREND DESC")
+      statement.setString(1, userName)
+
+      val rs = statement.executeQuery
+      while (rs.next) {
+        results.put(rs.getString("TAGS"))
+      }
+    }
+    catch {
+      case e: JSONException => log.error(e)
+      case e: SQLException => log.error(e)
+    }
+    finally {
+      SqlUtil.SafeClose(statement)
+      SqlUtil.SafeClose(db)
+    }
+
+    results
+  }
+
   def getTopTrends() : JSONArray = {
     val results = new JSONArray
 

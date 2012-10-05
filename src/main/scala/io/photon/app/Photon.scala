@@ -15,6 +15,7 @@ import collection.mutable.{ArrayBuffer, ListBuffer}
 import collection.mutable
 import java.text.SimpleDateFormat
 import java.util.Locale
+import util.JsonUtil
 
 
 object Photon {
@@ -253,22 +254,33 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
     addRoute(new TwitterGetRoute(twitterConfig, "/taggedBy/$user", new TwitterRouteHandler {
       override
       def exec(session: TwitterSession, args: java.util.Map[String, String]): RouteResponse = {
-        val filter = new JSONObject()
-        filter.put("userName", args.get("user"))
-        val distinct = new JSONObject()
-        distinct.put("name", "ID")
-        filter.put("distinct", distinct)
-        val orderBy = new JSONObject()
-        orderBy.put("name", "UID")
-        orderBy.put("desc", true)
-        filter.put("orderBy", orderBy)
-        val results = tagsStorage.find(filter)
-        // val ids = (0 until results.length()).map(results.getJSONObject(_).getLong("id")).toList
+
+        val results = {
+          val filter = new JSONObject()
+          filter.put("userName", args.get("user"))
+          val distinct = new JSONObject()
+          distinct.put("name", "ID")
+          filter.put("distinct", distinct)
+          val orderBy = new JSONObject()
+          orderBy.put("name", "UID")
+          orderBy.put("desc", true)
+          filter.put("orderBy", orderBy)
+          tagsStorage.find(filter)
+        }
+
         val tweets = getTweetsByTags(results)
         val obj = new JSONObject()
         obj.put("next_page", "?nop=true") // TODO: fix pagination
         obj.put("results", tweets)
-        return loadPage(session, decorateSearchResults(session, obj))
+        val searchResults = decorateSearchResults(session, obj)
+
+        searchResults.put(
+          "trends",
+          JsonUtil.createJsonObject(
+            "title", "Collections",
+            "results", tagsStorage.getUserCollections(args.get("user"))))
+
+        return loadPage(session, searchResults)
       }
     }))
 
@@ -597,8 +609,11 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
       }
     }
 
-    val trends = tagsStorage.getTopTrends()
-    searchResults.put("trends", trends)
+    searchResults.put(
+      "trends",
+      JsonUtil.createJsonObject(
+        "title", "Top Collections",
+        "results", tagsStorage.getTopTrends()))
     searchResults
   }
 
