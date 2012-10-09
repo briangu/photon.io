@@ -448,7 +448,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
       expandedQuery = expandedQuery + "(%s)".format(query)
     }
     val response = asyncHttpClient
-      .prepareGet("https://api.twitter.com/search.json")
+      .prepareGet("https://search.twitter.com/search.json")
       .addQueryParameter("result_type", workflow)
       .addQueryParameter("include_entities", "1")
       .addQueryParameter("q", expandedQuery)
@@ -466,7 +466,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
 
   protected def getPaginatedSearchResults(page: String, maxId: String, query: String, workflow: String) : JSONObject = {
     val response = asyncHttpClient
-      .prepareGet("https://api.twitter.com/search.json")
+      .prepareGet("https://search.twitter.com/search.json")
       .addQueryParameter("result_type", workflow)
       .addQueryParameter("include_entities", "1")
       .addQueryParameter("q", query)
@@ -507,7 +507,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
           expandedQuery = expandedQuery + "(%s)".format(query)
         }
         val response = asyncHttpClient
-          .prepareGet("https://api.twitter.com/search.json")
+          .prepareGet("https://search.twitter.com/search.json")
           .addQueryParameter("result_type", workflow)
           .addQueryParameter("include_entities", "1")
           .addQueryParameter("q", expandedQuery)
@@ -559,7 +559,7 @@ class Photon(twitterConfig: TwitterConfig, tagsStorage: CollectionsStorage, apiC
   //http://api.twitter.com/1/statuses/show/253507835592327168.json?include_entities=1
   protected def getTweetById(id: Long) : JSONObject = {
     val response = asyncHttpClient
-      .prepareGet("http://api.twitter.com/1/statuses/show/%s.json".format(id.toString))
+      .prepareGet("http://search.twitter.com/1/statuses/show/%s.json".format(id.toString))
       .addQueryParameter("include_entities", "1")
       .execute
       .get
