@@ -56,7 +56,7 @@ class Photon(
   fileProcessor: FileProcessor,
   twitterConfig: TwitterConfig,
   apiConfig: OAuthRouteConfig
-) extends ViperServer("res:///photon.io") {
+) extends ViperServer("res:///photon.io/") {
 
   final protected val PAGE_SIZE = 25
   final protected val MAIN_TEMPLATE = FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
