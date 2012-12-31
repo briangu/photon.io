@@ -50,7 +50,13 @@ object Photon {
   }
 }
 
-class Photon(storage: IndexStorage, cas: ContentAddressableStorage, fileProcessor: FileProcessor, twitterConfig: TwitterConfig, apiConfig: OAuthRouteConfig) extends ViperServer("res:///photon.io") {
+class Photon(
+  storage: IndexStorage,
+  cas: ContentAddressableStorage,
+  fileProcessor: FileProcessor,
+  twitterConfig: TwitterConfig,
+  apiConfig: OAuthRouteConfig
+) extends ViperServer("res:///photon.io") {
 
   final protected val PAGE_SIZE = 25
   final protected val MAIN_TEMPLATE = FileUtils.readResourceFile(this.getClass, "/templates/photon.io/main.html")
