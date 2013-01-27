@@ -1,6 +1,6 @@
 package io.photon.app
 
-import io.stored.server.common.Record
+//import io.stored.server.common.Record
 import io.viper.common.{ViperServer, NestServer}
 import io.viper.core.server.router._
 import io.viper.core.server.router.RouteResponse.RouteResponseDispose
@@ -270,11 +270,13 @@ class Photon(
     new HtmlResponse(tmp)
   }
 
+/*
   protected def resultsToJsonArray(session: TwitterSession, records: List[Record]) : JSONArray = {
     val arr = new JSONArray()
     records.foreach{r : Record => arr.put(ModelUtil.createResponseData(session, r.rawData, r.id)) }
     arr
   }
+*/
 
   protected def resultsToJsonArray(session: TwitterSession, records: JSONArray) : JSONArray = {
     val arr = new JSONArray()

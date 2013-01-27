@@ -36,11 +36,13 @@
       <artifactId>NettyExtension</artifactId>
       <version>1.1.9</version>
     </dependency>
+<!--
     <dependency>
       <groupId>io.stored</groupId>
       <artifactId>io.stored</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+-->
     <dependency>
       <groupId>cloudcmd</groupId>
       <artifactId>cloudcmd.common</artifactId>
