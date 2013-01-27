@@ -10,20 +10,22 @@ object CloudServices {
   val IndexStorage = new H2IndexStorage(CloudEngine)
   val FileProcessor = new DefaultFileProcessor(ConfigService, CloudEngine, IndexStorage, 640, 480)
 
-  def init(configRoot: String) {
+  def init(configRoot: String, rebuild: Boolean = false) {
     CloudServices.ConfigService.init(configRoot)
     CloudServices.CloudEngine.init
     CloudServices.IndexStorage.init(configRoot)
 //    AsyncScalr.setServiceThreadCount(2) // TODO: set via config
 
-    println("refreshing adapter caches")
-    CloudEngine.refreshCache()
+    if (rebuild) {
+      println("refreshing adapter caches")
+      CloudEngine.refreshCache()
 
-    println("initializing adapters with describe()")
-    CloudEngine.describe()
+      println("initializing adapters with describe()")
+      CloudEngine.describe()
 
-    println("reindexing index storage")
-    IndexStorage.reindex()
+      println("reindexing index storage")
+      IndexStorage.reindex()
+    }
 
     println("ready!")
   }
